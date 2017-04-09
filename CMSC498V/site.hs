@@ -26,6 +26,6 @@ main = hakyllWith config $ do
 
 config :: Configuration
 config = defaultConfiguration {
-          destinationDirectory = "docs"
+          destinationDirectory = "../docs"
        }
 
