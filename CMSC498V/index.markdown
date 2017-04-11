@@ -9,7 +9,9 @@ Stuff
 
 Lectures
 ----------
-- TBA
+- *Time:* Tu & Th 9:30am - 10:45am
+- *Location:* CSI 2120
+
 
 Overview
 -----------
