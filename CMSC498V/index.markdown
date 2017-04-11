@@ -4,7 +4,7 @@ Advanced Functional Programming Languages
 Stuff
 -----
 
-- *Instructor:* Niki Vzou (nvazou@cs.umd.edu)
+- *Instructor:* Niki Vazou (nvazou@cs.umd.edu)
 - *TA:* TBA
 
 Lectures
@@ -34,6 +34,13 @@ programming.
 Haskell, a refinement type checker for Haskell programs that extends
 Haskell's types with logical predicates to allow for expressive user
 specifications.
+
+Prerequisites
+--------------
+No prerequisites are officially required for the class. 
+Some familiarity with the concepts of functional programming would make 
+the transition to the Haskell world easier.  
+
 
 Grading
 -------
