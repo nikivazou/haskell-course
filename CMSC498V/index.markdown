@@ -5,12 +5,17 @@ Stuff
 -----
 
 - *Instructor:* Niki Vazou (nvazou@cs.umd.edu)
-- *TA:* TBA
+- *TA:* Ben Mariano (benmariano13@gmail.com)
 
 Lectures
 ----------
 - *Time:* Tu & Th 9:30am - 10:45am
 - *Location:* CSI 2120
+
+Office Hours
+-------------
+- *Niki:* Tu 10:45-11:45am at AVW 4139
+- *Ben:* TBA
 
 
 Overview
@@ -47,8 +52,8 @@ the transition to the Haskell world easier.
 Grading
 -------
 
-**The grading is not yet finalized.**
-
-- Clicker-Questions (10%). In class participation and responses on the clicker questions.
-- Homeworks (60%). There will be 4-5 take-home, programming assignments. 
-- Final or Project (30%). In class final or programming projects; to be decided. 
+- Questions (10%). In class participation and responses on questions.
+- Homeworks (20%). There will be small, almost-weekly, take-home, programming assignments. 
+- Tournaments (20%). Two or three tournaments on a strategy programming game (like tic-tac-toe).
+- [Project](https://nikivazou.github.io/CMSC498V/projects.html) (30%).  Haskell implementation of a (semi-) realistic project. 
+- Final (20%). In class final. 
