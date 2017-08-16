@@ -17,6 +17,10 @@ Office Hours
 - *Niki:* Tu 10:45-11:45am at AVW 4139
 - *Ben:* TBA
 
+Piazza
+------
+- *Signup Link:* [piazza.com/umd/fall2017/cmsc498v](https://piazza.com/umd/fall2017/cmsc498v)
+- *Class Link:* [piazza.com/umd/fall2017/cmsc498v/home](https://piazza.com/umd/fall2017/cmsc498v/home)
 
 Overview
 -----------
@@ -53,7 +57,7 @@ Grading
 -------
 
 - Questions (10%). In class participation and responses on questions.
-- Homeworks (20%). There will be small, almost-weekly, take-home, programming assignments. 
-- Tournaments (20%). Two or three tournaments on a strategy programming game (like tic-tac-toe).
-- [Project](https://nikivazou.github.io/CMSC498V/projects.html) (30%).  Haskell implementation of a (semi-) realistic project. 
+- [Homeworks](/homeworks.html) (20%). Small, almost-weekly, take-home, programming assignments. 
+- [Tournaments](/schedule.html) (20%). Two or three tournaments on a strategy game (like tic-tac-toe).
+- [Project](/projects.html) (30%).  Haskell implementation of a (semi-) realistic project. 
 - Final (20%). In class final. 
