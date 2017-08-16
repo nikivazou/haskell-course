@@ -22,35 +22,20 @@ Piazza
 - *Signup Link:* [piazza.com/umd/fall2017/cmsc498v](https://piazza.com/umd/fall2017/cmsc498v)
 - *Class Link:* [piazza.com/umd/fall2017/cmsc498v/home](https://piazza.com/umd/fall2017/cmsc498v/home)
 
-Overview
+Academic Integrity
 -----------
-The goal of this class is to expose students to advanced programming
-language ideas, including theory of programming languages, type
-systems,  high-level programming abstractions, and program analyses.
-We will develop these ideas in three parts.
-
-1. First, we start with a brief introduction to lambda calculus a
-compact but highly expressive programming language. Due to its
-simplicity lambda-calculus has been used to encode prototype type
-systems and program analysis.
-
-2. Second, we spend most of the class studying Haskell, a general
-purpose, functional programming language. Haskell directly implements
-the ideas of lambda-calculus and provides a high-level programing
-language that uses various novel programming techniques, like
-strong-typing, absence of side-effect, laziness, and monadic
-programming.
-
-3. Third, we present basic concepts of formal verification via Liquid
-Haskell, a refinement type checker for Haskell programs that extends
-Haskell's types with logical predicates to allow for expressive user
-specifications.
-
-Prerequisites
---------------
-No prerequisites are officially required for the class. 
-Some familiarity with the concepts of functional programming would make 
-the transition to the Haskell world easier.  
+Following [University of Maryland Code of Academic Integtiry](https://www.president.umd.edu/sites/president.umd.edu/files/documents/policies/III-100A.pdf)
+students are not allowed to perform any of the following:
+- *CHEATING:* fraud, deceit, or dishonesty in any academic course or exercise in
+an attempt to gain an unfair advantage and/or intentionally using or attempting to
+use unauthorized materials, information, or study aids in any academic course or
+exercise.
+- *FABRICATION:* intentional and unauthorized falsification or invention of any
+information or citation in any academic course or exercise.
+- *FACILITATING ACADEMIC DISHONESTY:* intentionally or knowingly
+helping or attempting to help another to violate any provision of this Code.
+- *PLAGIARISM:* intentionally or knowingly representing the words or ideas of
+another as one’s own in any academic course or exercise.
 
 
 Grading
