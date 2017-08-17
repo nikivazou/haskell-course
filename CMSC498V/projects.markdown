@@ -1,6 +1,10 @@
+TimeLine
+--------
+
 The project will happen at the *second* half of the semester. 
 The goal of the project is to give you some realistic experience of Haskell development and [pair programming](https://en.wikipedia.org/wiki/Pair_programming).
 You are expected to work in pairs and spend at least *30 hours* in the project. 
+
 - *Tue: 10/03:* Project Registration
 - *Tue, 10/10:* Project Proposal 
 - *Tue, 11/07:* Project Updates
@@ -10,6 +14,7 @@ Project Ideas
 --------------
 You can implement any project you wish. If you think your idea is unrealistic, discuss it with the instructor or the TA. 
 Here are some ideas/suggestions: 
+
 - A strategy game against the human, e.g., tic-tac-toc or chess. 
 - A puzzle solver, e.g., sudoku.
 - An efficient implementation of a data structure, e.g., string matching, red-black trees, zipper. 
@@ -23,6 +28,7 @@ Here are some ideas/suggestions:
 Project Evaluation
 ------------------
 The project will be evaluated based on the following criteria: 
+
 - *collaboration:* the project will be built on [github](https://github.com/) and all members should contribute equally. 
 - *library usage:* the project should use existing libraries of the [hackage](https://hackage.haskell.org/) ecosystem.  
 - *reproduction:* the project should be easily installed via [cabal](https://www.haskell.org/cabal/) or [stack](https://docs.haskellstack.org/en/stable/README/).
