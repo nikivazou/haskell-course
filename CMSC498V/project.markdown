@@ -15,7 +15,7 @@ Here are some ideas/suggestions:
 
 - A strategy game against the human, e.g., tic-tac-toc or chess. 
 - A puzzle solver, e.g., sudoku.
-- An efficient implementation of a data structure, e.g., string matching, red-black trees, zipper. 
+- An efficient implementation of a data structure, e.g., string matching, red-black trees. 
 - A parser, type-checker, and/or interpreter for lambda-calculus. 
 - A prover of propositional logic. 
 - A web application. 
@@ -36,7 +36,7 @@ The tests should be automatically checked via [Travis CI](https://travis-ci.com/
 - *[optional] verification:* optionally you can use [Liquid Haskell](https://ucsd-progsys.github.io/liquidhaskell-blog/) to check validity of your code.
 
 
-*Tue: 10/03:* Project Registration
+*Tue, 10/03:* Project Registration
 ----------------------------------
 
 You need to create a `github` repository for your project, write a `Readme.md` file that describes your goals and write *your names* and the *github link* to the [this](https://docs.google.com/document/d/1OQCYmsOTK25uycGGNqQ_6hyJPvKBxSNudDiNxUjQ8RA/edit?usp=sharing) document.
@@ -54,7 +54,7 @@ You will give a *5-10 min* description of your progress:
 - Do you expect to meet your goals until the deadline?
 - How are your goals adapted?
 
-*Tue: 12/05:* Project Presentation 
+*Tue, 12/05:* Project Presentation 
 -----------------------------------
 
 You will give a *10 min* description of your project.
