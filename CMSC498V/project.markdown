@@ -44,12 +44,12 @@ You need to create a `github` repository for your project, write a `Readme.md` f
 *Tue, 10/10:* Project Proposal 
 -------------------------------
 
-You will give a *5-10 min* description of your project. 
+You will give a *5 min* description of your project. 
 
 *Tue, 11/07:* Project Updates
 -----------------------------
 
-You will give a *5-10 min* description of your progress: 
+You will give a *5 min* description of your progress: 
 - What challenges (if any) did you have so far and how did you solve them?
 - Do you expect to meet your goals until the deadline?
 - How are your goals adapted?

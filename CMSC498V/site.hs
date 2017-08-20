@@ -15,7 +15,20 @@ main = hakyllWith config $ do
         route   idRoute
         compile compressCssCompiler
 
-    match (fromList ["index.markdown", "schedule.markdown", "resources.markdown", "homeworks.markdown", "project.markdown"]) $ do
+    match "lectures/*" $ do
+        route   $ setExtension "html"
+        compile $ pandocCompiler
+            >>= loadAndApplyTemplate "templates/post.html" defaultContext
+            >>= relativizeUrls
+
+    match (fromList 
+              [ "index.markdown"
+              , "schedule.markdown"
+              , "schedule-private.markdown"
+              , "resources.markdown"
+              , "homeworks.markdown"
+              , "project.markdown"
+              ]) $ do
         route   $ setExtension "html"
         compile $ pandocCompiler
             >>= loadAndApplyTemplate "templates/default.html" defaultContext
