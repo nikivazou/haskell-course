@@ -1,8 +1,5 @@
-- *Tue, 08/29:* <span style="color:gray"> Haskell 101</span>
-  - fib, Int, data type, intentation, comments 
-- *Thu, 08/31:* <span style="color:gray"> Lists</span>
-  - list comprehension, filter, all pairs
-  - hw: hanoi, pithagorean triples, [color states](http://vvv.tobiassjosten.net/haskell/haskell-list-comprehension-to-color-states/)
+- *Tue, 08/29:* Haskell 101 ([html](lectures/Haskell101.html), [hw](homeworks/HW1.lhs))
+- *Thu, 08/31:* <span style="color:gray"> Tic-Tac-Toe</span>
 - *Tue, 09/05:* <span style="color:green">**No class:**</span> [<span style="color:green">**ICFP.**</span>](http://conf.researchr.org/home/icfp-2017) 
 - *Thu, 09/07:* <span style="color:green">**No class:**</span> [<span style="color:green">**ICFP.**</span>](http://conf.researchr.org/home/icfp-2017) 
 - *Tue, 09/12:* <span style="color:gray"> Polymorphism</span>
