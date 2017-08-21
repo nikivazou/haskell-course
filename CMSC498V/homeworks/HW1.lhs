@@ -35,7 +35,7 @@ For example `removeUpper "Hello World!" = "ello orld!"`.
 
 \begin{code}
 removeUpper :: String -> String
-removeUpper xs = [x | x <- xs, isLower x]
+removeUpper xs = error "Define me!"
 \end{code}
 
 2. Complete the function `toLowerString` that turns all upper case characters of its String argument to lower. 
@@ -43,7 +43,7 @@ For example `toLowerString "Hello World!" = "hello world!"`.
 *Hint:* use the library function `toLower`.
 \begin{code}
 toLowerString :: String -> String
-toLowerString xs = [toLower x | x <- xs]
+toLowerString xs = error "Define me!"
 \end{code}
 
 
@@ -53,7 +53,7 @@ For example `noIdent "Hello World" = "Hello World"`.
 *Hint:* use the library function `elem`.
 \begin{code}
 noIdent :: String -> String
-noIdent xs = [ x | x <- xs, x `elem` (['a'..'z'] ++ ['A'..'Z'])]
+noIdent xs = error "Define me!"
 \end{code}
 
 **Problem 2:** Factoring
@@ -66,7 +66,7 @@ For example, `factors 12 = [1,2,3,4,6,12]` and factors 13 = [1,13].
 
 \begin{code}
 factors :: Int -> [Int] 
-factors n = [i | i <- [1..n], n `mod` i == 0]
+factors n = error "Define me!"
 \end{code}
 
 We say that an integer `n` is prime when its only factors are `1` and `n`. 
@@ -76,7 +76,7 @@ For example `isPrime 12 = False` and `isPrime 13 = True`.
 
 \begin{code}
 isPrime :: Int -> Bool 
-isPrime n = factors n == [1,n]
+isPrime n = error "Define me!"
 \end{code}
 
 3. Optimize the `factors n` function to only call the `mod` function 
@@ -90,15 +90,7 @@ and recurse on increasing `i`.
 - Recursion
 \begin{code}
 factorsOpt :: Int -> [Int]
-factorsOpt n = go 1 
-  where
-    go i 
-      | i * i > n     = []
-      | i * i == n    = [i]
-      | n `mod`i == 0 = i:(n`div`i):go(i+1) 
-      | n `mod`i == 0 = i:go(i+1) 
-      | otherwise     = go (i+1) 
-
+factorsOpt n = error "Define me!"
 \end{code}
 
 
@@ -115,7 +107,7 @@ Use `sameElems` to write a function `testFactors n` that tests that the two fact
 
 \begin{code}
 testFactors :: Int -> Bool 
-testFactors n = and [ factors i `sameElems` factorsOpt i | i <- [1..n]]
+testFactors n = error "Define me!"
 \end{code}
 
 **Problem 3:** Coloring
@@ -167,8 +159,7 @@ with respect to the input `adj`acency list.
 
 \begin{code}
 isGoodColoring :: [(Balcan, Balcan)] -> [(Balcan,Color)] -> Bool 
-isGoodColoring adj coloring 
-  = null [ (c1,c2) | (c1,c2) <- adj, lookup c1 coloring == lookup c2 coloring]
+isGoodColoring adj coloring = error "Define me!"
 \end{code}
 
 2. Write a function `colorings` that returns all the good colorings 
@@ -176,14 +167,7 @@ of the adjacency list `adjacencies`.
 
 \begin{code}
 colorings :: [[(Balcan, Color)]]
-colorings = filter (isGoodColoring adjacencies)
-  [
-   [(Albania, al), (Bulgaria, bl), (BosniaAndHerzegovina, bos), (Kosovo,ko), (Macedonia, mc),(Montenegro, mo)]
-  | al <- colors, bl <- colors, bos <- colors, ko <- colors, mc <- colors, mo <- colors 
-  ]
-
-colors :: [Color]
-colors = [Red, Green, Blue, Yellow]  
+colorings = error "Define me!"
 \end{code}
 
 
