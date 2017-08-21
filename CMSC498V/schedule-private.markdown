@@ -1,4 +1,4 @@
-- *Tue, 08/29:* Haskell 101 ([html](lectures/Haskell101.html), [hw](homeworks/HW1.lhs))
+- *Tue, 08/29:* Haskell 101 ([html](lectures/Haskell101.html), [hw1](homeworks/HW1.html))
 - *Thu, 08/31:* <span style="color:gray"> Tic-Tac-Toe</span>
 - *Tue, 09/05:* <span style="color:green">**No class:**</span> [<span style="color:green">**ICFP.**</span>](http://conf.researchr.org/home/icfp-2017) 
 - *Thu, 09/07:* <span style="color:green">**No class:**</span> [<span style="color:green">**ICFP.**</span>](http://conf.researchr.org/home/icfp-2017) 
