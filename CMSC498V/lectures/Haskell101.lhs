@@ -68,7 +68,7 @@ evaluate your code,
 make new definitions (that went fast!),
 
 ```
-let fib42 = fib 42
+*Main> let fib42 = fib 42
 ```
 
 or quit.
