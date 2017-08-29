@@ -13,7 +13,7 @@ Project Ideas
 You can implement any project you wish. If you think your idea is unrealistic, discuss it with the instructor or the TA. 
 Here are some ideas/suggestions: 
 
-- A strategy game against the human, e.g., tic-tac-toc or chess. 
+- A strategy game against the human, e.g., chess. 
 - A puzzle solver, e.g., sudoku.
 - An efficient implementation of a data structure, e.g., string matching, red-black trees. 
 - A parser, type-checker, and/or interpreter for lambda-calculus. 
