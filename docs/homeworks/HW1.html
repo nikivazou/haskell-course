@@ -30,7 +30,8 @@
 <h2 id="problem-1-strings"><strong>Problem 1:</strong> Strings</h2>
 <p>In Haskell the <code>String</code> data type is defined to be a list of <code>Char</code>acters, so <code>String</code> can be manipulated via list comprehension.</p>
 <p>For example, bellow list comprehension is used to combine each possible adjectives with each possible noun.</p>
-
+<pre><code>[adj ++ &quot; &quot; ++ noun | adj &lt;- [&quot;lazy&quot;, &quot;nasty&quot;], noun &lt;- [&quot;cat&quot;, &quot;language&quot;] ]
+[&quot;lazy cat&quot;,&quot;lazy language&quot;,&quot;nasty cat&quot;,&quot;nasty language&quot;]</code></pre>
 <p>You are requested to use list comprehension to define the following three functions on <code>String</code>s.</p>
 <ol style="list-style-type: decimal">
 <li>Complete the function <code>removeUpper</code> that removes all upper case characters from its String argument. For example <code>removeUpper &quot;Hello World!&quot; = &quot;ello orld!&quot;</code>. <em>Hint:</em> use the library function <code>isLower</code>.</li>
@@ -41,7 +42,7 @@
 <li>Complete the function <code>toLowerString</code> that turns all upper case characters of its String argument to lower. For example <code>toLowerString &quot;Hello World!&quot; = &quot;hello world!&quot;</code>. <em>Hint:</em> use the library function <code>toLower</code>.
 <div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt; toLowerString ::</span> <span class="dt">String</span> <span class="ot">-&gt;</span> <span class="dt">String</span>
 <span class="ot">&gt;</span> toLowerString xs <span class="fu">=</span> error <span class="st">&quot;Define me!&quot;</span></code></pre></div></li>
-<li>Complete the function <code>noIdent</code> that removes any non-letter character of its String argument to lower. We defined a letter to be the characters a..z<code>and</code>A..Z<code>. For example</code>noIdent “Hello World” = “Hello World”<code>. *Hint:* use the library function</code>elem`.
+<li>Complete the function <code>noIdent</code> that removes any non-letter character of its String argument to lower. We defined a letter to be the characters a..z<code>and</code>A..Z<code>. For example</code>noIdent “Hello World!” = “HelloWorld”<code>. *Hint:* use the library function</code>elem`.
 <div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt; noIdent ::</span> <span class="dt">String</span> <span class="ot">-&gt;</span> <span class="dt">String</span>
 <span class="ot">&gt;</span> noIdent xs <span class="fu">=</span> error <span class="st">&quot;Define me!&quot;</span></code></pre></div></li>
 </ol>

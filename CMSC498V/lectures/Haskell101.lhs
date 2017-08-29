@@ -1,8 +1,8 @@
-Haskell 101
-============
+Haskell 101: Syntax
+====================
 
 Haskell is a general purpose language! 
-This slide is writen in Haskell, check the source code [here](https://github.com/nikivazou/CMSC498V/blob/master/CMSC498V/lectures/Haskell101.lhs)!
+This site is writen in Haskell, check the source code [here](https://github.com/nikivazou/CMSC498V/blob/master/CMSC498V/lectures/Haskell101.lhs)!
 
 \begin{code}
 module Main where
@@ -17,20 +17,21 @@ supports direct encoding of mathematical functions.
 For example, the [Fibonacci](https://en.wikipedia.org/wiki/Fibonacci_number)
 definition
 
-\begin{spec}
-Fin_0 = 0 
-Fib_1 = 1 
-Fib_n = Fib_{n-1} + Fib_{n-2}
-\end{spec}
+$fib_0 = 0$
+$$fib_1 = 1$$
+$fib_i = fib_{i-1} + fib_{i-2}$
 
 is directly encoded as 
 
 \begin{code}
 fib :: Int -> Int 
-fib i = if i == 0 then 0 else if i == 1 then 1 else fib (i-1) + fib (i-2)
+fib i = if i == 0 then 0 
+        else if i == 1 then 1 
+        else fib (i-1) + fib (i-2)
 \end{code}
 
-Haskell is pure (has no side effects)
+Haskell functions are like math functions: pure (side-effect free).
+
 - *advantage: * everytime you can a function with *same input* it returns *the same* output. 
 - *disadvantage:* interaction with the world is tricky. 
 - *neutral:* there are no loops! (only recursion)
@@ -40,31 +41,42 @@ Running your code
 -----------------
 To run the `fib` function, you can load this file to `ghci`, a Haskell interpreter. 
 
-\begin{spec}
-:l Haskell101.lhs
-Ok, modules loaded: Main.
-\end{spec}
+```
+ > ghci
+ GHCi, version 8.0.2: http://www.haskell.org/ghc/  :? for help
+ Prelude> :l Haskell101.lhs
+ [1 of 1] Compiling Main             ( Haskell101.lhs, interpreted )
+ Ok, modules loaded: Main.
+```
+
 
 You can ask `ghci` the type or further information about the loaded functions,
 
-\begin{spec}
+```
 *Main> :t fib
 fib :: Int -> Int
 *Main> :i fib
 fib :: Int -> Int   -- Defined at Haskell101.lhs:30:1
-\end{spec}
+```
 
-evaluate your code
-\begin{spec}
+evaluate your code,
+```
 *Main> fib 10
 55
-\end{spec}
+```
 
-or make new definitions.
-\begin{spec}
+make new definitions (that went fast!),
+
+```
 let fib42 = fib 42
-\end{spec}
+```
 
+or quit.
+
+```
+*Main> :q
+Leaving GHCi.
+```
 
 **Q:** Is `fib 42` actually evaluated in the above definition? 
 
@@ -86,6 +98,7 @@ fib1 i
   = fib1 (i-1) + fib1 (i-2)
 \end{code}
 
+**Note:** No `=` before the guards!
 
 Syntax: Case Analysis 
 -------------
@@ -113,8 +126,8 @@ A final equivalent syntax is pattern matching:
 
 \begin{code}
 fib3 :: Int -> Int 
-fib3 0 = 0 
 fib3 1 = 1 
+fib3 0 = 0 
 fib3 i = fib3 (i-1) + fib3 (i-2)
 \end{code}
 
@@ -143,19 +156,20 @@ Data types classify data for two main purposes.
 
 Adding `1` to the largest `Int` will give an overflow. 
 
-\begin{spec} 
+
+```
 maxBound :: Int 
 9223372036854775807
 
 (maxBound + 1) :: Int 
 -9223372036854775808
-\end{spec}
+```
 
 User Defined Data Types
 ---------
 
 Users can comlibe data together and provide more operations to them. 
-For example, the data `IntError` combines integer values with Error string. 
+For example, the data `IntError` combines integer values with `Error` string. 
 
 \begin{code}
 data IntError 
@@ -163,21 +177,32 @@ data IntError
   | Error {err :: String} 
 \end{code}
 
-Every user defined data type comes with two operations 
+Every user defined data type comes with three operations 
+
 - **Construction:** How to construct such the data type 
 
-\begin{spec}
+```
 Value 42          :: IntError 
 Error "Not Valid" :: IntValue
-\end{spec} 
+```
+
+- **Selection:** Select value from data type 
+
+```
+*Main> val (Value 42)
+42
+
+*Main> err (Value 42)
+*** Exception: No match in record selector err
+```
 
 - **Case Analysis:** How to deconstruct the content of the data
 
-\begin{spec}
+```
 case val of
   Value i -> i + 42
   Error s -> error e
-\end{spec}
+```
 
 We use `IntError` to return `Error` when `fib` is called on negative numbers. 
 
@@ -198,7 +223,7 @@ Maybe Data Type
 ---------
 
 `IntError` is similar to Haskell's `Maybe` data type
-that has two constructors `Maybe` and `Nothing`.
+that has two constructors `Just` and `Nothing`.
 
 \begin{code}
 fibMaybe :: Int -> Maybe Int 
@@ -212,11 +237,14 @@ fibMaybe i =
     Nothing -> Nothing
 \end{code}
 
+**Q:** What is an advantage of using `Maybe` instead of user-defined `IntError`?
+
 Lists 
 ---------
 
 List is the most famous Haskell data type 
 with two constructors 
+
 - the *empty* list `[]` and 
 - the *cons* operator `:`. 
 
@@ -225,23 +253,25 @@ Toy List Construction
 
 List construction happens via these two constructors!
 
-\begin{spec}
-3:2:1:[]   :: Int 
-[3, 2, 1]  :: Int -- simplification
-\end{spec}
+```
+3:2:1:[]   :: [Int] 
+[3, 2, 1]  :: [Int] -- simplification
+```
 
 Case analysis uses the same constructors
 
-\begin{spec}
+```
+listCase :: [Int] -> Int
 listCase xs = 
   case xs of 
     []      -> 1 
     [2]     -> 2
-    [x,y,z] -> 2
-    x:xs    -> 3
-    [x,y]   -> 4 
-\end{spec}
+    [x,y,z] -> 3
+    x:xs    -> 4
+    [x,y]   -> 5 
+```
 
+**Q:** What is the value of `listCase [2, 6]`?
 
 Recursive List Construction
 ---------
@@ -294,11 +324,12 @@ Due to its popularity,
 list manipulation is grealty simplified by list comprehensions. 
 
 - List range
+
 List ranging is simplified to 
 
-\begin{spec}
+```
 range1 lo hi = [lo..hi]
-\end{spec}
+```
 
 For example, `[1..10]` gives the list `[1, 2, 3, 4, 5, 6, 7, 8, 9, 10]`.
 
@@ -314,7 +345,9 @@ evens = [x | x<-[1..10],  x `mod` 2 == 0]
 Using list comprehension, `fibs` is implemented as 
 
 \begin{code}
-fibs2 lo hi = [fromJust (fibMaybe x) | x <- [lo..hi], isJust (fibMaybe x)]
+fibs2 lo hi 
+  = [fromJust (fibMaybe x) | x <- [lo..hi]
+                           , isJust (fibMaybe x)]
 \end{code}
 
 
@@ -338,7 +371,9 @@ We can get only the right tringles by adding the pythagorian constraint.
 For *efficiency* we search only for sides `x` and `y` that are not greater than the hypothenuse.
 
 \begin{code}
-rightTriangles = [(x,y,z) | z<-[1..10], y<-[1..z], x<-[1..z], x^2 + y^2 == z^2]
+rightTriangles 
+  = [(x,y,z) | z<-[1..10], y<-[1..z], x<-[1..z]
+             , x^2 + y^2 == z^2]
 \end{code}
 
 **Q:** The triangle `(4,3,5)` appears twice as `(4,3,5)` and `(3,4,5)`. How do we filter such duplication?
@@ -347,16 +382,18 @@ Finally, we parameterize the right triangle generation on the length of the hypo
 to get all right triangles with length up to `n`:
 
 \begin{code}
-allRightTriangles n = [(x,y,z) | z<-[1..n], y<-[1..z], x<-[1..y], x^2 + y^2 == z^2]
+allRightTriangles n 
+  = [(x,y,z) | z<-[1..n], y<-[1..z], x<-[1..y]
+             , x^2 + y^2 == z^2]
 \end{code}
 
 
 Interaction with the real world
 -------------------------------
 
-Interaction with the real world (i.e., input, output) is wrapped inside the ``IO monad''.
+Interaction with the real world (i.e., input, output) is wrapped inside the "IO monad".
 The type `IO` encode the non-purity of this interaction: functions returning `IO` computations are no more mathematical functions. 
-Impure IO` functions can call pure mathematical functions
+Impure `IO` functions can call pure mathematical functions
 but not the inverse, 
 encorcing a clear separation of the pure boundaries. 
 

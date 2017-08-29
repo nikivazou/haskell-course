@@ -22,10 +22,10 @@ so `String` can be manipulated via list comprehension.
 
 For example, bellow list comprehension is used to combine each possible adjectives with each possible noun.
 
-\begin{spec}
+```
 [adj ++ " " ++ noun | adj <- ["lazy", "nasty"], noun <- ["cat", "language"] ]
 ["lazy cat","lazy language","nasty cat","nasty language"]
-\end{spec}
+```
 
 You are requested to use list comprehension to define the following three functions on `String`s.
 
@@ -49,7 +49,7 @@ toLowerString xs = error "Define me!"
 
 3. Complete the function `noIdent` that removes any non-letter character of its String argument to lower. 
 We defined a letter to be the characters a..z` and `A..Z`.
-For example `noIdent "Hello World" = "Hello World"`.
+For example `noIdent "Hello World!" = "HelloWorld"`.
 *Hint:* use the library function `elem`.
 \begin{code}
 noIdent :: String -> String

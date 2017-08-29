@@ -21,26 +21,44 @@
         </div>
 
         <div id="content">
-            <h1 id="haskell-101">Haskell 101</h1>
-<p>Haskell is a general purpose language! This slide is writen in Haskell, check the source code <a href="https://github.com/nikivazou/CMSC498V/blob/master/CMSC498V/lectures/Haskell101.lhs">here</a>!</p>
+            <h1 id="haskell-101-syntax">Haskell 101: Syntax</h1>
+<p>Haskell is a general purpose language! This site is writen in Haskell, check the source code <a href="https://github.com/nikivazou/CMSC498V/blob/master/CMSC498V/lectures/Haskell101.lhs">here</a>!</p>
 <div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt;</span> <span class="kw">module</span> <span class="dt">Main</span> <span class="kw">where</span>
 <span class="ot">&gt;</span> <span class="kw">import </span><span class="dt">Data.Maybe</span> (isJust, fromJust)</code></pre></div>
 <h2 id="recursion">Recursion</h2>
 <p>Haskell is a <em>functional</em> language: supports direct encoding of mathematical functions. For example, the <a href="https://en.wikipedia.org/wiki/Fibonacci_number">Fibonacci</a> definition</p>
-
+<p><span class="math inline"><em>f</em><em>i</em><em>b</em><sub>0</sub> = 0</span> <br /><span class="math display"><em>f</em><em>i</em><em>b</em><sub>1</sub> = 1</span><br /> <span class="math inline"><em>f</em><em>i</em><em>b</em><sub><em>i</em></sub> = <em>f</em><em>i</em><em>b</em><sub><em>i</em> − 1</sub> + <em>f</em><em>i</em><em>b</em><sub><em>i</em> − 2</sub></span></p>
 <p>is directly encoded as</p>
 <div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt; fib ::</span> <span class="dt">Int</span> <span class="ot">-&gt;</span> <span class="dt">Int</span> 
-<span class="ot">&gt;</span> fib i <span class="fu">=</span> <span class="kw">if</span> i <span class="fu">==</span> <span class="dv">0</span> <span class="kw">then</span> <span class="dv">0</span> <span class="kw">else</span> <span class="kw">if</span> i <span class="fu">==</span> <span class="dv">1</span> <span class="kw">then</span> <span class="dv">1</span> <span class="kw">else</span> fib (i<span class="fu">-</span><span class="dv">1</span>) <span class="fu">+</span> fib (i<span class="fu">-</span><span class="dv">2</span>)</code></pre></div>
-<p>Haskell is pure (has no side effects) - <em>advantage: </em> everytime you can a function with <em>same input</em> it returns <em>the same</em> output. - <em>disadvantage:</em> interaction with the world is tricky. - <em>neutral:</em> there are no loops! (only recursion)</p>
+<span class="ot">&gt;</span> fib i <span class="fu">=</span> <span class="kw">if</span> i <span class="fu">==</span> <span class="dv">0</span> <span class="kw">then</span> <span class="dv">0</span> 
+<span class="ot">&gt;</span>         <span class="kw">else</span> <span class="kw">if</span> i <span class="fu">==</span> <span class="dv">1</span> <span class="kw">then</span> <span class="dv">1</span> 
+<span class="ot">&gt;</span>         <span class="kw">else</span> fib (i<span class="fu">-</span><span class="dv">1</span>) <span class="fu">+</span> fib (i<span class="fu">-</span><span class="dv">2</span>)</code></pre></div>
+<p>Haskell functions are like math functions: pure (side-effect free).</p>
+<ul>
+<li><em>advantage: </em> everytime you can a function with <em>same input</em> it returns <em>the same</em> output.</li>
+<li><em>disadvantage:</em> interaction with the world is tricky.</li>
+<li><em>neutral:</em> there are no loops! (only recursion)</li>
+</ul>
 <h2 id="running-your-code">Running your code</h2>
 <p>To run the <code>fib</code> function, you can load this file to <code>ghci</code>, a Haskell interpreter.</p>
-
+<pre><code> &gt; ghci
+ GHCi, version 8.0.2: http://www.haskell.org/ghc/  :? for help
+ Prelude&gt; :l Haskell101.lhs
+ [1 of 1] Compiling Main             ( Haskell101.lhs, interpreted )
+ Ok, modules loaded: Main.</code></pre>
 <p>You can ask <code>ghci</code> the type or further information about the loaded functions,</p>
-
-evaluate your code
-
-or make new definitions.
-
+<pre><code>*Main&gt; :t fib
+fib :: Int -&gt; Int
+*Main&gt; :i fib
+fib :: Int -&gt; Int   -- Defined at Haskell101.lhs:30:1</code></pre>
+<p>evaluate your code,</p>
+<pre><code>*Main&gt; fib 10
+55</code></pre>
+<p>make new definitions (that went fast!),</p>
+<pre><code>let fib42 = fib 42</code></pre>
+<p>or quit.</p>
+<pre><code>*Main&gt; :q
+Leaving GHCi.</code></pre>
 <p><strong>Q:</strong> Is <code>fib 42</code> actually evaluated in the above definition?</p>
 <h2 id="syntax-guards">Syntax: Guards</h2>
 <p>Guards provide an alternative syntax for <em>if</em> expressions. The body of the <em>first</em> guard that is evaluated to true is returned.</p>
@@ -52,6 +70,7 @@ or make new definitions.
 <span class="ot">&gt;</span>   <span class="fu">=</span> i 
 <span class="ot">&gt;</span>   <span class="fu">|</span> otherwise 
 <span class="ot">&gt;</span>   <span class="fu">=</span> fib1 (i<span class="fu">-</span><span class="dv">1</span>) <span class="fu">+</span> fib1 (i<span class="fu">-</span><span class="dv">2</span>)</code></pre></div>
+<p><strong>Note:</strong> No <code>=</code> before the guards!</p>
 <h2 id="syntax-case-analysis">Syntax: Case Analysis</h2>
 <p>Another alternative syntax is using <code>case</code> analysis:</p>
 <div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt; fib2 ::</span> <span class="dt">Int</span> <span class="ot">-&gt;</span> <span class="dt">Int</span> 
@@ -64,8 +83,8 @@ or make new definitions.
 <h2 id="syntax-pattern-matching">Syntax: Pattern Matching</h2>
 <p>A final equivalent syntax is pattern matching:</p>
 <div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt; fib3 ::</span> <span class="dt">Int</span> <span class="ot">-&gt;</span> <span class="dt">Int</span> 
-<span class="ot">&gt;</span> fib3 <span class="dv">0</span> <span class="fu">=</span> <span class="dv">0</span> 
 <span class="ot">&gt;</span> fib3 <span class="dv">1</span> <span class="fu">=</span> <span class="dv">1</span> 
+<span class="ot">&gt;</span> fib3 <span class="dv">0</span> <span class="fu">=</span> <span class="dv">0</span> 
 <span class="ot">&gt;</span> fib3 i <span class="fu">=</span> fib3 (i<span class="fu">-</span><span class="dv">1</span>) <span class="fu">+</span> fib3 (i<span class="fu">-</span><span class="dv">2</span>)</code></pre></div>
 <p><strong>Evaluation order</strong> is from top to bottom.</p>
 <p><strong>Q:</strong> What happens if the recursive <code>fib3 i</code> case is defined first?</p>
@@ -84,18 +103,36 @@ or make new definitions.
 <li><code>Integer</code> is arbitrary precision integers, with range as large as you have memory for.</li>
 </ul>
 <p>Adding <code>1</code> to the largest <code>Int</code> will give an overflow.</p>
+<pre><code>maxBound :: Int 
+9223372036854775807
 
+(maxBound + 1) :: Int 
+-9223372036854775808</code></pre>
 <h2 id="user-defined-data-types">User Defined Data Types</h2>
-<p>Users can comlibe data together and provide more operations to them. For example, the data <code>IntError</code> combines integer values with Error string.</p>
+<p>Users can comlibe data together and provide more operations to them. For example, the data <code>IntError</code> combines integer values with <code>Error</code> string.</p>
 <div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt;</span> <span class="kw">data</span> <span class="dt">IntError</span> 
 <span class="ot">&gt;</span>   <span class="fu">=</span> <span class="dt">Value</span> {<span class="ot">val ::</span> <span class="dt">Int</span>} 
 <span class="ot">&gt;</span>   <span class="fu">|</span> <span class="dt">Error</span> {<span class="ot">err ::</span> <span class="dt">String</span>} </code></pre></div>
-<p>Every user defined data type comes with two operations - <strong>Construction:</strong> How to construct such the data type</p>
+<p>Every user defined data type comes with three operations</p>
+<ul>
+<li><strong>Construction:</strong> How to construct such the data type</li>
+</ul>
+<pre><code>Value 42          :: IntError 
+Error &quot;Not Valid&quot; :: IntValue</code></pre>
+<ul>
+<li><strong>Selection:</strong> Select value from data type</li>
+</ul>
+<pre><code>*Main&gt; val (Value 42)
+42
 
+*Main&gt; err (Value 42)
+*** Exception: No match in record selector err</code></pre>
 <ul>
 <li><strong>Case Analysis:</strong> How to deconstruct the content of the data</li>
 </ul>
-
+<pre><code>case val of
+  Value i -&gt; i + 42
+  Error s -&gt; error e</code></pre>
 <p>We use <code>IntError</code> to return <code>Error</code> when <code>fib</code> is called on negative numbers.</p>
 <div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt; fibError ::</span> <span class="dt">Int</span> <span class="ot">-&gt;</span> <span class="dt">IntError</span>
 <span class="ot">&gt;</span> fibError <span class="dv">0</span> <span class="fu">=</span> <span class="dt">Value</span> <span class="dv">0</span> 
@@ -107,7 +144,7 @@ or make new definitions.
 <span class="ot">&gt;</span>                  <span class="dt">Error</span> s <span class="ot">-&gt;</span> <span class="dt">Error</span> s 
 <span class="ot">&gt;</span>     <span class="dt">Error</span> s <span class="ot">-&gt;</span> <span class="dt">Error</span> s </code></pre></div>
 <h2 id="maybe-data-type">Maybe Data Type</h2>
-<p><code>IntError</code> is similar to Haskell’s <code>Maybe</code> data type that has two constructors <code>Maybe</code> and <code>Nothing</code>.</p>
+<p><code>IntError</code> is similar to Haskell’s <code>Maybe</code> data type that has two constructors <code>Just</code> and <code>Nothing</code>.</p>
 <div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt; fibMaybe ::</span> <span class="dt">Int</span> <span class="ot">-&gt;</span> <span class="dt">Maybe</span> <span class="dt">Int</span> 
 <span class="ot">&gt;</span> fibMaybe <span class="dv">0</span> <span class="fu">=</span> <span class="dt">Just</span> <span class="dv">0</span> 
 <span class="ot">&gt;</span> fibMaybe <span class="dv">1</span> <span class="fu">=</span> <span class="dt">Just</span> <span class="dv">1</span> 
@@ -117,13 +154,27 @@ or make new definitions.
 <span class="ot">&gt;</span>                 <span class="dt">Just</span> k  <span class="ot">-&gt;</span> <span class="dt">Just</span> (j<span class="fu">+</span>k)
 <span class="ot">&gt;</span>                 <span class="dt">Nothing</span> <span class="ot">-&gt;</span> <span class="dt">Nothing</span> 
 <span class="ot">&gt;</span>     <span class="dt">Nothing</span> <span class="ot">-&gt;</span> <span class="dt">Nothing</span></code></pre></div>
+<p><strong>Q:</strong> What is an advantage of using <code>Maybe</code> instead of user-defined <code>IntError</code>?</p>
 <h2 id="lists">Lists</h2>
-<p>List is the most famous Haskell data type with two constructors - the <em>empty</em> list <code>[]</code> and - the <em>cons</em> operator <code>:</code>.</p>
+<p>List is the most famous Haskell data type with two constructors</p>
+<ul>
+<li>the <em>empty</em> list <code>[]</code> and</li>
+<li>the <em>cons</em> operator <code>:</code>.</li>
+</ul>
 <h2 id="toy-list-construction">Toy List Construction</h2>
 <p>List construction happens via these two constructors!</p>
-
+<pre><code>3:2:1:[]   :: [Int] 
+[3, 2, 1]  :: [Int] -- simplification</code></pre>
 <p>Case analysis uses the same constructors</p>
-
+<pre><code>listCase :: [Int] -&gt; Int
+listCase xs = 
+  case xs of 
+    []      -&gt; 1 
+    [2]     -&gt; 2
+    [x,y,z] -&gt; 3
+    x:xs    -&gt; 4
+    [x,y]   -&gt; 5 </code></pre>
+<p><strong>Q:</strong> What is the value of <code>listCase [2, 6]</code>?</p>
 <h2 id="recursive-list-construction">Recursive List Construction</h2>
 <p>Realistic list construction occurs via recursive functions. For example <code>range lo hi</code> returns the list of the indexes from <code>lo</code> to <code>hi</code>.</p>
 <div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt; range ::</span> <span class="dt">Int</span> <span class="ot">-&gt;</span> <span class="dt">Int</span> <span class="ot">-&gt;</span> [<span class="dt">Int</span>]
@@ -150,9 +201,10 @@ or make new definitions.
 <h2 id="list-comprehension">List Comprehension</h2>
 <p>Due to its popularity, list manipulation is grealty simplified by list comprehensions.</p>
 <ul>
-<li>List range List ranging is simplified to</li>
+<li>List range</li>
 </ul>
-
+<p>List ranging is simplified to</p>
+<pre><code>range1 lo hi = [lo..hi]</code></pre>
 <p>For example, <code>[1..10]</code> gives the list <code>[1, 2, 3, 4, 5, 6, 7, 8, 9, 10]</code>.</p>
 <ul>
 <li>Filterning</li>
@@ -160,7 +212,9 @@ or make new definitions.
 <p>Ranges can be filtered with predicates that go after the range.</p>
 <div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt;</span> evens <span class="fu">=</span> [x <span class="fu">|</span> x<span class="ot">&lt;-</span>[<span class="dv">1</span><span class="fu">..</span><span class="dv">10</span>],  x <span class="ot">`mod`</span> <span class="dv">2</span> <span class="fu">==</span> <span class="dv">0</span>]</code></pre></div>
 <p>Using list comprehension, <code>fibs</code> is implemented as</p>
-<div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt;</span> fibs2 lo hi <span class="fu">=</span> [fromJust (fibMaybe x) <span class="fu">|</span> x <span class="ot">&lt;-</span> [lo<span class="fu">..</span>hi], isJust (fibMaybe x)]</code></pre></div>
+<div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt;</span> fibs2 lo hi 
+<span class="ot">&gt;</span>   <span class="fu">=</span> [fromJust (fibMaybe x) <span class="fu">|</span> x <span class="ot">&lt;-</span> [lo<span class="fu">..</span>hi]
+<span class="ot">&gt;</span>                            , isJust (fibMaybe x)]</code></pre></div>
 <ul>
 <li>Pairs</li>
 </ul>
@@ -169,12 +223,16 @@ or make new definitions.
 <p>For example, <code>triangles</code> give all possible trianges with sizes less than <code>10</code>.</p>
 <div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt;</span> triangles <span class="fu">=</span> [(x,y,z) <span class="fu">|</span> x<span class="ot">&lt;-</span>[<span class="dv">1</span><span class="fu">..</span><span class="dv">10</span>], y<span class="ot">&lt;-</span>[<span class="dv">1</span><span class="fu">..</span><span class="dv">10</span>], z<span class="ot">&lt;-</span>[<span class="dv">1</span><span class="fu">..</span><span class="dv">10</span>]]</code></pre></div>
 <p>We can get only the right tringles by adding the pythagorian constraint. For <em>efficiency</em> we search only for sides <code>x</code> and <code>y</code> that are not greater than the hypothenuse.</p>
-<div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt;</span> rightTriangles <span class="fu">=</span> [(x,y,z) <span class="fu">|</span> z<span class="ot">&lt;-</span>[<span class="dv">1</span><span class="fu">..</span><span class="dv">10</span>], y<span class="ot">&lt;-</span>[<span class="dv">1</span><span class="fu">..</span>z], x<span class="ot">&lt;-</span>[<span class="dv">1</span><span class="fu">..</span>z], x<span class="fu">^</span><span class="dv">2</span> <span class="fu">+</span> y<span class="fu">^</span><span class="dv">2</span> <span class="fu">==</span> z<span class="fu">^</span><span class="dv">2</span>]</code></pre></div>
+<div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt;</span> rightTriangles 
+<span class="ot">&gt;</span>   <span class="fu">=</span> [(x,y,z) <span class="fu">|</span> z<span class="ot">&lt;-</span>[<span class="dv">1</span><span class="fu">..</span><span class="dv">10</span>], y<span class="ot">&lt;-</span>[<span class="dv">1</span><span class="fu">..</span>z], x<span class="ot">&lt;-</span>[<span class="dv">1</span><span class="fu">..</span>z]
+<span class="ot">&gt;</span>              , x<span class="fu">^</span><span class="dv">2</span> <span class="fu">+</span> y<span class="fu">^</span><span class="dv">2</span> <span class="fu">==</span> z<span class="fu">^</span><span class="dv">2</span>]</code></pre></div>
 <p><strong>Q:</strong> The triangle <code>(4,3,5)</code> appears twice as <code>(4,3,5)</code> and <code>(3,4,5)</code>. How do we filter such duplication?</p>
 <p>Finally, we parameterize the right triangle generation on the length of the hypothenuse to get all right triangles with length up to <code>n</code>:</p>
-<div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt;</span> allRightTriangles n <span class="fu">=</span> [(x,y,z) <span class="fu">|</span> z<span class="ot">&lt;-</span>[<span class="dv">1</span><span class="fu">..</span>n], y<span class="ot">&lt;-</span>[<span class="dv">1</span><span class="fu">..</span>z], x<span class="ot">&lt;-</span>[<span class="dv">1</span><span class="fu">..</span>y], x<span class="fu">^</span><span class="dv">2</span> <span class="fu">+</span> y<span class="fu">^</span><span class="dv">2</span> <span class="fu">==</span> z<span class="fu">^</span><span class="dv">2</span>]</code></pre></div>
+<div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt;</span> allRightTriangles n 
+<span class="ot">&gt;</span>   <span class="fu">=</span> [(x,y,z) <span class="fu">|</span> z<span class="ot">&lt;-</span>[<span class="dv">1</span><span class="fu">..</span>n], y<span class="ot">&lt;-</span>[<span class="dv">1</span><span class="fu">..</span>z], x<span class="ot">&lt;-</span>[<span class="dv">1</span><span class="fu">..</span>y]
+<span class="ot">&gt;</span>              , x<span class="fu">^</span><span class="dv">2</span> <span class="fu">+</span> y<span class="fu">^</span><span class="dv">2</span> <span class="fu">==</span> z<span class="fu">^</span><span class="dv">2</span>]</code></pre></div>
 <h2 id="interaction-with-the-real-world">Interaction with the real world</h2>
-<p>Interaction with the real world (i.e., input, output) is wrapped inside the `<code>IO monad''. The type</code>IO<code>encode the non-purity of this interaction: functions returning</code>IO<code>computations are no more mathematical functions.  Impure IO</code> functions can call pure mathematical functions but not the inverse, encorcing a clear separation of the pure boundaries.</p>
+<p>Interaction with the real world (i.e., input, output) is wrapped inside the “IO monad”. The type <code>IO</code> encode the non-purity of this interaction: functions returning <code>IO</code> computations are no more mathematical functions. Impure <code>IO</code> functions can call pure mathematical functions but not the inverse, encorcing a clear separation of the pure boundaries.</p>
 <div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt; main ::</span> <span class="dt">IO</span> ()
 <span class="ot">&gt;</span> main <span class="fu">=</span> <span class="kw">do</span> 
 <span class="ot">&gt;</span>   putStrLn <span class="st">&quot;Hello World!&quot;</span> 

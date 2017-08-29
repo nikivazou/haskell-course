@@ -1,4 +1,4 @@
-Advanced Functional Programming Languages
+Advanced Functional Programming Languages 
 ====================================================
 
 Stuff
@@ -26,6 +26,7 @@ Academic Integrity
 -----------
 Following [University of Maryland Code of Academic Integtiry](https://www.president.umd.edu/sites/president.umd.edu/files/documents/policies/III-100A.pdf)
 students are not allowed to perform any of the following:
+
 - *CHEATING:* fraud, deceit, or dishonesty in any academic course or exercise in
 an attempt to gain an unfair advantage and/or intentionally using or attempting to
 use unauthorized materials, information, or study aids in any academic course or
@@ -42,7 +43,7 @@ Grading
 -------
 
 - Questions (10%). In class participation and responses on questions.
-- [Homeworks](/homeworks.html) (20%). Three or four take-home, programming assignments. 
-- [Tournaments](/schedule.html) (20%). Two tournaments on a strategy game (like tic-tac-toe).
+- [Homeworks](/homeworks.html) (20%). Four comprehension, programming assignments. 
+- [Tournament](/schedule.html) (10%). Two tournaments on a strategy game (like tic-tac-toe).
 - [Project](/project.html) (30%).  Haskell implementation of a (semi-) realistic project. 
-- Final (20%). In class final. 
+- Final (30%). In class final. 

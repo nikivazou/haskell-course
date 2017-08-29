@@ -31,7 +31,7 @@ The project will be evaluated based on the following criteria:
 - *collaboration:* the project will be built on [github](https://github.com/) and all members should contribute equally. 
 - *library usage:* the project should use existing libraries of the [hackage](https://hackage.haskell.org/) ecosystem.  
 - *reproduction:* the project should be easily installed via [cabal](https://www.haskell.org/cabal/) or [stack](https://docs.haskellstack.org/en/stable/README/).
-- *unit testing:* the project should pass unit tests that are implemented either manually or using [quickcheck[(https://hackage.haskell.org/package/QuickCheck). 
+- *unit testing:* the project should pass unit tests that are implemented either manually or using [quickcheck](https://hackage.haskell.org/package/QuickCheck). 
 The tests should be automatically checked via [Travis CI](https://travis-ci.com/) or [Circle CI](https://github.com/marketplace/circleci).
 - *[optional] verification:* optionally you can use [Liquid Haskell](https://ucsd-progsys.github.io/liquidhaskell-blog/) to check validity of your code.
 
@@ -50,6 +50,7 @@ You will give a *5 min* description of your project.
 -----------------------------
 
 You will give a *5 min* description of your progress: 
+
 - What challenges (if any) did you have so far and how did you solve them?
 - Do you expect to meet your goals until the deadline?
 - How are your goals adapted?

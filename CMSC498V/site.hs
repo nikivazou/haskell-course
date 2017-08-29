@@ -2,7 +2,7 @@
 {-# LANGUAGE OverloadedStrings #-}
 import           Data.Monoid (mappend)
 import           Hakyll
-
+import           Text.Pandoc.Options
 
 --------------------------------------------------------------------------------
 main :: IO ()
@@ -17,13 +17,13 @@ main = hakyllWith config $ do
 
     match "lectures/*.lhs" $ do
         route   $ setExtension "html"
-        compile $ pandocCompiler
+        compile $ myPandocCompiler
             >>= loadAndApplyTemplate "templates/default.html" defaultContext
             >>= relativizeUrls
 
     match "homeworks/*.lhs" $ do
         route   $ setExtension "html"
-        compile $ pandocCompiler
+        compile $ myPandocCompiler
             >>= loadAndApplyTemplate "templates/default.html" defaultContext
             >>= relativizeUrls    
 
@@ -36,12 +36,19 @@ main = hakyllWith config $ do
               , "project.markdown"
               ]) $ do
         route   $ setExtension "html"
-        compile $ pandocCompiler
+        compile $ myPandocCompiler
             >>= loadAndApplyTemplate "templates/default.html" defaultContext
             >>= relativizeUrls
 
     match "templates/*" $ compile templateCompiler
 
+
+myPandocCompiler ::  Compiler (Item String)
+myPandocCompiler 
+  = pandocCompiler {- With 
+       defaultHakyllReaderOptions 
+       (defaultHakyllWriterOptions ) -- {writerHTMLMathMethod = MathJax "https://cdn.mathjax.org/mathjax/latest/MathJax.js"})
+-} 
 
 config :: Configuration
 config = defaultConfiguration {
