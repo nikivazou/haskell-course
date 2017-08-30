@@ -45,10 +45,9 @@ main = hakyllWith config $ do
 
 myPandocCompiler ::  Compiler (Item String)
 myPandocCompiler 
-  = pandocCompiler {- With 
+  = pandocCompilerWith 
        defaultHakyllReaderOptions 
        (defaultHakyllWriterOptions ) -- {writerHTMLMathMethod = MathJax "https://cdn.mathjax.org/mathjax/latest/MathJax.js"})
--} 
 
 config :: Configuration
 config = defaultConfiguration {

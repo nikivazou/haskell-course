@@ -90,9 +90,7 @@ is returned.
 \begin{code}
 fib1 :: Int -> Int 
 fib1 i 
-  | i == 0
-  = i 
-  | i == 1
+  | i == 0 || i == 1
   = i 
   | otherwise 
   = fib1 (i-1) + fib1 (i-2)
@@ -151,7 +149,7 @@ Data types classify data for two main purposes.
 
 **Purpose 2:** Specification to the compiler how the programmer intends to use the data.
 
-- `Int` is the type of machine integers, with guaranteed range at least -229 to 229 - 1
+- `Int` is the type of machine integers, with guaranteed range at least -$2^{29}$ to $2^{29} - 1$.
 - `Integer` is arbitrary precision integers, with range as large as you have memory for.
 
 Adding `1` to the largest `Int` will give an overflow. 
@@ -226,7 +224,11 @@ Maybe Data Type
 that has two constructors `Just` and `Nothing`.
 
 \begin{code}
+fibMaybe' :: Int -> Int 
+fibMaybe' i = fromJust (fibMaybe i)
+
 fibMaybe :: Int -> Maybe Int 
+fibMaybe i | i < 0 = Nothing
 fibMaybe 0 = Just 0 
 fibMaybe 1 = Just 1 
 fibMaybe i = 

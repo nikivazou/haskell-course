@@ -64,9 +64,7 @@ Leaving GHCi.</code></pre>
 <p>Guards provide an alternative syntax for <em>if</em> expressions. The body of the <em>first</em> guard that is evaluated to true is returned.</p>
 <div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt; fib1 ::</span> <span class="dt">Int</span> <span class="ot">-&gt;</span> <span class="dt">Int</span> 
 <span class="ot">&gt;</span> fib1 i 
-<span class="ot">&gt;</span>   <span class="fu">|</span> i <span class="fu">==</span> <span class="dv">0</span>
-<span class="ot">&gt;</span>   <span class="fu">=</span> i 
-<span class="ot">&gt;</span>   <span class="fu">|</span> i <span class="fu">==</span> <span class="dv">1</span>
+<span class="ot">&gt;</span>   <span class="fu">|</span> i <span class="fu">==</span> <span class="dv">0</span> <span class="fu">||</span> i <span class="fu">==</span> <span class="dv">1</span>
 <span class="ot">&gt;</span>   <span class="fu">=</span> i 
 <span class="ot">&gt;</span>   <span class="fu">|</span> otherwise 
 <span class="ot">&gt;</span>   <span class="fu">=</span> fib1 (i<span class="fu">-</span><span class="dv">1</span>) <span class="fu">+</span> fib1 (i<span class="fu">-</span><span class="dv">2</span>)</code></pre></div>
@@ -99,7 +97,7 @@ Leaving GHCi.</code></pre>
 </ul>
 <p><strong>Purpose 2:</strong> Specification to the compiler how the programmer intends to use the data.</p>
 <ul>
-<li><code>Int</code> is the type of machine integers, with guaranteed range at least -229 to 229 - 1</li>
+<li><code>Int</code> is the type of machine integers, with guaranteed range at least -<span class="math inline">2<sup>29</sup></span> to <span class="math inline">2<sup>29</sup> − 1</span>.</li>
 <li><code>Integer</code> is arbitrary precision integers, with range as large as you have memory for.</li>
 </ul>
 <p>Adding <code>1</code> to the largest <code>Int</code> will give an overflow.</p>
@@ -145,7 +143,11 @@ Error &quot;Not Valid&quot; :: IntValue</code></pre>
 <span class="ot">&gt;</span>     <span class="dt">Error</span> s <span class="ot">-&gt;</span> <span class="dt">Error</span> s </code></pre></div>
 <h2 id="maybe-data-type">Maybe Data Type</h2>
 <p><code>IntError</code> is similar to Haskell’s <code>Maybe</code> data type that has two constructors <code>Just</code> and <code>Nothing</code>.</p>
-<div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt; fibMaybe ::</span> <span class="dt">Int</span> <span class="ot">-&gt;</span> <span class="dt">Maybe</span> <span class="dt">Int</span> 
+<div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt; fibMaybe' ::</span> <span class="dt">Int</span> <span class="ot">-&gt;</span> <span class="dt">Int</span> 
+<span class="ot">&gt;</span> fibMaybe' i <span class="fu">=</span> fromJust (fibMaybe i)
+<span class="ot">&gt;</span> 
+<span class="ot">&gt; fibMaybe ::</span> <span class="dt">Int</span> <span class="ot">-&gt;</span> <span class="dt">Maybe</span> <span class="dt">Int</span> 
+<span class="ot">&gt;</span> fibMaybe i <span class="fu">|</span> i <span class="fu">&lt;</span> <span class="dv">0</span> <span class="fu">=</span> <span class="dt">Nothing</span>
 <span class="ot">&gt;</span> fibMaybe <span class="dv">0</span> <span class="fu">=</span> <span class="dt">Just</span> <span class="dv">0</span> 
 <span class="ot">&gt;</span> fibMaybe <span class="dv">1</span> <span class="fu">=</span> <span class="dt">Just</span> <span class="dv">1</span> 
 <span class="ot">&gt;</span> fibMaybe i <span class="fu">=</span> 

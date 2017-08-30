@@ -24,14 +24,14 @@
             <h1 id="homework-1">Homework 1</h1>
 <h2 id="instructions">Instructions</h2>
 <p>The source code of this homework can be found <a href="https://raw.githubusercontent.com/nikivazou/CMSC498V/master/CMSC498V/homeworks/HW1.lhs">here</a>. You should fill in the definitions of the required functions but <strong>do not</strong> change the types of the functions.</p>
-<p><strong>How to submit????</strong></p>
+<p><strong>How to submit:</strong> TBA</p>
 <div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt;</span> <span class="kw">module</span> <span class="dt">HW1</span> <span class="kw">where</span>
 <span class="ot">&gt;</span> <span class="kw">import </span><span class="dt">Data.Char</span> </code></pre></div>
 <h2 id="problem-1-strings"><strong>Problem 1:</strong> Strings</h2>
 <p>In Haskell the <code>String</code> data type is defined to be a list of <code>Char</code>acters, so <code>String</code> can be manipulated via list comprehension.</p>
 <p>For example, bellow list comprehension is used to combine each possible adjectives with each possible noun.</p>
-<pre><code>[adj ++ &quot; &quot; ++ noun | adj &lt;- [&quot;lazy&quot;, &quot;nasty&quot;], noun &lt;- [&quot;cat&quot;, &quot;language&quot;] ]
-[&quot;lazy cat&quot;,&quot;lazy language&quot;,&quot;nasty cat&quot;,&quot;nasty language&quot;]</code></pre>
+<pre><code> &gt; [adj ++ &quot; &quot; ++ noun | adj &lt;- [&quot;lazy&quot;, &quot;nasty&quot;], noun &lt;- [&quot;cat&quot;, &quot;language&quot;] ]
+ [&quot;lazy cat&quot;,&quot;lazy language&quot;,&quot;nasty cat&quot;,&quot;nasty language&quot;]</code></pre>
 <p>You are requested to use list comprehension to define the following three functions on <code>String</code>s.</p>
 <ol style="list-style-type: decimal">
 <li>Complete the function <code>removeUpper</code> that removes all upper case characters from its String argument. For example <code>removeUpper &quot;Hello World!&quot; = &quot;ello orld!&quot;</code>. <em>Hint:</em> use the library function <code>isLower</code>.</li>
@@ -39,17 +39,19 @@
 <div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt; removeUpper ::</span> <span class="dt">String</span> <span class="ot">-&gt;</span> <span class="dt">String</span>
 <span class="ot">&gt;</span> removeUpper xs <span class="fu">=</span> error <span class="st">&quot;Define me!&quot;</span></code></pre></div>
 <ol start="2" style="list-style-type: decimal">
-<li>Complete the function <code>toLowerString</code> that turns all upper case characters of its String argument to lower. For example <code>toLowerString &quot;Hello World!&quot; = &quot;hello world!&quot;</code>. <em>Hint:</em> use the library function <code>toLower</code>.
-<div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt; toLowerString ::</span> <span class="dt">String</span> <span class="ot">-&gt;</span> <span class="dt">String</span>
-<span class="ot">&gt;</span> toLowerString xs <span class="fu">=</span> error <span class="st">&quot;Define me!&quot;</span></code></pre></div></li>
-<li>Complete the function <code>noIdent</code> that removes any non-letter character of its String argument to lower. We defined a letter to be the characters a..z<code>and</code>A..Z<code>. For example</code>noIdent “Hello World!” = “HelloWorld”<code>. *Hint:* use the library function</code>elem`.
-<div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt; noIdent ::</span> <span class="dt">String</span> <span class="ot">-&gt;</span> <span class="dt">String</span>
-<span class="ot">&gt;</span> noIdent xs <span class="fu">=</span> error <span class="st">&quot;Define me!&quot;</span></code></pre></div></li>
+<li>Complete the function <code>toLowerString</code> that turns all upper case characters of its String argument to lower. For example <code>toLowerString &quot;Hello World!&quot; = &quot;hello world!&quot;</code>. <em>Hint:</em> use the library function <code>toLower</code>.</li>
 </ol>
-<p><strong>Problem 2:</strong> Factoring</p>
-<p>We say that <code>a</code> is a factor of <code>n</code> when there exists an integer <code>b</code> so that <code>n = a b</code>.</p>
+<div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt; toLowerString ::</span> <span class="dt">String</span> <span class="ot">-&gt;</span> <span class="dt">String</span>
+<span class="ot">&gt;</span> toLowerString xs <span class="fu">=</span> error <span class="st">&quot;Define me!&quot;</span></code></pre></div>
+<ol start="3" style="list-style-type: decimal">
+<li>Complete the function <code>noIdent</code> that removes any non-letter character of its String argument to lower. A letter is one of the characters <code>a..z</code> or <code>A..Z</code>. For example <code>noIdent &quot;Hello World!&quot; = &quot;HelloWorld&quot;</code>. <em>Hint:</em> use the library function <code>elem</code>.</li>
+</ol>
+<div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt; noIdent ::</span> <span class="dt">String</span> <span class="ot">-&gt;</span> <span class="dt">String</span>
+<span class="ot">&gt;</span> noIdent xs <span class="fu">=</span> error <span class="st">&quot;Define me!&quot;</span></code></pre></div>
+<h2 id="problem-2-factoring"><strong>Problem 2:</strong> Factoring</h2>
+<p>We say that <code>a</code> is a factor of <code>n</code> when there exists an integer <code>b</code> so that <code>n = a * b</code>.</p>
 <ol style="list-style-type: decimal">
-<li>Define a function <code>factors n</code> that returns all functors of <code>n</code>. For example, <code>factors 12 = [1,2,3,4,6,12]</code> and factors 13 = [1,13].</li>
+<li>Define a function <code>factors n</code> that returns all functors of <code>n</code>. For example, <code>factors 12 = [1,2,3,4,6,12]</code> and <code>factors 13 = [1,13]</code>.</li>
 </ol>
 <div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt; factors ::</span> <span class="dt">Int</span> <span class="ot">-&gt;</span> [<span class="dt">Int</span>] 
 <span class="ot">&gt;</span> factors n <span class="fu">=</span> error <span class="st">&quot;Define me!&quot;</span></code></pre></div>
@@ -60,33 +62,35 @@
 <div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt; isPrime ::</span> <span class="dt">Int</span> <span class="ot">-&gt;</span> <span class="dt">Bool</span> 
 <span class="ot">&gt;</span> isPrime n <span class="fu">=</span> error <span class="st">&quot;Define me!&quot;</span></code></pre></div>
 <ol start="3" style="list-style-type: decimal">
-<li>Optimize the <code>factors n</code> function to only call the <code>mod</code> function at most square root n times. Note that factors appear in pairs. If you found <code>i</code> to be a factor of <code>n</code>, then <code>n</code>div<code>i</code> is also a factor of <code>n</code>. <em>Hint:</em> define a helper recursive function <code>factorsRec n i</code> and recurse on increasing <code>i</code>.</li>
+<li>Optimize the <code>factors n</code> function to only call the <code>mod</code> function at most <span style="white-space: nowrap; font-size:larger"> √<span style="text-decoration:overline;"> n </span> </span> times. Note that factors appear in pairs. If you found <code>i</code> to be a factor of <code>n</code>, then <code>div n i</code> is also a factor of <code>n</code>. <em>Hint:</em> define a helper recursive function <code>factorsRec n i</code> and recurse on increasing <code>i</code>.</li>
 </ol>
-<ul>
-<li>Recursion
 <div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt; factorsOpt ::</span> <span class="dt">Int</span> <span class="ot">-&gt;</span> [<span class="dt">Int</span>]
-<span class="ot">&gt;</span> factorsOpt n <span class="fu">=</span> error <span class="st">&quot;Define me!&quot;</span></code></pre></div></li>
-</ul>
+<span class="ot">&gt;</span> factorsOpt n <span class="fu">=</span> error <span class="st">&quot;Define me!&quot;</span></code></pre></div>
 <ol start="4" style="list-style-type: decimal">
-<li>Test your optimizations. The below function <code>sameElems xs ys</code> checks that the two input lists have the same elements.</li>
+<li><p>Test your optimization. The below function <code>sameElems xs ys</code> checks that the two input lists have the same elements, by checking that</p>
+<ul>
+<li>the two input lists have same length and</li>
+<li>all elements of the list <code>xs</code> are elements of the list <code>ys</code>.</li>
+</ul></li>
 </ol>
 <div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt; sameElems ::</span> [<span class="dt">Int</span>] <span class="ot">-&gt;</span> [<span class="dt">Int</span>] <span class="ot">-&gt;</span> <span class="dt">Bool</span> 
-<span class="ot">&gt;</span> sameElems xs ys <span class="fu">=</span> length xs <span class="fu">==</span> length ys <span class="fu">&amp;&amp;</span> all (<span class="ot">`elem`</span> ys) xs</code></pre></div>
-<p>Use <code>sameElems</code> to write a function <code>testFactors n</code> that tests that the two factos functions you wrote above return the same factors. <em>Hint:</em> use the library function <code>and</code>.</p>
+<span class="ot">&gt;</span> sameElems xs ys <span class="fu">=</span>  length xs <span class="fu">==</span> length ys 
+<span class="ot">&gt;</span>                 <span class="fu">&amp;&amp;</span> all (<span class="ot">`elem`</span> ys) xs</code></pre></div>
+<p>Use <code>sameElems</code> to write a function <code>testFactors n</code> that tests that the two factor functions you wrote above return the same factors for every integer up to <code>n</code>. <em>Hint:</em> use the library function <code>and</code>.</p>
 <div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt; testFactors ::</span> <span class="dt">Int</span> <span class="ot">-&gt;</span> <span class="dt">Bool</span> 
 <span class="ot">&gt;</span> testFactors n <span class="fu">=</span> error <span class="st">&quot;Define me!&quot;</span></code></pre></div>
-<p><strong>Problem 3:</strong> Coloring</p>
+<h2 id="problem-3-coloring"><strong>Problem 3:</strong> Coloring</h2>
 Let <code>Color</code> be the red, green, blue or yellor color data type.
 <div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt;</span> <span class="kw">data</span> <span class="dt">Color</span> 
 <span class="ot">&gt;</span>   <span class="fu">=</span> <span class="dt">Red</span> <span class="fu">|</span> <span class="dt">Green</span> <span class="fu">|</span> <span class="dt">Blue</span> <span class="fu">|</span> <span class="dt">Yellow</span> 
 <span class="ot">&gt;</span>   <span class="kw">deriving</span> (<span class="dt">Eq</span>, <span class="dt">Show</span>)</code></pre></div>
-<p><em>Note</em> the above <code>deriving</code> annotation teaches Haskell how to compare colors and turn the to strings for printing.</p>
+<p><em>Note</em> the above <code>deriving</code> annotation teaches Haskell how to compare colors and how to turn them to strings for printing.</p>
 Similarly, the <code>Balcan</code> data type defines the countries that belong in the <a href="https://en.wikipedia.org/wiki/Balkans">Balcan area</a>.
 <div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt;</span> <span class="kw">data</span> <span class="dt">Balcan</span> 
 <span class="ot">&gt;</span>   <span class="fu">=</span>  <span class="dt">Albania</span> <span class="fu">|</span> <span class="dt">Bulgaria</span>   <span class="fu">|</span> <span class="dt">BosniaAndHerzegovina</span> 
 <span class="ot">&gt;</span>   <span class="fu">|</span>  <span class="dt">Kosovo</span>  <span class="fu">|</span>  <span class="dt">Macedonia</span> <span class="fu">|</span> <span class="dt">Montenegro</span>
 <span class="ot">&gt;</span>   <span class="kw">deriving</span> (<span class="dt">Eq</span>, <span class="dt">Show</span>)</code></pre></div>
-<p>Two countries are adjacent when they share the same boarder. The below <code>adjacencies</code> list captures all the balcan adjacencies: <code>x</code> is adjacent to <code>y</code> when either <code>(x,y)</code>elem<code>adjacencies</code> or <code>(y,x)</code>elem<code>adjacencies</code>.</p>
+<p>Two countries are adjacent when they share the same boarder. The below <code>adjacencies</code> list captures all the balcan adjacencies: <code>x</code> is adjacent to <code>y</code> when either <code>elem (x,y) adjacencies</code> or <code>elem (y,x) adjacencies</code>.</p>
 <div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt; adjacencies ::</span> [(<span class="dt">Balcan</span>,<span class="dt">Balcan</span>)]
 <span class="ot">&gt;</span> adjacencies <span class="fu">=</span> 
 <span class="ot">&gt;</span>    [ (<span class="dt">Albania</span>, <span class="dt">Montenegro</span>), (<span class="dt">Albania</span>, <span class="dt">Kosovo</span>), (<span class="dt">Albania</span>, <span class="dt">Macedonia</span>)
@@ -96,12 +100,12 @@ Similarly, the <code>Balcan</code> data type defines the countries that belong i
 <span class="ot">&gt;</span>    ]</code></pre></div>
 <p>We call coloring a list of type <code>[(Balcan,Color)]</code> that related each Balcan country with a color. A coloring is good with respect to an adjacency matrix when every two adjacent countries have a diffent color.</p>
 <ol style="list-style-type: decimal">
-<li>Write a function <code>isGoodColoring adj coloring</code> that returns trus if and only if the <code>coloring</code> list is good with respect to the input <code>adj</code>acency list.</li>
+<li>Write a function <code>isGoodColoring adj coloring</code> that returns <code>True</code> if and only if the <code>coloring</code> list is good with respect to the input <code>adj</code>acency list.</li>
 </ol>
 <div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt; isGoodColoring ::</span> [(<span class="dt">Balcan</span>, <span class="dt">Balcan</span>)] <span class="ot">-&gt;</span> [(<span class="dt">Balcan</span>,<span class="dt">Color</span>)] <span class="ot">-&gt;</span> <span class="dt">Bool</span> 
 <span class="ot">&gt;</span> isGoodColoring adj coloring <span class="fu">=</span> error <span class="st">&quot;Define me!&quot;</span></code></pre></div>
 <ol start="2" style="list-style-type: decimal">
-<li>Write a function <code>colorings</code> that returns all the good colorings of the adjacency list <code>adjacencies</code>.</li>
+<li>Define<code>colorings</code> to return all the good colorings of the adjacency list <code>adjacencies</code>.</li>
 </ol>
 <div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt; colorings ::</span> [[(<span class="dt">Balcan</span>, <span class="dt">Color</span>)]]
 <span class="ot">&gt;</span> colorings <span class="fu">=</span> error <span class="st">&quot;Define me!&quot;</span></code></pre></div>
