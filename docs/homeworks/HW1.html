@@ -34,20 +34,20 @@
  [&quot;lazy cat&quot;,&quot;lazy language&quot;,&quot;nasty cat&quot;,&quot;nasty language&quot;]</code></pre>
 <p>You are requested to use list comprehension to define the following three functions on <code>String</code>s.</p>
 <ol style="list-style-type: decimal">
-<li>Complete the function <code>removeUpper</code> that removes all upper case characters from its String argument. For example <code>removeUpper &quot;Hello World!&quot; = &quot;ello orld!&quot;</code>. <em>Hint:</em> use the library function <code>isLower</code>.</li>
+<li>Complete the function <code>removeUpper</code> that removes all uppercase characters from its String argument. For example <code>removeUpper &quot;Hello World!&quot; = &quot;ello orld!&quot;</code>. <em>Hint:</em> use the library function <code>isLower</code>.</li>
 </ol>
 <div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt; removeUpper ::</span> <span class="dt">String</span> <span class="ot">-&gt;</span> <span class="dt">String</span>
 <span class="ot">&gt;</span> removeUpper xs <span class="fu">=</span> error <span class="st">&quot;Define me!&quot;</span></code></pre></div>
 <ol start="2" style="list-style-type: decimal">
-<li>Complete the function <code>toLowerString</code> that turns all upper case characters of its String argument to lower. For example <code>toLowerString &quot;Hello World!&quot; = &quot;hello world!&quot;</code>. <em>Hint:</em> use the library function <code>toLower</code>.</li>
-</ol>
-<div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt; toLowerString ::</span> <span class="dt">String</span> <span class="ot">-&gt;</span> <span class="dt">String</span>
-<span class="ot">&gt;</span> toLowerString xs <span class="fu">=</span> error <span class="st">&quot;Define me!&quot;</span></code></pre></div>
-<ol start="3" style="list-style-type: decimal">
 <li>Complete the function <code>noIdent</code> that removes any non-letter character of its String argument to lower. A letter is one of the characters <code>a..z</code> or <code>A..Z</code>. For example <code>noIdent &quot;Hello World!&quot; = &quot;HelloWorld&quot;</code>. <em>Hint:</em> use the library function <code>elem</code>.</li>
 </ol>
 <div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt; noIdent ::</span> <span class="dt">String</span> <span class="ot">-&gt;</span> <span class="dt">String</span>
 <span class="ot">&gt;</span> noIdent xs <span class="fu">=</span> error <span class="st">&quot;Define me!&quot;</span></code></pre></div>
+<ol start="3" style="list-style-type: decimal">
+<li>Complete the function <code>isPrefixOf xs ys</code> that turns <code>True</code> if and only if <code>xs</code> is prefix of <code>ys</code>. For example <code>isPrefixOf &quot;Haskell&quot; &quot;I like Haskell&quot; = False</code> and <code>isPrefixOf &quot;I like&quot; &quot;I like Haskell&quot; = True</code>.</li>
+</ol>
+<div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt; isPrefixOf ::</span> <span class="dt">String</span> <span class="ot">-&gt;</span> <span class="dt">String</span> <span class="ot">-&gt;</span> <span class="dt">Bool</span> 
+<span class="ot">&gt;</span> isPrefixOf xs <span class="fu">=</span> error <span class="st">&quot;Define me!&quot;</span></code></pre></div>
 <h2 id="problem-2-factoring"><strong>Problem 2:</strong> Factoring</h2>
 <p>We say that <code>a</code> is a factor of <code>n</code> when there exists an integer <code>b</code> so that <code>n = a * b</code>.</p>
 <ol style="list-style-type: decimal">
@@ -80,34 +80,34 @@
 <div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt; testFactors ::</span> <span class="dt">Int</span> <span class="ot">-&gt;</span> <span class="dt">Bool</span> 
 <span class="ot">&gt;</span> testFactors n <span class="fu">=</span> error <span class="st">&quot;Define me!&quot;</span></code></pre></div>
 <h2 id="problem-3-coloring"><strong>Problem 3:</strong> Coloring</h2>
-Let <code>Color</code> be the red, green, blue or yellor color data type.
+Let <code>Color</code> be the red, green, blue or yellow color data type.
 <div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt;</span> <span class="kw">data</span> <span class="dt">Color</span> 
 <span class="ot">&gt;</span>   <span class="fu">=</span> <span class="dt">Red</span> <span class="fu">|</span> <span class="dt">Green</span> <span class="fu">|</span> <span class="dt">Blue</span> <span class="fu">|</span> <span class="dt">Yellow</span> 
 <span class="ot">&gt;</span>   <span class="kw">deriving</span> (<span class="dt">Eq</span>, <span class="dt">Show</span>)</code></pre></div>
 <p><em>Note</em> the above <code>deriving</code> annotation teaches Haskell how to compare colors and how to turn them to strings for printing.</p>
-Similarly, the <code>Balcan</code> data type defines the countries that belong in the <a href="https://en.wikipedia.org/wiki/Balkans">Balcan area</a>.
-<div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt;</span> <span class="kw">data</span> <span class="dt">Balcan</span> 
+Similarly, the <code>Balkan</code> data type defines the countries that belong in the <a href="https://en.wikipedia.org/wiki/Balkans">Balkan area</a>.
+<div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt;</span> <span class="kw">data</span> <span class="dt">Balkan</span> 
 <span class="ot">&gt;</span>   <span class="fu">=</span>  <span class="dt">Albania</span> <span class="fu">|</span> <span class="dt">Bulgaria</span>   <span class="fu">|</span> <span class="dt">BosniaAndHerzegovina</span> 
 <span class="ot">&gt;</span>   <span class="fu">|</span>  <span class="dt">Kosovo</span>  <span class="fu">|</span>  <span class="dt">Macedonia</span> <span class="fu">|</span> <span class="dt">Montenegro</span>
 <span class="ot">&gt;</span>   <span class="kw">deriving</span> (<span class="dt">Eq</span>, <span class="dt">Show</span>)</code></pre></div>
-<p>Two countries are adjacent when they share the same boarder. The below <code>adjacencies</code> list captures all the balcan adjacencies: <code>x</code> is adjacent to <code>y</code> when either <code>elem (x,y) adjacencies</code> or <code>elem (y,x) adjacencies</code>.</p>
-<div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt; adjacencies ::</span> [(<span class="dt">Balcan</span>,<span class="dt">Balcan</span>)]
+<p>Two countries are adjacent when they share the same border. The below <code>adjacencies</code> list captures all the balkan adjacencies: <code>x</code> is adjacent to <code>y</code> when either <code>elem (x,y) adjacencies</code> or <code>elem (y,x) adjacencies</code>.</p>
+<div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt; adjacencies ::</span> [(<span class="dt">Balkan</span>,<span class="dt">Balkan</span>)]
 <span class="ot">&gt;</span> adjacencies <span class="fu">=</span> 
 <span class="ot">&gt;</span>    [ (<span class="dt">Albania</span>, <span class="dt">Montenegro</span>), (<span class="dt">Albania</span>, <span class="dt">Kosovo</span>), (<span class="dt">Albania</span>, <span class="dt">Macedonia</span>)
 <span class="ot">&gt;</span>    , (<span class="dt">Bulgaria</span>,<span class="dt">Macedonia</span>)
 <span class="ot">&gt;</span>    , (<span class="dt">BosniaAndHerzegovina</span>, <span class="dt">Montenegro</span>)
 <span class="ot">&gt;</span>    , (<span class="dt">Kosovo</span>, <span class="dt">Macedonia</span>), (<span class="dt">Kosovo</span>, <span class="dt">Montenegro</span>)
 <span class="ot">&gt;</span>    ]</code></pre></div>
-<p>We call coloring a list of type <code>[(Balcan,Color)]</code> that related each Balcan country with a color. A coloring is good with respect to an adjacency matrix when every two adjacent countries have a diffent color.</p>
+<p>We call coloring a list of type <code>[(Balkan,Color)]</code> that related each Balkan country with a color. A coloring is good with respect to an adjacency matrix when every two adjacent countries have a different color.</p>
 <ol style="list-style-type: decimal">
 <li>Write a function <code>isGoodColoring adj coloring</code> that returns <code>True</code> if and only if the <code>coloring</code> list is good with respect to the input <code>adj</code>acency list.</li>
 </ol>
-<div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt; isGoodColoring ::</span> [(<span class="dt">Balcan</span>, <span class="dt">Balcan</span>)] <span class="ot">-&gt;</span> [(<span class="dt">Balcan</span>,<span class="dt">Color</span>)] <span class="ot">-&gt;</span> <span class="dt">Bool</span> 
+<div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt; isGoodColoring ::</span> [(<span class="dt">Balkan</span>, <span class="dt">Balkan</span>)] <span class="ot">-&gt;</span> [(<span class="dt">Balkan</span>,<span class="dt">Color</span>)] <span class="ot">-&gt;</span> <span class="dt">Bool</span> 
 <span class="ot">&gt;</span> isGoodColoring adj coloring <span class="fu">=</span> error <span class="st">&quot;Define me!&quot;</span></code></pre></div>
 <ol start="2" style="list-style-type: decimal">
 <li>Define<code>colorings</code> to return all the good colorings of the adjacency list <code>adjacencies</code>.</li>
 </ol>
-<div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt; colorings ::</span> [[(<span class="dt">Balcan</span>, <span class="dt">Color</span>)]]
+<div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt; colorings ::</span> [[(<span class="dt">Balkan</span>, <span class="dt">Color</span>)]]
 <span class="ot">&gt;</span> colorings <span class="fu">=</span> error <span class="st">&quot;Define me!&quot;</span></code></pre></div>
         </div>
         <div id="footer">

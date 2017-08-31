@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+        <title>CMSC498V - FunctionalThinking</title>
+        <link rel="stylesheet" type="text/css" href="../css/default.css" />
+        <link rel="stylesheet" type="text/css" href="../css/syntax.css" />
+    </head>
+    <body>
+        <div id="header">
+            <div id="logo">
+                <a href="../">CMSC498V</a>
+            </div>
+            <div id="navigation">
+                <a href="../schedule.html">Schedule</a>
+                <a href="../homeworks.html">Homeworks</a>
+                <a href="../project.html">Projects</a>
+                <a href="../resources.html">Resources</a>
+            </div>
+        </div>
+
+        <div id="content">
+            <div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt;</span> <span class="kw">module</span> <span class="dt">FunctionalThinking</span> <span class="kw">where</span></code></pre></div>
+<h1 id="insert-sort">Insert Sort</h1>
+<p><a href="http://en.wikipedia.org/wiki/Insertion_sort">Wiki Insert Sort</a></p>
+<p>How to implement insertSort in Haskell</p>
+<ul>
+<li><p>Try to implement the imperative algorithm – <strong>Never!!!</strong></p></li>
+<li>Break your algorithm in sub problems
+<ul>
+<li>insert an element into a sorted list</li>
+<li>combine your subproblems</li>
+</ul></li>
+</ul>
+<h2 id="step-1-implement-insert">Step 1: Implement insert</h2>
+<p><code>insert x xs</code> inserts the element <code>x</code> into the sorted list <code>xs</code></p>
+<div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt; insert ::</span> (<span class="dt">Ord</span> a) <span class="ot">=&gt;</span> a <span class="ot">-&gt;</span> [a] <span class="ot">-&gt;</span> a
+<span class="ot">&gt;</span> insert <span class="fu">=</span> undefined </code></pre></div>
+<h2 id="step-2-use-insert-to-implement-sorting">Step 2: Use <code>insert</code> to implement sorting</h2>
+<p>Use <code>insert</code> to combine the elements of the initial unsorted list</p>
+<div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt; sort ::</span> (<span class="dt">Ord</span> a) <span class="ot">=&gt;</span> [a] <span class="ot">-&gt;</span> [a]
+<span class="ot">&gt;</span> sort <span class="fu">=</span> undefined </code></pre></div>
+<p><em>Reminder:</em> Did you user <code>fold</code>?</p>
+<p>When you want to combine list elements, with a function and a base case, it is suggested to use folds:</p>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell">foldr<span class="ot"> ::</span> (a <span class="ot">-&gt;</span> b <span class="ot">-&gt;</span> b) <span class="ot">-&gt;</span> b <span class="ot">-&gt;</span> [a] <span class="ot">-&gt;</span> b
+foldr f z [x1, x2, <span class="fu">...</span>, xn] <span class="fu">==</span> x1 <span class="ot">`f`</span> (x2 <span class="ot">`f`</span> <span class="fu">...</span> (xn <span class="ot">`f`</span> z)<span class="fu">...</span>)</code></pre></div>
+<h1 id="how-to-implement-a-function-in-haskell">How to implement a function in Haskell</h1>
+<ul>
+<li><p>Try to implement the imperative algorithm – <strong>Never!!!</strong></p></li>
+<li>Break your algorithm in sub functions
+<ul>
+<li>insert an element into a sorted list</li>
+<li>combine your helper functions</li>
+</ul></li>
+</ul>
+<p>OR</p>
+<ul>
+<li>Write the high level implementation of your algorithm, and then fill in the details</li>
+</ul>
+<h1 id="quicksort">QuickSort</h1>
+<p><a href="http://en.wikipedia.org/wiki/Quicksort">Wiki QuickSort</a></p>
+<p>I put the pivot in the middle, the (sorted list of) elements that are less or equal than the pivot at the left, and the (sorted list of) elements that are greater than the pivot at the left:</p>
+<div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt;</span> quicksort' (x<span class="fu">:</span>xs) <span class="fu">=</span> leq_than_x <span class="fu">++</span> [x] <span class="fu">++</span> g_than_x
+<span class="ot">&gt;</span>   <span class="kw">where</span> leq_than_x <span class="fu">=</span> undefined
+<span class="ot">&gt;</span>         g_than_x   <span class="fu">=</span> undefined</code></pre></div>
+<p>How do I get the elements of <code>xs</code> that are less than <code>x</code>?</p>
+<ul>
+<li>Use filter</li>
+</ul>
+<pre><code>leq_than_x = filter (\y -&gt; y &lt;= x) xs</code></pre>
+<p>where <code>(\y -&gt; y &lt;= x)</code> is an anonymous function with argument <code>y</code> and body <code>y &lt;= x</code> that behaves exactly like f:</p>
+<pre><code>f y = y &lt;= x</code></pre>
+<p>OR</p>
+<ul>
+<li>Use list comprehension</li>
+</ul>
+<pre><code>[y | y &lt;- xs, y &lt;= x]</code></pre>
+<div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt;</span> quicksort'' (x<span class="fu">:</span>xs) <span class="fu">=</span> leq_than_x <span class="fu">++</span> [x] <span class="fu">++</span> g_than_x
+<span class="ot">&gt;</span>   <span class="kw">where</span> leq_than_x <span class="fu">=</span> quicksort [y <span class="fu">|</span> y <span class="ot">&lt;-</span> xs, y <span class="fu">&lt;=</span> x]
+<span class="ot">&gt;</span>         g_than_x   <span class="fu">=</span> quicksort [y <span class="fu">|</span> y <span class="ot">&lt;-</span> xs, y <span class="fu">&gt;</span> x]</code></pre></div>
+<p>Finally putting everything in one line:</p>
+<div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt;</span> quicksort []     <span class="fu">=</span> []
+<span class="ot">&gt;</span> quicksort (x<span class="fu">:</span>xs) <span class="fu">=</span> (quicksort [y <span class="fu">|</span> y <span class="ot">&lt;-</span> xs, y <span class="fu">&lt;=</span> x]) <span class="fu">++</span> [x] <span class="fu">++</span> (quicksort [y <span class="fu">|</span> y <span class="ot">&lt;-</span> xs, y <span class="fu">&gt;</span> x])</code></pre></div>
+<p>In Haskell you <em>CAN</em> implement quicksort in one line! Compare it with implementations in any other language…. Isn’t this one more intuitive?</p>
+        </div>
+        <div id="footer">
+            Site proudly generated by
+            <a href="http://jaspervdj.be/hakyll">Hakyll</a>
+        </div>
+    </body>
+</html>

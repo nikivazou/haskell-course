@@ -17,6 +17,10 @@ Office Hours
 - *Niki:* Tu 10:45-11:45am at AVW 4139
 - *Ben:* TBA
 
+Feedback 
+---------
+- *Lecture evaluation form:* [https://goo.gl/forms/ReRCjH8CPzC3iANt1](https://goo.gl/forms/ReRCjH8CPzC3iANt1)
+
 Piazza
 ------
 - *Signup Link:* [piazza.com/umd/fall2017/cmsc498v](https://piazza.com/umd/fall2017/cmsc498v)

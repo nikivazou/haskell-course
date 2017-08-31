@@ -29,7 +29,7 @@ For example, bellow list comprehension is used to combine each possible adjectiv
 
 You are requested to use list comprehension to define the following three functions on `String`s.
 
-1. Complete the function `removeUpper` that removes all upper case characters from its String argument. 
+1. Complete the function `removeUpper` that removes all uppercase characters from its String argument. 
 For example `removeUpper "Hello World!" = "ello orld!"`.
 *Hint:* use the library function `isLower`.
 
@@ -38,17 +38,7 @@ removeUpper :: String -> String
 removeUpper xs = error "Define me!"
 \end{code}
 
-2. Complete the function `toLowerString` that turns all upper case characters of its String argument to lower. 
-For example `toLowerString "Hello World!" = "hello world!"`.
-*Hint:* use the library function `toLower`.
-
-\begin{code}
-toLowerString :: String -> String
-toLowerString xs = error "Define me!"
-\end{code}
-
-
-3. Complete the function `noIdent` that removes any non-letter character of its String argument to lower. 
+2. Complete the function `noIdent` that removes any non-letter character of its String argument to lower. 
 A letter is one of the characters `a..z` or `A..Z`.
 For example `noIdent "Hello World!" = "HelloWorld"`.
 *Hint:* use the library function `elem`.
@@ -56,6 +46,14 @@ For example `noIdent "Hello World!" = "HelloWorld"`.
 \begin{code}
 noIdent :: String -> String
 noIdent xs = error "Define me!"
+\end{code}
+
+3. Complete the function `isPrefixOf xs ys` that turns `True` if and only if `xs` is prefix of `ys`. 
+For example `isPrefixOf "Haskell" "I like Haskell" = False` and `isPrefixOf "I like" "I like Haskell" = True`.
+
+\begin{code}
+isPrefixOf :: String -> String -> Bool 
+isPrefixOf xs = error "Define me!"
 \end{code}
 
 **Problem 2:** Factoring
@@ -121,7 +119,7 @@ testFactors n = error "Define me!"
 **Problem 3:** Coloring
 -----------------------
 
-Let `Color` be the red, green, blue or yellor color data type. 
+Let `Color` be the red, green, blue or yellow color data type. 
 \begin{code}
 data Color 
   = Red | Green | Blue | Yellow 
@@ -131,23 +129,23 @@ data Color
 *Note* the above `deriving` annotation teaches Haskell 
 how to compare colors and how to turn them to strings for printing. 
 
-Similarly, the `Balcan` data type defines the countries that belong in the 
-[Balcan area](https://en.wikipedia.org/wiki/Balkans).
+Similarly, the `Balkan` data type defines the countries that belong in the 
+[Balkan area](https://en.wikipedia.org/wiki/Balkans).
 \begin{code}
-data Balcan 
+data Balkan 
   =  Albania | Bulgaria   | BosniaAndHerzegovina 
   |  Kosovo  |  Macedonia | Montenegro
   deriving (Eq, Show)
 \end{code}
 
-Two countries are adjacent when they share the same boarder. 
+Two countries are adjacent when they share the same border. 
 The below `adjacencies` list 
-captures all the balcan adjacencies: 
+captures all the balkan adjacencies: 
 `x` is adjacent to `y` when either `elem (x,y) adjacencies` 
 or `elem (y,x) adjacencies`.
 
 \begin{code}
-adjacencies :: [(Balcan,Balcan)]
+adjacencies :: [(Balkan,Balkan)]
 adjacencies = 
    [ (Albania, Montenegro), (Albania, Kosovo), (Albania, Macedonia)
    , (Bulgaria,Macedonia)
@@ -157,17 +155,17 @@ adjacencies =
 \end{code}
 
 We call coloring 
-a list of type `[(Balcan,Color)]`
-that related each Balcan country with a color. 
+a list of type `[(Balkan,Color)]`
+that related each Balkan country with a color. 
 A coloring is good with respect to an adjacency matrix 
-when every two adjacent countries have a diffent color. 
+when every two adjacent countries have a different color. 
 
 1. Write a function `isGoodColoring adj coloring`
 that returns `True` if and only if the `coloring` list is good 
 with respect to the input `adj`acency list. 
 
 \begin{code}
-isGoodColoring :: [(Balcan, Balcan)] -> [(Balcan,Color)] -> Bool 
+isGoodColoring :: [(Balkan, Balkan)] -> [(Balkan,Color)] -> Bool 
 isGoodColoring adj coloring = error "Define me!"
 \end{code}
 
@@ -175,7 +173,7 @@ isGoodColoring adj coloring = error "Define me!"
 of the adjacency list `adjacencies`. 
 
 \begin{code}
-colorings :: [[(Balcan, Color)]]
+colorings :: [[(Balkan, Color)]]
 colorings = error "Define me!"
 \end{code}
 

@@ -15,6 +15,13 @@ main = hakyllWith config $ do
         route   idRoute
         compile compressCssCompiler
 
+
+    match "invited/*.md" $ do
+        route   $ setExtension "html"
+        compile $ myPandocCompiler
+            >>= loadAndApplyTemplate "templates/default.html" defaultContext
+            >>= relativizeUrls
+
     match "lectures/*.lhs" $ do
         route   $ setExtension "html"
         compile $ myPandocCompiler
