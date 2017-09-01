@@ -28,7 +28,7 @@
 <span class="ot">&gt;</span> <span class="kw">import </span><span class="dt">Data.Maybe</span> (isJust, fromJust)
 <span class="ot">&gt;</span> <span class="kw">import </span><span class="dt">Data.Char</span>  (toLower)
 <span class="ot">&gt;</span> 
-<span class="ot">&gt;</span> <span class="kw">import </span><span class="dt">Prelude</span> <span class="kw">hiding</span> (head, tail, (++), map, foldr, length)</code></pre></div>
+<span class="ot">&gt;</span> <span class="kw">import </span><span class="dt">Prelude</span> <span class="kw">hiding</span> (head, tail, (++), map, foldr, length, const)</code></pre></div>
 <h2 id="recursion">Recursion</h2>
 <p>Haskell is a <em>functional</em> language: supports direct encoding of mathematical functions. For example, the <a href="https://en.wikipedia.org/wiki/Fibonacci_number">Fibonacci</a> definition</p>
 <p><span class="math inline"><em>f</em><em>i</em><em>b</em><sub>0</sub> = 0</span> <br /><span class="math display"><em>f</em><em>i</em><em>b</em><sub>1</sub> = 1</span><br /> <span class="math inline"><em>f</em><em>i</em><em>b</em><sub><em>i</em></sub> = <em>f</em><em>i</em><em>b</em><sub><em>i</em> − 1</sub> + <em>f</em><em>i</em><em>b</em><sub><em>i</em> − 2</sub></span></p>
@@ -181,14 +181,14 @@
 <p><strong>Q:</strong> Is there a type for the cons constructor too?</p>
 <div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="ot">(:) ::</span> <span class="fu">??</span> </code></pre></div>
 <p>Case analysis uses the list constructors</p>
-<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="ot">listCase ::</span> [<span class="dt">Int</span>] <span class="ot">-&gt;</span> <span class="dt">Int</span>
-listCase xs <span class="fu">=</span> 
-  <span class="kw">case</span> xs <span class="kw">of</span> 
-    []      <span class="ot">-&gt;</span> <span class="dv">1</span> 
-    [<span class="dv">2</span>]     <span class="ot">-&gt;</span> <span class="dv">2</span>
-    [x,y,z] <span class="ot">-&gt;</span> <span class="dv">3</span>
-    x<span class="fu">:</span>xs    <span class="ot">-&gt;</span> <span class="dv">4</span>
-    [x,y]   <span class="ot">-&gt;</span> <span class="dv">5</span> </code></pre></div>
+<div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt; listCase ::</span> [<span class="dt">Int</span>] <span class="ot">-&gt;</span> <span class="dt">Int</span>
+<span class="ot">&gt;</span> listCase xs <span class="fu">=</span> 
+<span class="ot">&gt;</span>   <span class="kw">case</span> xs <span class="kw">of</span> 
+<span class="ot">&gt;</span>     []      <span class="ot">-&gt;</span> <span class="dv">1</span> 
+<span class="ot">&gt;</span>     [<span class="dv">2</span>]     <span class="ot">-&gt;</span> <span class="dv">2</span>
+<span class="ot">&gt;</span>     [x,y,z] <span class="ot">-&gt;</span> <span class="dv">3</span>
+<span class="ot">&gt;</span>     x<span class="fu">:</span>xs    <span class="ot">-&gt;</span> <span class="dv">4</span>
+<span class="ot">&gt;</span>     [x,y]   <span class="ot">-&gt;</span> <span class="dv">5</span> </code></pre></div>
 <p><strong>Q:</strong> What is the value of <code>listCase [2, 6]</code>?</p>
 <h2 id="list-comprehension">List Comprehension</h2>
 <p>Due to its popularity, list manipulation is greatly simplified by list comprehensions.</p>
@@ -205,7 +205,13 @@ listCase xs <span class="fu">=</span>
 <p>With this we can solve many <a href="https://projecteuler.net/archives">Project Euler</a> problems!</p>
 <p><strong>Q:</strong> <a href="https://projecteuler.net/problem=1">Problem 1</a> of Project Euler asks for the sum of all the multiples of 3 or 5 below 1000.</p>
 <div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt; problem1 ::</span> <span class="dt">Int</span> 
-<span class="ot">&gt;</span> problem1 <span class="fu">=</span> undefined</code></pre></div>
+<span class="ot">&gt;</span> problem1 <span class="fu">=</span> sum (helper <span class="dv">1</span> <span class="dv">999</span>)
+<span class="ot">&gt;</span> 
+<span class="ot">&gt;</span> problem1' <span class="fu">=</span> [x <span class="fu">|</span> x <span class="ot">&lt;-</span> [<span class="dv">1</span><span class="fu">..</span><span class="dv">999</span>], mod x <span class="dv">3</span> <span class="fu">==</span> <span class="dv">0</span> <span class="fu">||</span> mod x <span class="dv">5</span> <span class="fu">==</span> <span class="dv">0</span>]
+<span class="ot">&gt;</span> helper lo hi 
+<span class="ot">&gt;</span>   <span class="fu">|</span> lo <span class="fu">&gt;=</span> hi <span class="fu">=</span> [] 
+<span class="ot">&gt;</span>   <span class="fu">|</span> lo <span class="ot">`mod`</span> <span class="dv">3</span> <span class="fu">==</span> <span class="dv">0</span> <span class="fu">||</span> lo <span class="ot">`mod`</span> <span class="dv">5</span> <span class="fu">==</span> <span class="dv">0</span> <span class="fu">=</span> lo<span class="fu">:</span>helper (lo<span class="fu">+</span><span class="dv">1</span>) hi
+<span class="ot">&gt;</span>   <span class="fu">|</span> otherwise                          <span class="fu">=</span>  helper (lo<span class="fu">+</span><span class="dv">1</span>) hi</code></pre></div>
 <ul>
 <li>Pairs</li>
 </ul>
@@ -215,7 +221,7 @@ listCase xs <span class="fu">=</span>
 <div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt;</span> triangles <span class="fu">=</span> [(x,y,z) <span class="fu">|</span> x<span class="ot">&lt;-</span>[<span class="dv">1</span><span class="fu">..</span><span class="dv">10</span>], y<span class="ot">&lt;-</span>[<span class="dv">1</span><span class="fu">..</span><span class="dv">10</span>], z<span class="ot">&lt;-</span>[<span class="dv">1</span><span class="fu">..</span><span class="dv">10</span>]]</code></pre></div>
 <p>We can get only the right triangles by adding the pythagorean constraint. For <em>efficiency</em> we search only for sides <code>x</code> and <code>y</code> that are not greater than the hypotenuse.</p>
 <div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt;</span> rightTriangles 
-<span class="ot">&gt;</span>   <span class="fu">=</span> [(x,y,z) <span class="fu">|</span> z<span class="ot">&lt;-</span>[<span class="dv">1</span><span class="fu">..</span><span class="dv">10</span>], y<span class="ot">&lt;-</span>[<span class="dv">1</span><span class="fu">..</span>z], x<span class="ot">&lt;-</span>[<span class="dv">1</span><span class="fu">..</span>z]
+<span class="ot">&gt;</span>   <span class="fu">=</span> [(x,y,z) <span class="fu">|</span> z<span class="ot">&lt;-</span>[<span class="dv">1</span><span class="fu">..</span><span class="dv">10</span>], y<span class="ot">&lt;-</span>[<span class="dv">1</span><span class="fu">..</span>z], x<span class="ot">&lt;-</span>[<span class="dv">1</span><span class="fu">..</span>y]
 <span class="ot">&gt;</span>              , x<span class="fu">^</span><span class="dv">2</span> <span class="fu">+</span> y<span class="fu">^</span><span class="dv">2</span> <span class="fu">==</span> z<span class="fu">^</span><span class="dv">2</span>]</code></pre></div>
 <p><strong>Q:</strong> The triangle <code>(4,3,5)</code> appears twice as <code>(4,3,5)</code> and <code>(3,4,5)</code>. How do we filter such duplication?</p>
 <p>Finally, we parameterize the right triangle generation on the length of the hypotenuse to get all right triangles with length up to <code>n</code>:</p>
@@ -261,21 +267,23 @@ length <span class="st">&quot;string&quot;</span>     <span class="fu">=</span> 
 <p><em>The rule of polymorphism</em> is that every function that returns a type variable not appearing in its arguments will crash.</p>
 <p>For example, you can define a non-crashing functions that takes two arguments of type <code>a</code> and <code>b</code> and returns a <code>b</code>.</p>
 <div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt; const ::</span> a <span class="ot">-&gt;</span> b <span class="ot">-&gt;</span> b 
-<span class="ot">&gt;</span> const <span class="fu">=</span> undefined </code></pre></div>
+<span class="ot">&gt;</span> const    <span class="fu">=</span> challenge</code></pre></div>
 <p>Now, try to define a non-crashing function that takes two arguments of type <code>a</code> and <code>b</code> and returns a <code>c</code>.</p>
-<div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt; challenge ::</span> a <span class="ot">-&gt;</span> b <span class="ot">-&gt;</span> c 
-<span class="ot">&gt;</span> challenge <span class="fu">=</span> undefined </code></pre></div>
+<div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt; challenge ::</span> a1 <span class="ot">-&gt;</span> b1 <span class="ot">-&gt;</span> c1
+<span class="ot">&gt;</span> challenge   x y  <span class="fu">=</span> error <span class="st">&quot;&quot;</span> </code></pre></div>
 <p>Back to recursive list functions, let’s take the tail of a list!</p>
 <p><strong>Q:</strong> Define the tail of a list</p>
 <div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell">tail <span class="st">&quot;Yeah Haskell!&quot;</span> <span class="fu">=</span> <span class="st">&quot;eah Haskell!&quot;</span>
 tail [<span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">3</span>, <span class="dv">4</span>]  <span class="fu">=</span> [<span class="dv">2</span>, <span class="dv">3</span>, <span class="dv">4</span>]</code></pre></div>
 <div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt; tail ::</span> [a] <span class="ot">-&gt;</span> [a]
-<span class="ot">&gt;</span> tail <span class="fu">=</span> undefined</code></pre></div>
+<span class="ot">&gt;</span> tail (x<span class="fu">:</span>xs) <span class="fu">=</span> xs </code></pre></div>
 <p><strong>Q:</strong> Concatenate two lists</p>
-<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell">concat <span class="st">&quot;?eah&quot;</span>   <span class="st">&quot;Haskell!!!!!&quot;</span> <span class="fu">=</span> <span class="st">&quot;?eah Haskell!!!!!&quot;</span>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell">concat <span class="st">&quot;?eah &quot;</span>   <span class="st">&quot;Haskell!!!!!&quot;</span> <span class="fu">=</span> <span class="st">&quot;?eah Haskell!!!!!&quot;</span>
 concat  [<span class="fu">-</span><span class="dv">1</span>, <span class="dv">0</span>] [<span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">3</span>, <span class="dv">4</span>]   <span class="fu">=</span> [<span class="fu">-</span><span class="dv">1</span>, <span class="dv">0</span>, <span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">3</span>, <span class="dv">4</span>]</code></pre></div>
-<div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt; concat ::</span> [a] <span class="ot">-&gt;</span> [a] <span class="ot">-&gt;</span> [a]
-<span class="ot">&gt;</span> concat <span class="fu">=</span> undefined </code></pre></div>
+<div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt; concat' ::</span> [a] <span class="ot">-&gt;</span> [a] <span class="ot">-&gt;</span> [a]
+<span class="ot">&gt;</span> concat' [] ys <span class="fu">=</span> ys 
+<span class="ot">&gt;</span> <span class="co">-- concat' xs [] = xs </span>
+<span class="ot">&gt;</span> concat' (x<span class="fu">:</span>xs) ys <span class="fu">=</span> x<span class="fu">:</span>(concat' xs ys)</code></pre></div>
 <p><strong>Note on infix operators</strong>. The default list concatenation operator in Haskell is the infix <code>(++)</code>.</p>
 <div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="st">&quot;?eah&quot;</span>   <span class="fu">++</span>  <span class="st">&quot;Haskell!!!!!&quot;</span> <span class="fu">=</span> <span class="st">&quot;?eah Haskell!!!!!&quot;</span>
 [<span class="fu">-</span><span class="dv">1</span>, <span class="dv">0</span>]  <span class="fu">++</span>  [<span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">3</span>, <span class="dv">4</span>]   <span class="fu">=</span> [<span class="fu">-</span><span class="dv">1</span>, <span class="dv">0</span>, <span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">3</span>, <span class="dv">4</span>]</code></pre></div>

@@ -10,7 +10,7 @@ module Main where
 import Data.Maybe (isJust, fromJust)
 import Data.Char  (toLower)
 
-import Prelude hiding (head, tail, (++), map, foldr, length)
+import Prelude hiding (head, tail, (++), map, foldr, length, const)
 \end{code}
 
 Recursion 
@@ -265,14 +265,16 @@ Lists can contain any values
 
 Case analysis uses the list constructors
 
-< listCase :: [Int] -> Int
-< listCase xs = 
-<   case xs of 
-<     []      -> 1 
-<     [2]     -> 2
-<     [x,y,z] -> 3
-<     x:xs    -> 4
-<     [x,y]   -> 5 
+\begin{code}
+listCase :: [Int] -> Int
+listCase xs = 
+  case xs of 
+    []      -> 1 
+    [2]     -> 2
+    [x,y,z] -> 3
+    x:xs    -> 4
+    [x,y]   -> 5 
+\end{code}
 
 **Q:** What is the value of `listCase [2, 6]`?
 
@@ -305,7 +307,17 @@ the sum of all the multiples of 3 or 5 below 1000.
 
 \begin{code}
 problem1 :: Int 
-problem1 = undefined
+problem1 = sum (helper 1 999)
+
+problem1' = [x | x <- [1..999], mod x 3 == 0 || mod x 5 == 0]
+helper lo hi 
+  | lo >= hi = [] 
+  | lo `mod` 3 == 0 || lo `mod` 5 == 0 = lo:helper (lo+1) hi
+  | otherwise                          =  helper (lo+1) hi
+
+
+
+
 \end{code}
 
 
@@ -330,7 +342,7 @@ For *efficiency* we search only for sides `x` and `y` that are not greater than 
 
 \begin{code}
 rightTriangles 
-  = [(x,y,z) | z<-[1..10], y<-[1..z], x<-[1..z]
+  = [(x,y,z) | z<-[1..10], y<-[1..z], x<-[1..y]
              , x^2 + y^2 == z^2]
 \end{code}
 
@@ -411,14 +423,14 @@ For example, you can define a non-crashing functions that takes two arguments of
 
 \begin{code}
 const :: a -> b -> b 
-const = undefined 
+const    = challenge
 \end{code}
 
 Now, try to define a non-crashing function that takes two arguments of type `a` and `b` and returns a `c`. 
 
 \begin{code}
-challenge :: a -> b -> c 
-challenge = undefined 
+challenge :: a1 -> b1 -> c1
+challenge   x y  = error "" 
 \end{code}
 
 Back to recursive list functions, let's take the tail of a list!
@@ -428,19 +440,22 @@ Back to recursive list functions, let's take the tail of a list!
 < tail "Yeah Haskell!" = "eah Haskell!"
 < tail [1, 2, 3, 4]  = [2, 3, 4]
 
+
 \begin{code}
 tail :: [a] -> [a]
-tail = undefined
+tail (x:xs) = xs 
 \end{code}
 
 **Q:** Concatenate two lists
 
-< concat "?eah"   "Haskell!!!!!" = "?eah Haskell!!!!!"
+< concat "?eah "   "Haskell!!!!!" = "?eah Haskell!!!!!"
 < concat  [-1, 0] [1, 2, 3, 4]   = [-1, 0, 1, 2, 3, 4]
 
 \begin{code}
-concat :: [a] -> [a] -> [a]
-concat = undefined 
+concat' :: [a] -> [a] -> [a]
+concat' [] ys = ys 
+-- concat' xs [] = xs 
+concat' (x:xs) ys = x:(concat' xs ys)
 \end{code}
 
 **Note on infix operators**. 

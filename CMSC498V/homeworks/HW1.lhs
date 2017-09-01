@@ -27,7 +27,7 @@ For example, bellow list comprehension is used to combine each possible adjectiv
  ["lazy cat","lazy language","nasty cat","nasty language"]
 ```
 
-You are requested to use list comprehension to define the following three functions on `String`s.
+You are requested to use list comprehension to define the following two functions on `String`s.
 
 1. Complete the function `removeUpper` that removes all uppercase characters from its String argument. 
 For example `removeUpper "Hello World!" = "ello orld!"`.
@@ -48,12 +48,12 @@ noIdent :: String -> String
 noIdent xs = error "Define me!"
 \end{code}
 
-3. Complete the function `isPrefixOf xs ys` that turns `True` if and only if `xs` is prefix of `ys`. 
+3. Now use recursion to define the function `isPrefixOf xs ys` that turns `True` if and only if `xs` is prefix of `ys`. 
 For example `isPrefixOf "Haskell" "I like Haskell" = False` and `isPrefixOf "I like" "I like Haskell" = True`.
 
 \begin{code}
 isPrefixOf :: String -> String -> Bool 
-isPrefixOf xs = error "Define me!"
+isPrefixOf xs ys = error "Define me!"
 \end{code}
 
 **Problem 2:** Factoring
@@ -159,6 +159,9 @@ a list of type `[(Balkan,Color)]`
 that related each Balkan country with a color. 
 A coloring is good with respect to an adjacency matrix 
 when every two adjacent countries have a different color. 
+A coloring is complete with respect to an adjacency matrix 
+when it colors every country in the matrix. 
+Good colorings may be incomplete. 
 
 1. Write a function `isGoodColoring adj coloring`
 that returns `True` if and only if the `coloring` list is good 
@@ -169,7 +172,7 @@ isGoodColoring :: [(Balkan, Balkan)] -> [(Balkan,Color)] -> Bool
 isGoodColoring adj coloring = error "Define me!"
 \end{code}
 
-2. Define`colorings` to return all the good colorings 
+2. Define`colorings` to return all the good and complete colorings 
 of the adjacency list `adjacencies`. 
 
 \begin{code}

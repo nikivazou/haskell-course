@@ -32,7 +32,7 @@
 <p>For example, bellow list comprehension is used to combine each possible adjectives with each possible noun.</p>
 <pre><code> &gt; [adj ++ &quot; &quot; ++ noun | adj &lt;- [&quot;lazy&quot;, &quot;nasty&quot;], noun &lt;- [&quot;cat&quot;, &quot;language&quot;] ]
  [&quot;lazy cat&quot;,&quot;lazy language&quot;,&quot;nasty cat&quot;,&quot;nasty language&quot;]</code></pre>
-<p>You are requested to use list comprehension to define the following three functions on <code>String</code>s.</p>
+<p>You are requested to use list comprehension to define the following two functions on <code>String</code>s.</p>
 <ol style="list-style-type: decimal">
 <li>Complete the function <code>removeUpper</code> that removes all uppercase characters from its String argument. For example <code>removeUpper &quot;Hello World!&quot; = &quot;ello orld!&quot;</code>. <em>Hint:</em> use the library function <code>isLower</code>.</li>
 </ol>
@@ -44,10 +44,10 @@
 <div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt; noIdent ::</span> <span class="dt">String</span> <span class="ot">-&gt;</span> <span class="dt">String</span>
 <span class="ot">&gt;</span> noIdent xs <span class="fu">=</span> error <span class="st">&quot;Define me!&quot;</span></code></pre></div>
 <ol start="3" style="list-style-type: decimal">
-<li>Complete the function <code>isPrefixOf xs ys</code> that turns <code>True</code> if and only if <code>xs</code> is prefix of <code>ys</code>. For example <code>isPrefixOf &quot;Haskell&quot; &quot;I like Haskell&quot; = False</code> and <code>isPrefixOf &quot;I like&quot; &quot;I like Haskell&quot; = True</code>.</li>
+<li>Now use recursion to define the function <code>isPrefixOf xs ys</code> that turns <code>True</code> if and only if <code>xs</code> is prefix of <code>ys</code>. For example <code>isPrefixOf &quot;Haskell&quot; &quot;I like Haskell&quot; = False</code> and <code>isPrefixOf &quot;I like&quot; &quot;I like Haskell&quot; = True</code>.</li>
 </ol>
 <div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt; isPrefixOf ::</span> <span class="dt">String</span> <span class="ot">-&gt;</span> <span class="dt">String</span> <span class="ot">-&gt;</span> <span class="dt">Bool</span> 
-<span class="ot">&gt;</span> isPrefixOf xs <span class="fu">=</span> error <span class="st">&quot;Define me!&quot;</span></code></pre></div>
+<span class="ot">&gt;</span> isPrefixOf xs ys <span class="fu">=</span> error <span class="st">&quot;Define me!&quot;</span></code></pre></div>
 <h2 id="problem-2-factoring"><strong>Problem 2:</strong> Factoring</h2>
 <p>We say that <code>a</code> is a factor of <code>n</code> when there exists an integer <code>b</code> so that <code>n = a * b</code>.</p>
 <ol style="list-style-type: decimal">
@@ -98,14 +98,14 @@ Similarly, the <code>Balkan</code> data type defines the countries that belong i
 <span class="ot">&gt;</span>    , (<span class="dt">BosniaAndHerzegovina</span>, <span class="dt">Montenegro</span>)
 <span class="ot">&gt;</span>    , (<span class="dt">Kosovo</span>, <span class="dt">Macedonia</span>), (<span class="dt">Kosovo</span>, <span class="dt">Montenegro</span>)
 <span class="ot">&gt;</span>    ]</code></pre></div>
-<p>We call coloring a list of type <code>[(Balkan,Color)]</code> that related each Balkan country with a color. A coloring is good with respect to an adjacency matrix when every two adjacent countries have a different color.</p>
+<p>We call coloring a list of type <code>[(Balkan,Color)]</code> that related each Balkan country with a color. A coloring is good with respect to an adjacency matrix when every two adjacent countries have a different color. A coloring is complete with respect to an adjacency matrix when it colors every country in the matrix. Good colorings may be incomplete.</p>
 <ol style="list-style-type: decimal">
 <li>Write a function <code>isGoodColoring adj coloring</code> that returns <code>True</code> if and only if the <code>coloring</code> list is good with respect to the input <code>adj</code>acency list.</li>
 </ol>
 <div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt; isGoodColoring ::</span> [(<span class="dt">Balkan</span>, <span class="dt">Balkan</span>)] <span class="ot">-&gt;</span> [(<span class="dt">Balkan</span>,<span class="dt">Color</span>)] <span class="ot">-&gt;</span> <span class="dt">Bool</span> 
 <span class="ot">&gt;</span> isGoodColoring adj coloring <span class="fu">=</span> error <span class="st">&quot;Define me!&quot;</span></code></pre></div>
 <ol start="2" style="list-style-type: decimal">
-<li>Define<code>colorings</code> to return all the good colorings of the adjacency list <code>adjacencies</code>.</li>
+<li>Define<code>colorings</code> to return all the good and complete colorings of the adjacency list <code>adjacencies</code>.</li>
 </ol>
 <div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt; colorings ::</span> [[(<span class="dt">Balkan</span>, <span class="dt">Color</span>)]]
 <span class="ot">&gt;</span> colorings <span class="fu">=</span> error <span class="st">&quot;Define me!&quot;</span></code></pre></div>
