@@ -15,7 +15,7 @@ Lectures
 Office Hours
 -------------
 - *Niki:* Tu 10:45-11:45am at AVW 4139
-- *Ben:* TBA
+- *Ben:* Mon 3-5pm at AVW 4103
 
 Feedback 
 ---------
@@ -23,7 +23,6 @@ Feedback
 
 Piazza
 ------
-- *Signup Link:* [piazza.com/umd/fall2017/cmsc498v](https://piazza.com/umd/fall2017/cmsc498v)
 - *Class Link:* [piazza.com/umd/fall2017/cmsc498v/home](https://piazza.com/umd/fall2017/cmsc498v/home)
 
 Academic Integrity

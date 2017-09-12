@@ -26,7 +26,8 @@
 <div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt;</span> <span class="kw">module</span> <span class="dt">Main</span> <span class="kw">where</span>
 <span class="ot">&gt;</span> 
 <span class="ot">&gt;</span> <span class="kw">import </span><span class="dt">Data.Maybe</span> (isJust, fromJust)
-<span class="ot">&gt;</span> <span class="kw">import </span><span class="dt">Data.Char</span>  (toLower)
+<span class="ot">&gt;</span> <span class="kw">import </span><span class="dt">Data.Char</span>  (toLower, toUpper)
+<span class="ot">&gt;</span> <span class="kw">import </span><span class="dt">Data.List</span>  (nub, nubBy)
 <span class="ot">&gt;</span> 
 <span class="ot">&gt;</span> <span class="kw">import </span><span class="dt">Prelude</span> <span class="kw">hiding</span> (head, tail, (++), map, foldr, length, const)</code></pre></div>
 <h2 id="recursion">Recursion</h2>
@@ -181,14 +182,14 @@
 <p><strong>Q:</strong> Is there a type for the cons constructor too?</p>
 <div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="ot">(:) ::</span> <span class="fu">??</span> </code></pre></div>
 <p>Case analysis uses the list constructors</p>
-<div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt; listCase ::</span> [<span class="dt">Int</span>] <span class="ot">-&gt;</span> <span class="dt">Int</span>
-<span class="ot">&gt;</span> listCase xs <span class="fu">=</span> 
-<span class="ot">&gt;</span>   <span class="kw">case</span> xs <span class="kw">of</span> 
-<span class="ot">&gt;</span>     []      <span class="ot">-&gt;</span> <span class="dv">1</span> 
-<span class="ot">&gt;</span>     [<span class="dv">2</span>]     <span class="ot">-&gt;</span> <span class="dv">2</span>
-<span class="ot">&gt;</span>     [x,y,z] <span class="ot">-&gt;</span> <span class="dv">3</span>
-<span class="ot">&gt;</span>     x<span class="fu">:</span>xs    <span class="ot">-&gt;</span> <span class="dv">4</span>
-<span class="ot">&gt;</span>     [x,y]   <span class="ot">-&gt;</span> <span class="dv">5</span> </code></pre></div>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="ot">listCase ::</span> [<span class="dt">Int</span>] <span class="ot">-&gt;</span> <span class="dt">Int</span>
+listCase xs <span class="fu">=</span> 
+  <span class="kw">case</span> xs <span class="kw">of</span> 
+    []      <span class="ot">-&gt;</span> <span class="dv">1</span> 
+    [<span class="dv">2</span>]     <span class="ot">-&gt;</span> <span class="dv">2</span>
+    [x,y,z] <span class="ot">-&gt;</span> <span class="dv">3</span>
+    x<span class="fu">:</span>xs    <span class="ot">-&gt;</span> <span class="dv">4</span>
+    [x,y]   <span class="ot">-&gt;</span> <span class="dv">5</span> </code></pre></div>
 <p><strong>Q:</strong> What is the value of <code>listCase [2, 6]</code>?</p>
 <h2 id="list-comprehension">List Comprehension</h2>
 <p>Due to its popularity, list manipulation is greatly simplified by list comprehensions.</p>
@@ -355,13 +356,83 @@ listLen (x<span class="fu">:</span>xs) <span class="fu">=</span> <span class="dv
 </ul>
 <div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell">listLen <span class="fu">=</span> foldr (\_ tailLen <span class="ot">-&gt;</span> <span class="dv">1</span> <span class="fu">+</span> tailLen) <span class="dv">0</span> </code></pre></div>
 <ul>
-<li><em>Step 2:</em> Unused arguments can be simplified with <code>const</code></li>
+<li><em>Step 2:</em> Unused arguments can be simplified with <code>const :: a -&gt; b -&gt; a</code>. The function <code>const</code> just consumes the second unused argument <code>b</code>!</li>
 </ul>
 <div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell">listLen <span class="fu">=</span> foldr (const (\tailLen <span class="ot">-&gt;</span> <span class="dv">1</span> <span class="fu">+</span> tailLen)) <span class="dv">0</span> </code></pre></div>
 <ul>
-<li><em>Step 3:</em> Back to Step 1 :)</li>
+<li><em>Step 3:</em> Back to Step 1 on <code>tailLen</code> :)</li>
 </ul>
 <div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell">listLen <span class="fu">=</span> foldr (const (<span class="dv">1</span><span class="fu">+</span>)) <span class="dv">0</span> </code></pre></div>
+<h2 id="higher-order-haskell-dialect">Higher-Order Haskell dialect</h2>
+<p>We call <code>map</code> and <code>foldr</code> higher order functions because they accept function arguments. To better understand higher order programming, lets play with Haskell’s most common functions, the dollar and the dot.</p>
+<p>Haskell dislikes parethensis so much that has a (very commonly used) operator merely to remove parenthesis. The ‘$’ operator is used to remove parenthesis at the last argument of functions. For example</p>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell">take <span class="dv">5</span> (map (<span class="fu">+</span><span class="dv">1</span>) [<span class="dv">1</span><span class="fu">..</span><span class="dv">10</span>])</code></pre></div>
+<p>is writen as</p>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell">take <span class="dv">5</span> <span class="fu">$</span> map (<span class="fu">+</span><span class="dv">1</span>) [<span class="dv">1</span><span class="fu">..</span><span class="dv">10</span>]</code></pre></div>
+<p>The cool part: ‘$’ is a Haskell function defined in the <a href="https://hackage.haskell.org/package/base-4.10.0.0/docs/src/GHC.Base.html#%24"><code>Prelude</code></a> as</p>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="ot">($)   ::</span> (a <span class="ot">-&gt;</span> b) <span class="ot">-&gt;</span> a <span class="ot">-&gt;</span> b
+f <span class="fu">$</span> x <span class="fu">=</span>  f x</code></pre></div>
+<p>with a fixity annotation that gives it higher precedence than function application!</p>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="kw">infixr</span> <span class="dv">0</span>  <span class="fu">$</span></code></pre></div>
+<p>The cooler part: you can (ab)use dollar to apply a constant <code>x</code> to a function, for every function!</p>
+<p><strong>Q:</strong> What is the type of <code>($ &quot;me!&quot;)</code>?</p>
+<p><strong>Q:</strong> What is the result of <code>map ($ &quot;me!&quot;) [map toUpper , (++&quot;!?!?!&quot;)]</code>?</p>
+<p>The coolest part: you can define your own dollar-like functions For instance, we can define the <code>(•)</code> operator to with a strong left precedence (that is, stronger than function application)</p>
+<div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt;</span> <span class="kw">infixl</span> <span class="dv">0</span> •
+<span class="ot">&gt;</span> (•)<span class="ot"> ::</span> (a <span class="ot">-&gt;</span> b) <span class="ot">-&gt;</span> a <span class="ot">-&gt;</span> b
+<span class="ot">&gt;</span> f • x <span class="fu">=</span> f x </code></pre></div>
+<p>Now we can remove all the argument parenthesis and intead create argument lists!</p>
+<div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt; fourArgs ::</span> <span class="dt">String</span> <span class="ot">-&gt;</span> <span class="dt">String</span> <span class="ot">-&gt;</span> <span class="dt">String</span> <span class="ot">-&gt;</span> <span class="dt">String</span> <span class="ot">-&gt;</span> <span class="dt">String</span> 
+<span class="ot">&gt;</span> fourArgs x1 x2 x3 x4 <span class="fu">=</span> x1 <span class="fu">++</span> x2 <span class="fu">++</span> x3 <span class="fu">++</span> x4 
+<span class="ot">&gt;</span> 
+<span class="ot">&gt;</span> argList <span class="fu">=</span> fourArgs 
+<span class="ot">&gt;</span>            • <span class="st">&quot;Now I can list my arguments!&quot;</span>
+<span class="ot">&gt;</span>            • map toUpper <span class="st">&quot;I am the second Argument!&quot;</span>
+<span class="ot">&gt;</span>            • map toLower <span class="st">&quot;Argument List !!!&quot;</span>
+<span class="ot">&gt;</span>            • map toUpper <span class="st">&quot;Final Argument&quot;</span> <span class="fu">++</span> <span class="st">&quot;!!!&quot;</span></code></pre></div>
+<p>The second famous Haskell operator is <code>(.)</code> for function composition.</p>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="ot">(.) ::</span> (b <span class="ot">-&gt;</span> c) <span class="ot">-&gt;</span> (a <span class="ot">-&gt;</span> b) <span class="ot">-&gt;</span> a <span class="ot">-&gt;</span> c
+f <span class="fu">.</span> g x <span class="fu">=</span> f (g x)</code></pre></div>
+<p>For example, adding first <code>1</code> and then <code>4</code> to an argument adds <code>5</code> to the argument!</p>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="fu">*</span><span class="dt">Main</span><span class="fu">&gt;</span> <span class="kw">let</span> plus5 <span class="fu">=</span> (<span class="fu">+</span><span class="dv">4</span>) <span class="fu">.</span> (<span class="fu">+</span><span class="dv">1</span>) 
+<span class="fu">*</span><span class="dt">Main</span><span class="fu">&gt;</span> plus5 <span class="dv">0</span> 
+<span class="dv">5</span></code></pre></div>
+<p>Not so interesting… Lets compose more interesting functions!</p>
+<p>We start with a function that checks greater than <code>1</code></p>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="fu">*</span><span class="dt">Main</span><span class="fu">&gt;</span> <span class="fu">:</span>t (<span class="fu">&gt;</span><span class="dv">1</span>)
+(<span class="fu">&gt;</span><span class="dv">1</span>)<span class="ot"> ::</span> <span class="dt">Int</span> <span class="ot">-&gt;</span> <span class="dt">Bool</span>
+<span class="fu">*</span><span class="dt">Main</span><span class="fu">&gt;</span> (<span class="fu">&gt;</span><span class="dv">1</span>) <span class="dv">0</span>
+<span class="dt">False</span>
+<span class="fu">*</span><span class="dt">Main</span><span class="fu">&gt;</span> (<span class="fu">&gt;</span><span class="dv">1</span>) <span class="dv">2</span>
+<span class="dt">True</span></code></pre></div>
+<p>We compose the above function once:</p>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="fu">*</span><span class="dt">Main</span><span class="fu">&gt;</span> <span class="fu">:</span>t ((<span class="fu">&gt;</span><span class="dv">1</span>)<span class="fu">.</span>)
+((<span class="fu">&gt;</span><span class="dv">1</span>)<span class="fu">.</span>)<span class="ot"> ::</span> (<span class="dt">Int</span> <span class="ot">-&gt;</span> <span class="dt">Int</span>) <span class="ot">-&gt;</span> <span class="dt">Int</span> <span class="ot">-&gt;</span> <span class="dt">Bool</span>
+<span class="fu">*</span><span class="dt">Main</span><span class="fu">&gt;</span> ((<span class="fu">&gt;</span><span class="dv">1</span>)<span class="fu">.</span>) (<span class="fu">+</span><span class="dv">42</span>) <span class="dv">1</span>
+<span class="dt">True</span>
+<span class="fu">*</span><span class="dt">Main</span><span class="fu">&gt;</span> ((<span class="fu">&gt;</span><span class="dv">1</span>)<span class="fu">.</span>) (<span class="fu">+</span><span class="dv">42</span>) (<span class="fu">-</span><span class="dv">90</span>)
+<span class="dt">False</span></code></pre></div>
+<p>And compose it again!</p>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="fu">*</span><span class="dt">Main</span><span class="fu">&gt;</span> <span class="fu">:</span>t (((<span class="fu">&gt;</span><span class="dv">1</span>)<span class="fu">.</span>)<span class="fu">.</span>)
+(((<span class="fu">&gt;</span><span class="dv">1</span>)<span class="fu">.</span>)<span class="fu">.</span>)<span class="ot"> ::</span> (<span class="dt">Int</span> <span class="ot">-&gt;</span> <span class="dt">Int</span> <span class="ot">-&gt;</span> <span class="dt">Int</span>) <span class="ot">-&gt;</span> <span class="dt">Int</span> <span class="ot">-&gt;</span> <span class="dt">Int</span> <span class="ot">-&gt;</span> <span class="dt">Bool</span>
+<span class="fu">*</span><span class="dt">Main</span><span class="fu">&gt;</span> (((<span class="fu">&gt;</span><span class="dv">1</span>)<span class="fu">.</span>)<span class="fu">.</span>) (<span class="fu">+</span>) <span class="dv">1</span> <span class="dv">2</span>
+<span class="dt">True</span>
+<span class="fu">*</span><span class="dt">Main</span><span class="fu">&gt;</span> (((<span class="fu">&gt;</span><span class="dv">1</span>)<span class="fu">.</span>)<span class="fu">.</span>) (<span class="fu">+</span>) <span class="dv">1</span> <span class="dv">0</span>
+<span class="dt">False</span></code></pre></div>
+<p>We can now define a function <code>isFactor x y</code> that checks if <code>x</code> is a factor of <code>y</code></p>
+<div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt; isFactor ::</span> <span class="dt">Int</span> <span class="ot">-&gt;</span> <span class="dt">Int</span> <span class="ot">-&gt;</span> <span class="dt">Bool</span> 
+<span class="ot">&gt;</span> isFactor <span class="fu">=</span> (((<span class="fu">&gt;</span><span class="dv">1</span>)<span class="fu">.</span>)<span class="fu">.</span>gcd)</code></pre></div>
+<p>Lets close it up by using <code>isFactor</code> to find out all the prime numbers!</p>
+<p>The list function <code>nub</code> filters out all the list duplicates</p>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="ot">nub ::</span> <span class="dt">Eq</span> a <span class="ot">=&gt;</span> [a] <span class="ot">-&gt;</span> [a] 
+nub [<span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">3</span>, <span class="dv">2</span>, <span class="dv">1</span>]
+[<span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">3</span>]</code></pre></div>
+<p>The list function <code>nubBy</code> uses a user specified predicate to filter out list elements</p>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="ot">nubBy ::</span> (a <span class="ot">-&gt;</span> a <span class="ot">-&gt;</span> <span class="dt">Bool</span>) [a] <span class="ot">-&gt;</span> [a] 
+nubBy (<span class="fu">&lt;</span>) [<span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">3</span>, <span class="dv">2</span>, <span class="dv">1</span>]
+[<span class="dv">1</span>, <span class="dv">1</span>]</code></pre></div>
+<p>When the nub predicate is <code>isFactor</code> then we get back only prime numbers!</p>
+<div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt;</span> primes <span class="fu">=</span> nubBy (((<span class="fu">&gt;</span><span class="dv">1</span>)<span class="fu">.</span>)<span class="fu">.</span>gcd) [<span class="dv">1</span><span class="fu">..</span><span class="dv">100</span>]</code></pre></div>
 <h2 id="interaction-with-the-real-world">Interaction with the real world</h2>
 <p>Now you have learned everything you need to write basic Haskell programs. But, if Haskell programs are pure (i.e., same input always gives same output) wouldn’t Haskell programs be obsolete? Programs make sense only when they returned (or <em>output</em>) different results, depending on some user <em>input</em>.</p>
 <p>Haskell carefully allows interaction with the real world (input and output) on computations inside the “IO monad”.</p>

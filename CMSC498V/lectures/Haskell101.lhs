@@ -8,7 +8,8 @@ This site is writen in Haskell, check the source code [here](https://github.com/
 module Main where
 
 import Data.Maybe (isJust, fromJust)
-import Data.Char  (toLower)
+import Data.Char  (toLower, toUpper)
+import Data.List  (nub, nubBy)
 
 import Prelude hiding (head, tail, (++), map, foldr, length, const)
 \end{code}
@@ -265,16 +266,14 @@ Lists can contain any values
 
 Case analysis uses the list constructors
 
-\begin{code}
-listCase :: [Int] -> Int
-listCase xs = 
-  case xs of 
-    []      -> 1 
-    [2]     -> 2
-    [x,y,z] -> 3
-    x:xs    -> 4
-    [x,y]   -> 5 
-\end{code}
+< listCase :: [Int] -> Int
+< listCase xs = 
+<   case xs of 
+<     []      -> 1 
+<     [2]     -> 2
+<     [x,y,z] -> 3
+<     x:xs    -> 4
+<     [x,y]   -> 5 
 
 **Q:** What is the value of `listCase [2, 6]`?
 
@@ -506,6 +505,7 @@ and so now, we can write the simple recursive function
 Lets now write a function that given a list of integers 
 increases each of its elements by 1
 
+
 < plusOneList :: [Int] -> [Int]
 < plusOneList []     = []
 < plusOneList (n:ns) = (n+1) : plusOneList ns
@@ -593,13 +593,141 @@ listLen xs = foldr (\_ tailLen -> 1 + tailLen) 0 xs
 
 < listLen = foldr (\_ tailLen -> 1 + tailLen) 0 
 
-- *Step 2:* Unused arguments can be simplified with `const` 
+- *Step 2:* Unused arguments can be simplified with `const :: a -> b -> a`. 
+The function `const` just consumes the second unused argument `b`! 
 
 < listLen = foldr (const (\tailLen -> 1 + tailLen)) 0 
 
-- *Step 3:* Back to Step 1 :)
+- *Step 3:* Back to Step 1 on `tailLen` :)
 
 < listLen = foldr (const (1+)) 0 
+
+
+Higher-Order Haskell dialect
+----------------------------
+
+We call `map` and `foldr` higher order functions because they accept function arguments. 
+To better understand higher order programming, lets play with Haskell's 
+most common functions, the dollar and the dot. 
+
+Haskell dislikes parethensis so much that has a (very commonly used) operator 
+merely to remove parenthesis. 
+The '$' operator is used to remove parenthesis at the last argument of functions. 
+For example
+
+< take 5 (map (+1) [1..10])
+
+is writen as 
+
+< take 5 $ map (+1) [1..10]
+
+The cool part: '$' is a Haskell function defined in the [`Prelude`](https://hackage.haskell.org/package/base-4.10.0.0/docs/src/GHC.Base.html#%24) as 
+
+< ($)   :: (a -> b) -> a -> b
+< f $ x =  f x
+
+with a fixity annotation that gives it higher precedence than function application!
+
+< infixr 0  $
+
+The cooler part: you can (ab)use dollar to apply a constant `x` to a function, 
+for every function!
+
+**Q:** What is the type of `($ "me!")`?
+
+**Q:** What is the result of `map ($ "me!") [map toUpper , (++"!?!?!")]`?
+
+The coolest part: you can define your own dollar-like functions 
+For instance, we can define the `(•)` operator to with a strong left 
+precedence (that is, stronger than function application)
+
+\begin{code}
+infixl 0 •
+(•) :: (a -> b) -> a -> b
+f • x = f x 
+\end{code}
+
+Now we can remove all the argument parenthesis and intead create argument lists!
+
+\begin{code}
+fourArgs :: String -> String -> String -> String -> String 
+fourArgs x1 x2 x3 x4 = x1 ++ x2 ++ x3 ++ x4 
+
+argList = fourArgs 
+           • "Now I can list my arguments!"
+           • map toUpper "I am the second Argument!"
+           • map toLower "Argument List !!!"
+           • map toUpper "Final Argument" ++ "!!!"
+\end{code}
+
+
+
+The second famous Haskell operator is `(.)` for function composition.
+
+< (.) :: (b -> c) -> (a -> b) -> a -> c
+< f . g x = f (g x)
+
+For example, adding first `1` and then `4` to an argument adds `5` to the argument!
+
+< *Main> let plus5 = (+4) . (+1) 
+< *Main> plus5 0 
+< 5
+
+Not so interesting... Lets compose more interesting functions!
+
+We start with a function that checks greater than `1`
+
+< *Main> :t (>1)
+< (>1) :: Int -> Bool
+< *Main> (>1) 0
+< False
+< *Main> (>1) 2
+< True
+
+We compose the above function once: 
+
+< *Main> :t ((>1).)
+< ((>1).) :: (Int -> Int) -> Int -> Bool
+< *Main> ((>1).) (+42) 1
+< True
+< *Main> ((>1).) (+42) (-90)
+< False
+
+And compose it again!
+
+< *Main> :t (((>1).).)
+< (((>1).).) :: (Int -> Int -> Int) -> Int -> Int -> Bool
+< *Main> (((>1).).) (+) 1 2
+< True
+< *Main> (((>1).).) (+) 1 0
+< False
+
+We can now define a function `isFactor x y` that checks if `x` is a factor of `y`
+
+\begin{code}
+isFactor :: Int -> Int -> Bool 
+isFactor = (((>1).).gcd)
+\end{code}
+
+Lets close it up by using `isFactor` to find out all the prime numbers! 
+
+The list function `nub` filters out all the list duplicates
+
+< nub :: Eq a => [a] -> [a] 
+< nub [1, 2, 3, 2, 1]
+< [1, 2, 3]
+
+The list function `nubBy` uses a user specified predicate to filter out list elements
+
+< nubBy :: (a -> a -> Bool) [a] -> [a] 
+< nubBy (<) [1, 2, 3, 2, 1]
+< [1, 1]
+
+When the nub predicate is `isFactor` then we get back only prime numbers!
+
+\begin{code}
+primes = nubBy (((>1).).gcd) [1..100]
+\end{code}
 
 
 Interaction with the real world
