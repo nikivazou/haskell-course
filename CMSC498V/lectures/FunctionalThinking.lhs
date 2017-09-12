@@ -24,7 +24,7 @@ Step 1: Implement insert
 `insert x xs` inserts the element `x` into the sorted list `xs`
 
 \begin{code}
-insert :: (Ord a) => a -> [a] -> a
+insert :: (Ord a) => a -> [a] -> [a]
 insert = undefined 
 \end{code}
 
