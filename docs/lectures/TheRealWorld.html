@@ -22,7 +22,7 @@
 
         <div id="content">
             <h1 id="haskell-in-the-real-world">Haskell in the Real World</h1>
-<p>Let’s look how a real Haskell program looks like by examiming the tic-tac-toc game in <a href="https://github.com/nikivazou/tic-tac-toe" class="uri">https://github.com/nikivazou/tic-tac-toe</a>.</p>
+<p>Let’s look how a real Haskell program looks like by examining the tic-tac-toc game in <a href="https://github.com/nikivazou/tic-tac-toe" class="uri">https://github.com/nikivazou/tic-tac-toe</a>.</p>
 <h2 id="basic-build">Basic build</h2>
 <p>We can build the game by running</p>
 <div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell">cd src 
@@ -69,7 +69,7 @@ ghc <span class="co">--make TicTacToe.hs</span></code></pre></div>
         }</code></pre></div>
 <p><code>Player.Human</code> and <code>Player.Computer</code> define different values of this data type, by defining how a human and the computer play a move.</p>
 <h2 id="deriving-instances">Deriving instances</h2>
-<p>Haskell suppors overloading of functions (that is the same function performs different operations depending on the arguments that it is called) via type classes.</p>
+<p>Haskell supports overloading of functions (that is the same function performs different operations depending on the arguments that it is called) via type classes.</p>
 <p>Two of the most famous type classes are <code>Eq</code> and <code>Show</code> for equality checking and printing resp.</p>
 <div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="kw">class</span> <span class="dt">Eq</span> a <span class="kw">where</span> 
 <span class="ot">   (==) ::</span> a <span class="ot">-&gt;</span> a <span class="ot">-&gt;</span> <span class="dt">Bool</span> </code></pre></div>
@@ -96,13 +96,13 @@ ghc <span class="co">--make TicTacToe.hs</span></code></pre></div>
 <h2 id="package-manager">Package Manager</h2>
 <p>One can compile applications directly with ghc, but as the application grows we really need a package manager.</p>
 <ul>
-<li><p>Portability. Even tic-tac-toe depends on a library <a href="https://hackage.haskell.org/package/random-fu-0.2.7.0/docs/Data-Random.html"><code>random</code></a>. What version of the library is compatibly with our appication?</p></li>
+<li><p>Portability. Even tic-tac-toe depends on a library <a href="https://hackage.haskell.org/package/random-fu-0.2.7.0/docs/Data-Random.html"><code>random</code></a>. What version of the library is compatible with our application?</p></li>
 <li><p>Distribution. Assuming I know the correct version of <code>random</code> then before to compile tic-tac-toc I first need to install <code>random</code>.</p></li>
 <li><p>Common interface. If I build a library (like random) how can users know what this library is about/where to find my library.</p></li>
 </ul>
 <p>Haskell’s package manager is <a href="https://www.haskell.org/cabal/"><code>cabal</code></a>.</p>
 <ul>
-<li>Each application needs a <code>.cabal</code> file that (semi-automatically) specifies the dependenices and further documentation.</li>
+<li>Each application needs a <code>.cabal</code> file that (semi-automatically) specifies the dependencies and further documentation.</li>
 </ul>
 <div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="st"># tic-tac-toe.cabal</span>
 build<span class="fu">-</span>depends<span class="fu">:</span> random <span class="fu">&gt;=</span><span class="fl">1.1</span> <span class="fu">&amp;&amp;</span> <span class="fu">&lt;</span><span class="fl">1.2</span></code></pre></div>
@@ -118,7 +118,7 @@ build<span class="fu">-</span>depends<span class="fu">:</span> random <span clas
 <div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell">stack init </code></pre></div>
 <p>will generate a <code>.stack-work</code> directory that will store all local dependencies.</p>
 <h2 id="do-not-forget-the-testing">Do not forget the testing</h2>
-<p>Testing should always be part of the development proccess! Cabal lets you build a test suite. Here</p>
+<p>Testing should always be part of the development process! Cabal lets you build a test suite. Here</p>
 <div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell">cabal configure <span class="co">--enable-tests</span>
 cabal test </code></pre></div>
 <p>will run <code>tests/Test.hs</code> (that indeed does nothing…). Alternatively, just run</p>

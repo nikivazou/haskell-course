@@ -2,7 +2,7 @@ Haskell in the Real World
 ===========
 
 Let's look how a real Haskell program looks like
-by examiming the tic-tac-toc game in [https://github.com/nikivazou/tic-tac-toe](https://github.com/nikivazou/tic-tac-toe).
+by examining the tic-tac-toc game in [https://github.com/nikivazou/tic-tac-toe](https://github.com/nikivazou/tic-tac-toe).
 
 Basic build
 ----------
@@ -89,7 +89,7 @@ by defining how a human and the computer play a move.
 Deriving instances 
 -------------------
 
-Haskell suppors overloading of functions 
+Haskell supports overloading of functions 
 (that is the same function performs different operations depending on the arguments
 that it is called) via type classes. 
 
@@ -133,7 +133,7 @@ Package Manager
 One can compile applications directly with ghc, 
 but as the application grows we really need a package manager. 
 
-- Portability. Even tic-tac-toe depends on a library [`random`](https://hackage.haskell.org/package/random-fu-0.2.7.0/docs/Data-Random.html). What version of the library is compatibly with our appication?
+- Portability. Even tic-tac-toe depends on a library [`random`](https://hackage.haskell.org/package/random-fu-0.2.7.0/docs/Data-Random.html). What version of the library is compatible with our application?
 
 - Distribution. Assuming I know the correct version of `random` then before to compile tic-tac-toc I first need to install `random`. 
 
@@ -141,7 +141,7 @@ but as the application grows we really need a package manager.
 
 Haskell's package manager is [`cabal`](https://www.haskell.org/cabal/). 
 
-- Each application needs a `.cabal` file that (semi-automatically) specifies the dependenices and further documentation.
+- Each application needs a `.cabal` file that (semi-automatically) specifies the dependencies and further documentation.
 
 < # tic-tac-toe.cabal
 < build-depends: random >=1.1 && <1.2
@@ -166,7 +166,7 @@ will generate a `.stack-work` directory that will store all local dependencies.
 Do not forget the testing
 --------------------------
 
-Testing should always be part of the development proccess!
+Testing should always be part of the development process!
 Cabal lets you build a test suite. Here 
 
 < cabal configure --enable-tests
