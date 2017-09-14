@@ -25,8 +25,15 @@ Step 1: Implement insert
 
 \begin{code}
 insert :: (Ord a) => a -> [a] -> [a]
-insert = undefined 
+insert x []   = [x]
+insert x (y:ys)
+  | x < y     = x:y:ys
+  | otherwise = y:insert x ys 
+
 \end{code}
+
+
+
 
 Step 2: Use `insert` to implement sorting
 ------------------------------------------
@@ -35,7 +42,7 @@ Use `insert` to combine the elements of the initial unsorted list
 
 \begin{code}
 sort :: (Ord a) => [a] -> [a]
-sort = undefined 
+sort = foldl (flip insert) []
 \end{code}
 
 
@@ -77,9 +84,22 @@ the (sorted list of) elements that are greater than the pivot at the left:
 
 
 \begin{code}
-quicksort' (x:xs) = leq_than_x ++ [x] ++ g_than_x
-  where leq_than_x = undefined
-        g_than_x   = undefined
+quicksort' []      = []
+quicksort' (x:xs)  = leq_than_x ++ [x] ++ g_than_x
+  where leq_than_x = quicksort' [y | y <- xs , y <= x]
+        g_than_x   = quicksort' $ filter (> x) xs
+
+
+instance Ord Tile  where
+ EmptyTile <= EmptyTile = True  
+ X <= EmptyTile = True  
+ O <= EmptyTile = True  
+ _ <= _ = False 
+
+data Tile = EmptyTile | X | O 
+  deriving (Eq, Show)
+-- infixr $ 0 
+-- f $ x = f x         
 \end{code}
 
 How do I get the elements of `xs` that are less than `x`?
