@@ -1,0 +1,154 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+        <title>CMSC498V - HW2</title>
+        <link rel="stylesheet" type="text/css" href="../css/default.css" />
+        <link rel="stylesheet" type="text/css" href="../css/syntax.css" />
+    </head>
+    <body>
+        <div id="header">
+            <div id="logo">
+                <a href="../">CMSC498V</a>
+            </div>
+            <div id="navigation">
+                <a href="../schedule.html">Schedule</a>
+                <a href="../homeworks.html">Homeworks</a>
+                <a href="../project.html">Projects</a>
+                <a href="../resources.html">Resources</a>
+            </div>
+        </div>
+
+        <div id="content">
+            <h1 id="homework-2">Homework 2</h1>
+<h2 id="instructions">Instructions</h2>
+<p>The source code of this homework can be found <a href="https://raw.githubusercontent.com/nikivazou/CMSC498V/master/CMSC498V/homeworks/HW2.lhs">here</a>. You should fill in the definitions of the required functions but <strong>do not</strong> change the types of the functions.</p>
+<p><strong>How to submit:</strong> Ben????</p>
+<div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt;</span> <span class="kw">module</span> <span class="dt">HW2</span> <span class="kw">where</span>
+<span class="ot">&gt;</span> <span class="kw">import </span><span class="dt">Prelude</span> <span class="kw">hiding</span> (map)</code></pre></div>
+<h2 id="problem-1-programming-patterns"><strong>Problem 1:</strong> Programming Patterns</h2>
+<p>In the class we “saw” mapping and folding on lists. Here you are required to port these patterns on Trees.</p>
+<p>A tree is either empty or contains a value and two subtrees:</p>
+<div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt;</span> <span class="kw">data</span> <span class="dt">Tree</span> a <span class="fu">=</span> <span class="dt">Tip</span> <span class="fu">|</span> <span class="dt">Bin</span> a (<span class="dt">Tree</span> a) (<span class="dt">Tree</span> a)
+<span class="ot">&gt;</span>   <span class="kw">deriving</span> (<span class="dt">Eq</span>, <span class="dt">Show</span>)</code></pre></div>
+<p>For testing, we define few trees</p>
+<div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt;</span> tree1 <span class="fu">=</span> <span class="dt">Tip</span> 
+<span class="ot">&gt;</span> tree2 <span class="fu">=</span> <span class="dt">Bin</span> <span class="dv">1</span> (<span class="dt">Bin</span> <span class="dv">2</span> <span class="dt">Tip</span> <span class="dt">Tip</span>) <span class="dt">Tip</span>  
+<span class="ot">&gt;</span> tree3 <span class="fu">=</span> <span class="dt">Bin</span> <span class="dv">0</span>  tree2 tree2
+<span class="ot">&gt;</span> tree4 <span class="fu">=</span> <span class="dt">Bin</span> <span class="st">&quot;I am&quot;</span> (<span class="dt">Bin</span> <span class="st">&quot;a&quot;</span> <span class="dt">Tip</span> <span class="dt">Tip</span>) (<span class="dt">Bin</span> <span class="st">&quot;tree&quot;</span> <span class="dt">Tip</span> <span class="dt">Tip</span>)</code></pre></div>
+<ol style="list-style-type: decimal">
+<li><strong>Mapping:</strong> Define a function that maps all elements of a tree. For example,</li>
+</ol>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell">map (<span class="fu">+</span><span class="dv">1</span>)    tree2 <span class="fu">=</span> <span class="dt">Bin</span> <span class="dv">2</span> (<span class="dt">Bin</span> <span class="dv">3</span> <span class="dt">Tip</span> <span class="dt">Tip</span>) <span class="dt">Tip</span>
+map (<span class="fu">++</span><span class="st">&quot;!&quot;</span>) tree4 <span class="fu">=</span> <span class="dt">Bin</span> <span class="st">&quot;I am!&quot;</span> (<span class="dt">Bin</span> <span class="st">&quot;a!&quot;</span> <span class="dt">Tip</span> <span class="dt">Tip</span>) (<span class="dt">Bin</span> <span class="st">&quot;tree!&quot;</span> <span class="dt">Tip</span> <span class="dt">Tip</span>)</code></pre></div>
+<div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt; map ::</span> (a <span class="ot">-&gt;</span> b) <span class="ot">-&gt;</span> <span class="dt">Tree</span> a <span class="ot">-&gt;</span> <span class="dt">Tree</span> b 
+<span class="ot">&gt;</span> map f t <span class="fu">=</span> error <span class="st">&quot;Define me!&quot;</span></code></pre></div>
+<ol start="2" style="list-style-type: decimal">
+<li><strong>Folding:</strong> Define a function that folds the elements of a tree, top to bottom and left to right; so that</li>
+</ol>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell">fold (<span class="fu">++</span>) <span class="st">&quot;&quot;</span> tree4 <span class="fu">==</span> <span class="st">&quot;I amatree&quot;</span>
+fold (<span class="fu">+</span>)  <span class="dv">0</span>  tree3 <span class="fu">==</span> <span class="dv">6</span></code></pre></div>
+<div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt; fold ::</span> (b <span class="ot">-&gt;</span> a <span class="ot">-&gt;</span> b) <span class="ot">-&gt;</span> b <span class="ot">-&gt;</span> <span class="dt">Tree</span> a <span class="ot">-&gt;</span> b 
+<span class="ot">&gt;</span> fold f b <span class="fu">=</span> error <span class="st">&quot;Define me!&quot;</span></code></pre></div>
+<ol start="3" style="list-style-type: decimal">
+<li><strong>Elements:</strong> Use your <code>fold</code> function to define a function that returns the list of all the elements of the tree. For example,</li>
+</ol>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell">elems  tree2 <span class="fu">==</span> [<span class="dv">2</span>,<span class="dv">1</span>]
+elems  tree4 <span class="fu">==</span> [<span class="st">&quot;tree&quot;</span>,<span class="st">&quot;a&quot;</span>,<span class="st">&quot;I am&quot;</span>] </code></pre></div>
+<div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt; elems ::</span> <span class="dt">Tree</span> a <span class="ot">-&gt;</span> [a]
+<span class="ot">&gt;</span> elems t <span class="fu">=</span> error <span class="st">&quot;Define me!&quot;</span></code></pre></div>
+<h2 id="problem-2-merge-sort"><strong>Problem 2:</strong> Merge Sort</h2>
+<p>In this problem, you will implement the standard <a href="https://en.wikipedia.org/wiki/Merge_sort">merge sort</a> algorithm.</p>
+<p>The function <code>mergeSort</code> splits the input list at halves, recursively sorts both halves and merges the two sorted halves.</p>
+<div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt; mergeSort ::</span> [<span class="dt">Int</span>] <span class="ot">-&gt;</span> [<span class="dt">Int</span>]
+<span class="ot">&gt;</span> mergeSort []  <span class="fu">=</span> [] 
+<span class="ot">&gt;</span> mergeSort [x] <span class="fu">=</span> [x]
+<span class="ot">&gt;</span> mergeSort xs  <span class="fu">=</span> merge (mergeSort ys) (mergeSort zs)
+<span class="ot">&gt;</span>   <span class="kw">where</span> 
+<span class="ot">&gt;</span>   (ys,zs)     <span class="fu">=</span> splitHalf xs</code></pre></div>
+<ol style="list-style-type: decimal">
+<li><strong>List splitting:</strong> Define the function <code>splitHalf xs</code> that split the input list into two sublists. For example:</li>
+</ol>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell">splitHalf [<span class="dv">1</span><span class="fu">..</span><span class="dv">4</span>] <span class="fu">==</span> ([<span class="dv">1</span>,<span class="dv">2</span>],[<span class="dv">3</span>,<span class="dv">4</span>])
+splitHalf [<span class="dv">1</span><span class="fu">..</span><span class="dv">5</span>] <span class="fu">==</span> ([<span class="dv">1</span>,<span class="dv">2</span>],[<span class="dv">3</span>,<span class="dv">4</span>,<span class="dv">5</span>])</code></pre></div>
+<p><em>Hint:</em> You can use the function <code>splitAt</code>.</p>
+<div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt; splitHalf ::</span> [a] <span class="ot">-&gt;</span> ([a],[a])
+<span class="ot">&gt;</span> splitHalf xs <span class="fu">=</span> error <span class="st">&quot;Define me!&quot;</span></code></pre></div>
+<ol start="2" style="list-style-type: decimal">
+<li><strong>Merging:</strong> Define the function <code>merge</code> that merges two sorted lists. For example,</li>
+</ol>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell">merge [<span class="dv">1</span>, <span class="dv">5</span>, <span class="dv">9</span>] [<span class="dv">2</span>,<span class="dv">8</span>] <span class="fu">==</span> [<span class="dv">1</span>,<span class="dv">2</span>,<span class="dv">5</span>,<span class="dv">8</span>,<span class="dv">9</span>]</code></pre></div>
+<p>Your definition should satisfy the below type signature that reads as follows: The input lists contain elements of type <code>a</code> that satisfies the constraint <code>Ord</code>. This constraint lets you use any of the standard following comparison operators on elements of the input lists</p>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell">(<span class="fu">&lt;</span>), (<span class="fu">&lt;=</span>), (<span class="fu">&gt;</span>),<span class="ot"> (&gt;=) ::</span> <span class="dt">Ord</span> a <span class="ot">=&gt;</span> a <span class="ot">-&gt;</span> a <span class="ot">-&gt;</span> <span class="dt">Bool</span>   </code></pre></div>
+<div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt; merge ::</span> <span class="dt">Ord</span> a <span class="ot">=&gt;</span> [a] <span class="ot">-&gt;</span> [a] <span class="ot">-&gt;</span> [a]
+<span class="ot">&gt;</span> merge xs ys <span class="fu">=</span> error <span class="st">&quot;Define me!&quot;</span></code></pre></div>
+<ol start="3" style="list-style-type: decimal">
+<li><strong>Raising the Ord constraint:</strong> Haskell defines the data type <code>Ordering</code> as follows:</li>
+</ol>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="kw">data</span> <span class="dt">Ordering</span> <span class="fu">=</span> <span class="dt">LT</span> <span class="fu">|</span> <span class="dt">EQ</span> <span class="fu">|</span> <span class="dt">GT</span></code></pre></div>
+<p>to represent less, equal, and greater comparison respectively. Moreover the library function compare is defined so that</p>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell">compare x y <span class="fu">==</span> <span class="dt">LT</span> <span class="fu">&lt;=&gt;</span> x <span class="fu">&lt;</span>  y
+compare x y <span class="fu">==</span> <span class="dt">EQ</span> <span class="fu">&lt;=&gt;</span> x <span class="fu">==</span> y
+compare x y <span class="fu">==</span> <span class="dt">GT</span> <span class="fu">&lt;=&gt;</span> x <span class="fu">&gt;</span>  y</code></pre></div>
+<p>Redefine the <code>merge</code> and <code>mergeSort</code> functions to take an explicit comparison argument. That is, complete the definitions below so that</p>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell">mergeBy compare xs <span class="fu">==</span> merge xs </code></pre></div>
+<div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt; mergeBy ::</span> (a <span class="ot">-&gt;</span> a <span class="ot">-&gt;</span> <span class="dt">Ordering</span>) <span class="ot">-&gt;</span> [a] <span class="ot">-&gt;</span> [a] <span class="ot">-&gt;</span> [a]
+<span class="ot">&gt;</span> mergeBy cmp xs ys     <span class="fu">=</span> error <span class="st">&quot;Define me!&quot;</span>
+<span class="ot">&gt;</span> 
+<span class="ot">&gt; mergeSortBy ::</span> (a <span class="ot">-&gt;</span> a <span class="ot">-&gt;</span> <span class="dt">Ordering</span>) <span class="ot">-&gt;</span> [a] <span class="ot">-&gt;</span> [a]
+<span class="ot">&gt;</span> mergeSortBy cmp xs ys <span class="fu">=</span> error <span class="st">&quot;Define me!&quot;</span></code></pre></div>
+<h2 id="problem-3-fancy-sort"><strong>Problem 3:</strong> Fancy Sort</h2>
+<p>Merge sort is an efficient sorting algorithm, but it does not perform well when the input list is already sorted! The goal of this problem is to implement a different sorting algorithm, <code>fancySort</code> that performs excellent when the list is already increasing or even decreasing.</p>
+<p>The idea behind <code>fancySort</code> is the following.</p>
+<ul>
+<li>First, grap all the sorted sequences that appear in the input list and</li>
+<li>then, merge all the sorted sublists together.</li>
+</ul>
+<div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt; fancySort ::</span> <span class="dt">Ord</span> a <span class="ot">=&gt;</span> [a] <span class="ot">-&gt;</span> [a]
+<span class="ot">&gt;</span> fancySort <span class="fu">=</span> mergeAll <span class="fu">.</span> sequences</code></pre></div>
+<ol style="list-style-type: decimal">
+<li><strong>Merging:</strong> Define the function <code>mergeAll</code> that uses the <code>merge</code> from Problem 2 to merge a list of sorted lists into a single sorted list. For example,</li>
+</ol>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell">mergeAll [[<span class="dv">1</span>, <span class="dv">5</span>, <span class="dv">9</span>], [<span class="dv">2</span>,<span class="dv">8</span>], [<span class="dv">7</span>]] <span class="fu">==</span> [<span class="dv">1</span>,<span class="dv">2</span>,<span class="dv">5</span>,<span class="dv">7</span>,<span class="dv">8</span>,<span class="dv">9</span>]</code></pre></div>
+<div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt; mergeAll ::</span> <span class="dt">Ord</span> a <span class="ot">=&gt;</span> [[a]] <span class="ot">-&gt;</span> [a]
+<span class="ot">&gt;</span> mergeAll xs <span class="fu">=</span> error <span class="st">&quot;Define me!&quot;</span></code></pre></div>
+<p>The <code>fancySort</code> function creates the sorted sequences as follows. If the input list <code>(a:b:xs)</code> looks like ascending, that is <code>a &lt; b</code>, then we call <code>ascending'</code> with the “accumulated” sorted list <code>[a]</code> and a “pivot” element <code>b</code> with the goal to collect the rest of the ascending list. Otherwise we call <code>descending</code> with dual arguments and goals. For example,</p>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell">sequences [<span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">3</span>, <span class="dv">2</span>, <span class="dv">1</span>] <span class="fu">==</span> [[<span class="dv">1</span>,<span class="dv">2</span>,<span class="dv">3</span>],[<span class="dv">1</span>,<span class="dv">2</span>],[]]
+sequences [<span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">3</span>, <span class="dv">4</span>, <span class="dv">5</span>] <span class="fu">==</span> [[<span class="dv">1</span>,<span class="dv">2</span>,<span class="dv">3</span>,<span class="dv">4</span>,<span class="dv">5</span>],[]]
+sequences [<span class="dv">5</span>, <span class="dv">4</span>, <span class="dv">3</span>, <span class="dv">2</span>, <span class="dv">1</span>] <span class="fu">==</span> [[<span class="dv">1</span>,<span class="dv">2</span>,<span class="dv">3</span>,<span class="dv">4</span>,<span class="dv">5</span>],[]]</code></pre></div>
+<div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt; sequences ::</span> <span class="dt">Ord</span> a <span class="ot">=&gt;</span> [a] <span class="ot">-&gt;</span> [[a]]
+<span class="ot">&gt;</span> sequences (a<span class="fu">:</span>b<span class="fu">:</span>xs)
+<span class="ot">&gt;</span>   <span class="fu">|</span> a <span class="fu">&lt;</span> b     <span class="fu">=</span> ascending' b [a] xs
+<span class="ot">&gt;</span>   <span class="fu">|</span> otherwise <span class="fu">=</span> descending b [a] xs
+<span class="ot">&gt;</span> sequences xs  <span class="fu">=</span> [xs]</code></pre></div>
+<p>The function <code>ascending' a as (b:bs)</code> takes as input the pivot element <code>a</code>, the increasing accumulator <code>as</code>, and the unsorted list <code>xs</code>. If the pivot is less than <code>b</code>, it puts the pivot in the head of the accumulator and recurses, otherwise, it returns the first sorted sequence <code>reverse(a:as)</code> and calls back to <code>sequences</code> to construct the next descending sequence.</p>
+<div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt; ascending' ::</span> <span class="dt">Ord</span> a <span class="ot">=&gt;</span> a <span class="ot">-&gt;</span> [a] <span class="ot">-&gt;</span> [a] <span class="ot">-&gt;</span> [[a]]
+<span class="ot">&gt;</span> ascending' a as (b<span class="fu">:</span>bs)
+<span class="ot">&gt;</span>   <span class="fu">|</span> a <span class="fu">&lt;</span> b <span class="fu">=</span> ascending' b (a<span class="fu">:</span>as) bs
+<span class="ot">&gt;</span> ascending' a as bs <span class="fu">=</span> (reverse(a<span class="fu">:</span>as))<span class="fu">:</span>sequences bs</code></pre></div>
+<ol start="2" style="list-style-type: decimal">
+<li><strong>Define descending:</strong> Follow the definition of <code>ascending'</code> to define <code>descending</code> that returns the first descending sequence it finds and calls back to <code>sequences</code> for the rest. For example,</li>
+</ol>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell">descending <span class="dv">4</span> [] [<span class="dv">3</span>, <span class="dv">2</span>, <span class="dv">1</span>]       <span class="fu">==</span> [[<span class="dv">1</span>,<span class="dv">2</span>,<span class="dv">3</span>,<span class="dv">4</span>],[]]
+descending <span class="dv">0</span> [] [<span class="dv">3</span>, <span class="dv">2</span>, <span class="dv">1</span>]       <span class="fu">==</span> [[<span class="dv">0</span>],[<span class="dv">1</span>,<span class="dv">2</span>,<span class="dv">3</span>],[]]
+descending <span class="dv">0</span> [] [<span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">3</span>, <span class="dv">2</span>, <span class="dv">1</span>] <span class="fu">==</span> [[<span class="dv">0</span>],[<span class="dv">1</span>,<span class="dv">2</span>,<span class="dv">3</span>],[<span class="dv">1</span>,<span class="dv">2</span>],[]]</code></pre></div>
+<div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt; descending ::</span> <span class="dt">Ord</span> a <span class="ot">=&gt;</span> a <span class="ot">-&gt;</span> [a] <span class="ot">-&gt;</span> [a] <span class="ot">-&gt;</span> [[a]]
+<span class="ot">&gt;</span> descending a as bs <span class="fu">=</span> error <span class="st">&quot;Define me!&quot;</span></code></pre></div>
+<ol start="3" style="list-style-type: decimal">
+<li><strong>(Difficult) Optimize ascending:</strong> Ascending on an increasing list gives us back exactly one sequence:</li>
+</ol>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell">ascending' <span class="dv">0</span> [] [<span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">3</span>, <span class="dv">4</span>] <span class="fu">==</span> [[<span class="dv">0</span>,<span class="dv">1</span>,<span class="dv">2</span>,<span class="dv">3</span>,<span class="dv">4</span>],[]]</code></pre></div>
+<p>but to do so, the <code>ascending'</code> definition imposes a huge performance leak as it has to reverse the returning list. Define a higher order <code>ascending</code> that satisfies the below type signature, does not reverse the returning sequence and still behaves like <code>ascending'</code> in that</p>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell">forall xs, a<span class="fu">:</span> ascending a id xs <span class="fu">==</span> ascending' a [] xs  </code></pre></div>
+<p>where <code>id</code> is the identity functions.</p>
+<div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt; ascending ::</span> <span class="dt">Ord</span> a <span class="ot">=&gt;</span> a <span class="ot">-&gt;</span> ([a] <span class="ot">-&gt;</span> [a]) <span class="ot">-&gt;</span> [a] <span class="ot">-&gt;</span> [[a]]
+<span class="ot">&gt;</span> ascending a as bs <span class="fu">=</span> error <span class="st">&quot;Define me!&quot;</span></code></pre></div>
+<p>Finally, replace the call to <code>ascending'</code> with <code>ascending</code> in the <code>sequences</code> definition.</p>
+        </div>
+        <div id="footer">
+            Site proudly generated by
+            <a href="http://jaspervdj.be/hakyll">Hakyll</a>
+        </div>
+    </body>
+</html>
