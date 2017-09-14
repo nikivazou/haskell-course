@@ -1,0 +1,144 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+        <title>CMSC498V - TheRealWorld</title>
+        <link rel="stylesheet" type="text/css" href="../css/default.css" />
+        <link rel="stylesheet" type="text/css" href="../css/syntax.css" />
+    </head>
+    <body>
+        <div id="header">
+            <div id="logo">
+                <a href="../">CMSC498V</a>
+            </div>
+            <div id="navigation">
+                <a href="../schedule.html">Schedule</a>
+                <a href="../homeworks.html">Homeworks</a>
+                <a href="../project.html">Projects</a>
+                <a href="../resources.html">Resources</a>
+            </div>
+        </div>
+
+        <div id="content">
+            <h1 id="haskell-in-the-real-world">Haskell in the Real World</h1>
+<p>Let’s look how a real Haskell program looks like by examiming the tic-tac-toc game in <a href="https://github.com/nikivazou/tic-tac-toe" class="uri">https://github.com/nikivazou/tic-tac-toe</a>.</p>
+<h2 id="basic-build">Basic build</h2>
+<p>We can build the game by running</p>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell">cd src 
+ghc <span class="co">--make TicTacToe.hs</span></code></pre></div>
+<p>Then the executable <code>TicTacToe</code> is created. This executable runs the function <code>main :: IO ()</code> inside the module <code>Main</code>. Usually, the Main module mostly interacts with the real world, while all the pure functions and types are defined in different modules. Here, all the types are defined in <code>Types</code> and all the playing strategies in the <code>Strategies.*</code>.</p>
+<h2 id="modules">Modules</h2>
+<p>In Haskell each file is a module. Each module defines a set of functions (that other modules can import).</p>
+<p>A module can export all the defined functions, e.g.,</p>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="kw">module</span> <span class="dt">Types</span> <span class="kw">where</span> </code></pre></div>
+<p>or some specific functions, e.g.,</p>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="kw">module</span> <span class="dt">Player.Computer</span> (playerComputer) <span class="kw">where</span> </code></pre></div>
+<p>When importing modules you again have many alternatives:</p>
+<ul>
+<li>Import all the functions in the module</li>
+</ul>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="kw">import </span><span class="dt">Types</span> </code></pre></div>
+<ul>
+<li>Import specific functions</li>
+</ul>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="kw">import </span><span class="dt">Player.Human</span> (playerHuman)</code></pre></div>
+<ul>
+<li>Hide some functions (why?)</li>
+</ul>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="kw">import </span><span class="dt">Prelude</span> <span class="kw">hiding</span> ((!!))</code></pre></div>
+<ul>
+<li>Import qualified module, where you have you call the functions using all the name, e.g., <code>Data.List.intercalate</code> (why?)</li>
+</ul>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="kw">import qualified</span> <span class="dt">Data.List</span> </code></pre></div>
+<ul>
+<li>Import qualified module, but with a name alias, e.g., <code>M.fromJust</code>.</li>
+</ul>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="kw">import qualified</span> <span class="dt">Data.Maybe</span> <span class="kw">as</span> <span class="dt">M</span> </code></pre></div>
+<h2 id="type-definitions">Type Definitions</h2>
+<p>Two ways to define types in Haskell are <code>data</code> and <code>type</code>. We already saw that <code>data</code> defines <strong>new</strong> data types, e.g.,</p>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="kw">data</span> <span class="dt">Tile</span> <span class="fu">=</span> <span class="dt">EmptyTile</span> <span class="fu">|</span> <span class="dt">X</span> <span class="fu">|</span> <span class="dt">O</span> </code></pre></div>
+<p>On the other hand, type <code>type</code> is used to define type alias for existing types (why?). For example a move is a pair of integers,</p>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="kw">type</span> <span class="dt">Move</span>   <span class="fu">=</span> (<span class="dt">Int</span>,<span class="dt">Int</span>)</code></pre></div>
+<p>while the board maps moves to tiles</p>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="kw">type</span> <span class="dt">Board</span>  <span class="fu">=</span> [(<span class="dt">Move</span>, <span class="dt">Tile</span>)]</code></pre></div>
+<p>Data and types can get quite interesting! For example, the <code>Types.Player</code> data type has a function <code>playerMove</code> that defines all the functionality of the tic-tac-toe game.</p>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="kw">data</span> <span class="dt">Player</span> <span class="fu">=</span> 
+ <span class="dt">Player</span> {<span class="ot"> playerMove ::</span> <span class="dt">Tile</span> <span class="ot">-&gt;</span> <span class="dt">Board</span> <span class="ot">-&gt;</span> <span class="dt">IO</span> <span class="dt">Move</span>
+        ,<span class="ot"> playerName ::</span> <span class="dt">String</span>
+        }</code></pre></div>
+<p><code>Player.Human</code> and <code>Player.Computer</code> define different values of this data type, by defining how a human and the computer play a move.</p>
+<h2 id="deriving-instances">Deriving instances</h2>
+<p>Haskell suppors overloading of functions (that is the same function performs different operations depending on the arguments that it is called) via type classes.</p>
+<p>Two of the most famous type classes are <code>Eq</code> and <code>Show</code> for equality checking and printing resp.</p>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="kw">class</span> <span class="dt">Eq</span> a <span class="kw">where</span> 
+<span class="ot">   (==) ::</span> a <span class="ot">-&gt;</span> a <span class="ot">-&gt;</span> <span class="dt">Bool</span> </code></pre></div>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="kw">class</span> <span class="dt">Show</span> a <span class="kw">where</span>
+<span class="ot">  show ::</span> a <span class="ot">-&gt;</span> <span class="dt">String</span> </code></pre></div>
+<p>There are two ways to define the <code>(==)</code> and <code>show</code> methods for a data type</p>
+<ul>
+<li>Instance declaration (manually write an instance)</li>
+</ul>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="kw">instance</span> <span class="dt">Show</span> <span class="dt">Tile</span> <span class="kw">where</span>
+  show <span class="dt">EmptyTile</span> <span class="fu">=</span> <span class="st">&quot;     &quot;</span>
+  show <span class="dt">X</span>         <span class="fu">=</span> <span class="st">&quot;  X  &quot;</span>
+  show <span class="dt">O</span>         <span class="fu">=</span> <span class="st">&quot;  O  &quot;</span></code></pre></div>
+<ul>
+<li>Deriving Annotation (let the compiler derive it for you)</li>
+</ul>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="kw">data</span> <span class="dt">Tile</span> <span class="fu">=</span> <span class="dt">EmptyTile</span> <span class="fu">|</span> <span class="dt">X</span> <span class="fu">|</span> <span class="dt">O</span> 
+ <span class="kw">deriving</span> (<span class="dt">Eq</span>)</code></pre></div>
+<p>Why not always automatically derive the instances?</p>
+<ol style="list-style-type: decimal">
+<li><p>Sometimes the derived instance is not the desired one. See what happens when the <code>show</code> method for <code>Tile</code> is derived.</p></li>
+<li><p>Sometimes derivation is <em>impossible</em>. For example, the compiler cannot derive a <code>show</code> for <code>Players</code> as there is no (standard) way to show functions. But we can define show just to print <code>playerName</code>.</p></li>
+</ol>
+<h2 id="package-manager">Package Manager</h2>
+<p>One can compile applications directly with ghc, but as the application grows we really need a package manager.</p>
+<ul>
+<li><p>Portability. Even tic-tac-toe depends on a library <a href="https://hackage.haskell.org/package/random-fu-0.2.7.0/docs/Data-Random.html"><code>random</code></a>. What version of the library is compatibly with our appication?</p></li>
+<li><p>Distribution. Assuming I know the correct version of <code>random</code> then before to compile tic-tac-toc I first need to install <code>random</code>.</p></li>
+<li><p>Common interface. If I build a library (like random) how can users know what this library is about/where to find my library.</p></li>
+</ul>
+<p>Haskell’s package manager is <a href="https://www.haskell.org/cabal/"><code>cabal</code></a>.</p>
+<ul>
+<li>Each application needs a <code>.cabal</code> file that (semi-automatically) specifies the dependenices and further documentation.</li>
+</ul>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="st"># tic-tac-toe.cabal</span>
+build<span class="fu">-</span>depends<span class="fu">:</span> random <span class="fu">&gt;=</span><span class="fl">1.1</span> <span class="fu">&amp;&amp;</span> <span class="fu">&lt;</span><span class="fl">1.2</span></code></pre></div>
+<p><strong>Q:</strong> Why do we need lower and upper bounds?</p>
+<ul>
+<li>Cabal will install all the dependencies for you by searching the Haskell packages on <a href="http://hackage.haskell.org/">Hackage</a>. Anyone can submit packages to Hackage (as long as they have a cabal file).</li>
+</ul>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell">cabal install </code></pre></div>
+<p>What if I simultaneously want to build two different application with conflicting dependencies?</p>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="st"># evil-tic-tac-toe</span>
+build<span class="fu">-</span>depends<span class="fu">:</span> random <span class="fu">&gt;=</span><span class="fl">0.6</span> <span class="fu">&amp;&amp;</span> <span class="fu">&lt;</span><span class="fl">1.0</span></code></pre></div>
+<p>Sandboxing lets you have locally different versions of the same library specific for each application you are building. Haskell’s sandboxer is <a href="https://docs.haskellstack.org/en/stable/README/">stack</a>. It requires a (semi-automatically built) <code>stack.yaml</code> file and</p>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell">stack init </code></pre></div>
+<p>will generate a <code>.stack-work</code> directory that will store all local dependencies.</p>
+<h2 id="do-not-forget-the-testing">Do not forget the testing</h2>
+<p>Testing should always be part of the development proccess! Cabal lets you build a test suite. Here</p>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell">cabal configure <span class="co">--enable-tests</span>
+cabal test </code></pre></div>
+<p>will run <code>tests/Test.hs</code> (that indeed does nothing…). Alternatively, just run</p>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell">stack test</code></pre></div>
+<h2 id="code-sharing">Code sharing</h2>
+<p>When your project is ready, share it on Hackage so that other Haskellers enjoy it!</p>
+<p>Until it is ready upload it on <a href="https://github.com">github</a>. Why?</p>
+<ul>
+<li>Version control will answer many questions
+<ul>
+<li>what was that edit I made yesterday when my code was fast/worked?</li>
+<li>who broke/fixed my code?</li>
+<li>why did I make this edit? (assuming good commit messages…)</li>
+</ul></li>
+<li>Test integration: <a href="https://travis-ci.org/">Travis</a> (assuming you manage to set it correct) runs unit test at all your commits!</li>
+</ul>
+        </div>
+        <div id="footer">
+            Site proudly generated by
+            <a href="http://jaspervdj.be/hakyll">Hakyll</a>
+        </div>
+    </body>
+</html>
