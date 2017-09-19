@@ -242,9 +242,13 @@ where `id` is the identity functions.
 or any other list operations. Define `ascending` only by using 
 
 - one comparison, 
+
 - recursive calls to `ascending` and `sequences`,
+
 - function application and abstraction (i.e., lambda),
+
 - the list data constructors (`[]` and `(:)`),
+
 - and no intermediate helper functions. 
 
 \begin{code}

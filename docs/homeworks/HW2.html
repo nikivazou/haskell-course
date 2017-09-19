@@ -142,7 +142,14 @@ descending <span class="dv">0</span> [] [<span class="dv">1</span>, <span class=
 <p>but to do so, the <code>ascending'</code> definition imposes a huge performance leak as it has to reverse the returning list. Define a higher order <code>ascending</code> that satisfies the below type signature, does not reverse the returning sequence and still behaves like <code>ascending'</code> in that</p>
 <div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell">forall xs, a<span class="fu">:</span> ascending a id xs <span class="fu">==</span> ascending' a [] xs  </code></pre></div>
 <p>where <code>id</code> is the identity functions.</p>
-<p><strong>Restrictions:</strong> Increasing lists should be accessed only once! You are not allowed to use <code>reverse</code>, <code>(++)</code>, or any other list operations. Define <code>ascending</code> only by using - one comparison, - recursive calls to <code>ascending</code> and <code>sequences</code>, - function application and abstraction (i.e., lambda), - the list data constructors (<code>[]</code> and <code>(:)</code>), - and no intermediate helper functions.</p>
+<p><strong>Restrictions:</strong> Increasing lists should be accessed only once! You are not allowed to use <code>reverse</code>, <code>(++)</code>, or any other list operations. Define <code>ascending</code> only by using</p>
+<ul>
+<li><p>one comparison,</p></li>
+<li><p>recursive calls to <code>ascending</code> and <code>sequences</code>,</p></li>
+<li><p>function application and abstraction (i.e., lambda),</p></li>
+<li><p>the list data constructors (<code>[]</code> and <code>(:)</code>),</p></li>
+<li><p>and no intermediate helper functions.</p></li>
+</ul>
 <div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt; ascending ::</span> <span class="dt">Ord</span> a <span class="ot">=&gt;</span> a <span class="ot">-&gt;</span> ([a] <span class="ot">-&gt;</span> [a]) <span class="ot">-&gt;</span> [a] <span class="ot">-&gt;</span> [[a]]
 <span class="ot">&gt;</span> ascending a as bs <span class="fu">=</span> error <span class="st">&quot;Define me!&quot;</span></code></pre></div>
 <p>Finally, replace the call to <code>ascending'</code> with <code>ascending</code> in the <code>sequences</code> definition.</p>
