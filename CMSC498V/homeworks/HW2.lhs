@@ -7,7 +7,7 @@ Instructions
 The source code of this homework can be found [here](https://raw.githubusercontent.com/nikivazou/CMSC498V/master/CMSC498V/homeworks/HW2.lhs).
 You should fill in the definitions of the required functions but **do not** change the types of the functions. 
 
-**How to submit:** Ben????
+**How to submit:** Submit this file and a `MinMax.lhs` file via the submit server. 
 
 \begin{code}
 module HW2 where
