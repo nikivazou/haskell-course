@@ -235,7 +235,16 @@ behaves like `ascending'` in that
 
 < forall xs, a: ascending a id xs == ascending' a [] xs  
 
+
 where `id` is the identity functions. 
+
+**Be careful:** Increasing lists should be accessed only once! You are not allowed to use `reverse`, `(++)`, 
+or any other list operations. Define `ascending` only by using 
+  - one comparison, 
+  - recursive calls to `ascending` and `sequences`,
+  - function application and abstraction (i.e., lambda),
+  - the list data constructors (`[]` and `(:)`),
+  - and no intermediate helper functions. 
 
 \begin{code}
 ascending :: Ord a => a -> ([a] -> [a]) -> [a] -> [[a]]
@@ -244,4 +253,35 @@ ascending a as bs = error "Define me!"
 
 Finally, replace the call to `ascending'` with `ascending` in the `sequences` definition.
 
+
+
+**Problem 4:** Tic-Tac-Toe
+------------------------------------
+
+- Step 1: Download the [tic-tac-toe](https://github.com/nikivazou/tic-tac-toe) game. 
+
+< git clone https://github.com/nikivazou/tic-tac-toe.git
+
+- Step 2: Install the game and play against the random strategy. 
+
+< cd tic-tac-toe/
+< stack install 
+< tic-tac-toe
+
+- Step 3: Follow the description in the [src/Player/MinMax.lhs](https://github.com/nikivazou/tic-tac-toe/blob/master/src/Player/MinMax.lhs) file. 
+
+- Step 4: Import and call your player. In [src/TicTacToe.hs](https://github.com/nikivazou/tic-tac-toe/blob/master/src/TicTacToe.hs) add
+
+< import Player.MinMax (playerMinMax)
+
+then in
+[src/TicTacToe.hs#L11](https://github.com/nikivazou/tic-tac-toe/blob/master/src/TicTacToe.hs#L11) replace 
+
+< player1 = playerHuman "Me!"
+
+with 
+
+< player1 = playerMinMax
+
+and make sure that your `playerMinMax` always wins the computer. 
 
