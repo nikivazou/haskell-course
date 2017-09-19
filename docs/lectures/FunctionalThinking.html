@@ -36,14 +36,14 @@
 <h2 id="step-1-implement-insert">Step 1: Implement insert</h2>
 <p><code>insert x xs</code> inserts the element <code>x</code> into the sorted list <code>xs</code></p>
 <div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt; insert ::</span> (<span class="dt">Ord</span> a) <span class="ot">=&gt;</span> a <span class="ot">-&gt;</span> [a] <span class="ot">-&gt;</span> [a]
-<span class="ot">&gt;</span> insert x xs <span class="fu">=</span> <span class="kw">case</span> xs <span class="kw">of</span> 
-<span class="ot">&gt;</span>                 []     <span class="ot">-&gt;</span> [x] 
-<span class="ot">&gt;</span>                 (y<span class="fu">:</span>ys) <span class="ot">-&gt;</span> <span class="kw">if</span> x <span class="fu">&lt;</span> y <span class="kw">then</span> x<span class="fu">:</span>y<span class="fu">:</span>ys
-<span class="ot">&gt;</span>                                    <span class="kw">else</span> y<span class="fu">:</span>insert x ys </code></pre></div>
+<span class="ot">&gt;</span> insert x []   <span class="fu">=</span> [x]
+<span class="ot">&gt;</span> insert x (y<span class="fu">:</span>ys)
+<span class="ot">&gt;</span>   <span class="fu">|</span> x <span class="fu">&lt;</span> y     <span class="fu">=</span> x<span class="fu">:</span>y<span class="fu">:</span>ys
+<span class="ot">&gt;</span>   <span class="fu">|</span> otherwise <span class="fu">=</span> y<span class="fu">:</span>insert x ys </code></pre></div>
 <h2 id="step-2-use-insert-to-implement-sorting">Step 2: Use <code>insert</code> to implement sorting</h2>
 <p>Use <code>insert</code> to combine the elements of the initial unsorted list</p>
 <div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt; sort ::</span> (<span class="dt">Ord</span> a) <span class="ot">=&gt;</span> [a] <span class="ot">-&gt;</span> [a]
-<span class="ot">&gt;</span> sort <span class="fu">=</span> undefined </code></pre></div>
+<span class="ot">&gt;</span> sort <span class="fu">=</span> foldl (flip insert) []</code></pre></div>
 <p><em>Reminder:</em> Did you user <code>fold</code>?</p>
 <p>When you want to combine list elements, with a function and a base case, it is suggested to use folds:</p>
 <div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell">foldr<span class="ot"> ::</span> (a <span class="ot">-&gt;</span> b <span class="ot">-&gt;</span> b) <span class="ot">-&gt;</span> b <span class="ot">-&gt;</span> [a] <span class="ot">-&gt;</span> b
@@ -64,9 +64,22 @@ foldr f z [x1, x2, <span class="fu">...</span>, xn] <span class="fu">==</span> x
 <h1 id="quicksort">QuickSort</h1>
 <p><a href="http://en.wikipedia.org/wiki/Quicksort">Wiki QuickSort</a></p>
 <p>I put the pivot in the middle, the (sorted list of) elements that are less or equal than the pivot at the left, and the (sorted list of) elements that are greater than the pivot at the left:</p>
-<div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt;</span> quicksort' (x<span class="fu">:</span>xs) <span class="fu">=</span> leq_than_x <span class="fu">++</span> [x] <span class="fu">++</span> g_than_x
-<span class="ot">&gt;</span>   <span class="kw">where</span> leq_than_x <span class="fu">=</span> undefined
-<span class="ot">&gt;</span>         g_than_x   <span class="fu">=</span> undefined</code></pre></div>
+<div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt;</span> quicksort' []      <span class="fu">=</span> []
+<span class="ot">&gt;</span> quicksort' (x<span class="fu">:</span>xs)  <span class="fu">=</span> leq_than_x <span class="fu">++</span> [x] <span class="fu">++</span> g_than_x
+<span class="ot">&gt;</span>   <span class="kw">where</span> leq_than_x <span class="fu">=</span> quicksort' [y <span class="fu">|</span> y <span class="ot">&lt;-</span> xs , y <span class="fu">&lt;=</span> x]
+<span class="ot">&gt;</span>         g_than_x   <span class="fu">=</span> quicksort' <span class="fu">$</span> filter (<span class="fu">&gt;</span> x) xs
+<span class="ot">&gt;</span> 
+<span class="ot">&gt;</span> 
+<span class="ot">&gt;</span> <span class="kw">instance</span> <span class="dt">Ord</span> <span class="dt">Tile</span>  <span class="kw">where</span>
+<span class="ot">&gt;</span>  <span class="dt">EmptyTile</span> <span class="fu">&lt;=</span> <span class="dt">EmptyTile</span> <span class="fu">=</span> <span class="dt">True</span>  
+<span class="ot">&gt;</span>  <span class="dt">X</span> <span class="fu">&lt;=</span> <span class="dt">EmptyTile</span> <span class="fu">=</span> <span class="dt">True</span>  
+<span class="ot">&gt;</span>  <span class="dt">O</span> <span class="fu">&lt;=</span> <span class="dt">EmptyTile</span> <span class="fu">=</span> <span class="dt">True</span>  
+<span class="ot">&gt;</span>  _ <span class="fu">&lt;=</span> _ <span class="fu">=</span> <span class="dt">False</span> 
+<span class="ot">&gt;</span> 
+<span class="ot">&gt;</span> <span class="kw">data</span> <span class="dt">Tile</span> <span class="fu">=</span> <span class="dt">EmptyTile</span> <span class="fu">|</span> <span class="dt">X</span> <span class="fu">|</span> <span class="dt">O</span> 
+<span class="ot">&gt;</span>   <span class="kw">deriving</span> (<span class="dt">Eq</span>, <span class="dt">Show</span>)
+<span class="ot">&gt;</span> <span class="co">-- infixr $ 0 </span>
+<span class="ot">&gt;</span> <span class="co">-- f $ x = f x         </span></code></pre></div>
 <p>How do I get the elements of <code>xs</code> that are less than <code>x</code>?</p>
 <ul>
 <li>Use filter</li>
