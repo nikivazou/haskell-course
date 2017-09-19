@@ -240,6 +240,7 @@ where `id` is the identity functions.
 
 **Restrictions:** Increasing lists should be accessed only once! You are not allowed to use `reverse`, `(++)`, 
 or any other list operations. Define `ascending` only by using 
+
 - one comparison, 
 - recursive calls to `ascending` and `sequences`,
 - function application and abstraction (i.e., lambda),
