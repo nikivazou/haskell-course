@@ -1,0 +1,399 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+        <title>CMSC498V - TypeClasses</title>
+        <link rel="stylesheet" type="text/css" href="../css/default.css" />
+        <link rel="stylesheet" type="text/css" href="../css/syntax.css" />
+    </head>
+    <body>
+        <div id="header">
+            <div id="logo">
+                <a href="../">CMSC498V</a>
+            </div>
+            <div id="navigation">
+                <a href="../schedule.html">Schedule</a>
+                <a href="../homeworks.html">Homeworks</a>
+                <a href="../project.html">Projects</a>
+                <a href="../resources.html">Resources</a>
+            </div>
+        </div>
+
+        <div id="content">
+            <h1 id="type-classes">Type Classes</h1>
+<div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt;</span> <span class="ot">{-# LANGUAGE FlexibleInstances    #-}</span>
+<span class="ot">&gt;</span> <span class="kw">module</span> <span class="dt">TypeClasses</span> <span class="kw">where</span></code></pre></div>
+<p>We have already seen that the <code>(&lt;)</code> operator works for a bunch of different underlying data types. For example</p>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell">ghci<span class="fu">&gt;</span> <span class="dv">2</span> <span class="fu">&lt;</span> <span class="dv">3</span>
+<span class="dt">True</span> 
+
+ghci<span class="fu">&gt;</span> <span class="fl">3.9</span> <span class="fu">&lt;</span> <span class="fl">3.5</span>
+<span class="dt">False</span> </code></pre></div>
+<p>Similarly we can compare all sorts of values</p>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell">ghci<span class="fu">&gt;</span> <span class="dv">2</span> <span class="fu">==</span> <span class="dv">3</span>
+<span class="dt">False</span>
+
+ghci<span class="fu">&gt;</span> [<span class="fl">2.9</span>, <span class="fl">3.5</span>] <span class="fu">==</span> [<span class="fl">2.9</span>, <span class="fl">3.5</span>]
+<span class="dt">True</span></code></pre></div>
+<p>“So?” Indeed, this is quite unremarkable, since languages since the dawn of time has supported some form of operator “overloading” to support this kind of <strong>ad–hoc polymorphism</strong>.</p>
+<p>However, in Haskell, there is no caste system. There is no distinction between operators and functions. All are first class citizens in Haskell.</p>
+<p>Well then, what type do we give to functions like <code>(&lt;)</code> and <code>(==)</code>? Something like</p>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="ot">(&lt;) ::</span> <span class="dt">Integer</span> <span class="ot">-&gt;</span> <span class="dt">Integer</span> <span class="ot">-&gt;</span> <span class="dt">Bool</span> </code></pre></div>
+<p>would be too anemic, since we want to add two doubles as well! Can type variables help?</p>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="ot">(&lt;) ::</span> a <span class="ot">-&gt;</span> a <span class="ot">-&gt;</span> <span class="dt">Bool</span></code></pre></div>
+<p>Nope. Thats a bit too aggressive, since it doesn’t make sense, to compare two functions with each other! Haskell solves this problem with an insanely slick mechanism called typeclasses, introduced by <a href="http://dl.acm.org/citation.cfm?id=75283">Wadler and Blott</a>.</p>
+<h2 id="qualified-types">Qualified Types</h2>
+<p>To see the right type, lets just ask</p>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell">ghci<span class="fu">&gt;</span> <span class="fu">:</span><span class="kw">type</span> (<span class="fu">&lt;</span>)
+<span class="ot">(&lt;) ::</span> <span class="dt">Ord</span> a <span class="ot">=&gt;</span> a <span class="ot">-&gt;</span> a <span class="ot">-&gt;</span> <span class="dt">Bool</span></code></pre></div>
+<p>We call the above a <strong>qualified type</strong>. Read it as, <code>(&lt;)</code> takes in two <code>a</code> values and returns an <code>Bool</code>, for any type <code>a</code> that is an <code>Ord</code>.</p>
+<p>The name <code>Ord</code> can be thought of as a predicate over types. Some types satisfy the <code>Ord</code> predicate. Examples include <code>Integer</code>, <code>Double</code> etc, and any values of those types can be passed to <code>(&lt;)</code>. Other types do not satisfy the predicate. Examples include functions etc, and so values of those types cannot be passed to <code>(&lt;)</code>.</p>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell">ghci<span class="fu">&gt;</span> id <span class="fu">&lt;</span> flip 
+<span class="fu">&lt;</span>interactive<span class="fu">&gt;:</span><span class="dv">15</span><span class="fu">:</span><span class="dv">1</span><span class="fu">:</span> error<span class="fu">:</span>
+    • <span class="dt">No</span> <span class="kw">instance</span> for (<span class="dt">Ord</span> ((a0 <span class="ot">-&gt;</span> a0 <span class="ot">-&gt;</span> c0) <span class="ot">-&gt;</span> a0 <span class="ot">-&gt;</span> a0 <span class="ot">-&gt;</span> c0))
+        arising from a use <span class="kw">of</span> ‘<span class="fu">&lt;</span>’
+        (maybe you haven't applied a function to enough arguments<span class="fu">?</span>)
+    • <span class="dt">In</span> the expression<span class="fu">:</span> id <span class="fu">&lt;</span> flip
+      <span class="dt">In</span> an equation for ‘it’<span class="fu">:</span> it <span class="fu">=</span> id <span class="fu">&lt;</span> flip</code></pre></div>
+<p>Now these kinds of error messages make sense. Basically Haskell is complaining that function types are not an instance of <code>Ord</code>.</p>
+<h2 id="ok-so-what-is-a-typeclass">OK, SO WHAT IS A TYPECLASS?</h2>
+<p>In a nutshell, a typeclass is a collection of operations (functions) that must exist for the underlying type. For example, lets look at possibly the simplest typeclass <code>Eq</code></p>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="kw">class</span>  <span class="dt">Eq</span> a  <span class="kw">where</span>
+<span class="ot">  (==) ::</span> a <span class="ot">-&gt;</span> a <span class="ot">-&gt;</span> <span class="dt">Bool</span>
+<span class="ot">  (/=) ::</span> a <span class="ot">-&gt;</span> a <span class="ot">-&gt;</span> <span class="dt">Bool</span></code></pre></div>
+<p>That is, a type a can be an instance of <code>Eq</code> as long as there are two functions that determine if two a values are respectively equal or disequal. Similarly, the typeclass <code>Show</code> captures the requirements that make a particular datatype be viewable,</p>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="kw">class</span>  <span class="dt">Show</span> a  <span class="kw">where</span>
+<span class="ot">  show ::</span> a <span class="ot">-&gt;</span> <span class="dt">String</span></code></pre></div>
+<p>Indeed, we can test this on different (built-in) types</p>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell">ghci<span class="fu">&gt;</span> show <span class="dv">2</span>
+<span class="st">&quot;2&quot;</span>
+
+ghci<span class="fu">&gt;</span> show <span class="fl">3.14</span>
+<span class="st">&quot;3.14&quot;</span></code></pre></div>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell">ghci<span class="fu">&gt;</span> show (<span class="dv">1</span>, <span class="st">&quot;two&quot;</span>, ([],[],[]))
+<span class="st">&quot;(1,\&quot;two\&quot;,([],[],[]))&quot;</span></code></pre></div>
+<p>When we type an expression into ghci, it computes the value and then calls show on the result. Thus, if we create a new type by</p>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell">ghci<span class="fu">&gt;</span> <span class="kw">data</span> <span class="dt">Unshowable</span> <span class="fu">=</span> <span class="dt">A</span> <span class="fu">|</span> <span class="dt">B</span> <span class="fu">|</span> <span class="dt">C</span></code></pre></div>
+<p>then we can create values of the type,</p>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell">ghci<span class="fu">&gt;</span> <span class="kw">let</span> x <span class="fu">=</span> <span class="dt">A</span>
+ghci<span class="fu">&gt;</span> <span class="fu">:</span><span class="kw">type</span> x
+<span class="ot">x ::</span> <span class="dt">Unshowable</span></code></pre></div>
+<p>but can’t view or compare them</p>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell">ghci<span class="fu">&gt;</span> x <span class="fu">=</span> <span class="dt">A</span>
+
+<span class="fu">&lt;</span>interactive<span class="fu">&gt;:</span><span class="dv">1</span><span class="fu">:</span><span class="dv">0</span><span class="fu">:</span>
+    <span class="dt">No</span> <span class="kw">instance</span> for (<span class="dt">Show</span> <span class="dt">Unshowable</span>)
+      arising from a use <span class="kw">of</span> <span class="ot">`print' at &lt;interactive&gt;:1:0</span>
+<span class="ot">    Possible fix: add an instance declaration for (Show Unshowable)</span>
+<span class="ot">    In a stmt of a 'do' expression: print it</span>
+
+<span class="ot">ghci&gt; x == x</span>
+
+<span class="ot">&lt;interactive&gt;:1:0:</span>
+<span class="ot">    No instance for (Eq Unshowable)</span>
+<span class="ot">      arising from a use of `</span><span class="fu">==</span><span class="ch">' at &lt;interactive&gt;:1:0-5</span>
+    <span class="dt">Possible</span> fix<span class="fu">:</span> add an <span class="kw">instance</span> declaration for (<span class="dt">Eq</span> <span class="dt">Unshowable</span>)
+    <span class="dt">In</span> the expression<span class="fu">:</span> x <span class="fu">==</span> x
+    <span class="dt">In</span> the definition <span class="kw">of</span> <span class="ot">`it': it = x == x</span></code></pre></div>
+<p>Again, the previously incomprehensible type error message should make sense to you.</p>
+<p><strong>Q:</strong> Lets create an instance for <code>Show Unshowable</code>.</p>
+<h2 id="automatic-derivation">AUTOMATIC DERIVATION</h2>
+<p>Of course, this is lame; we should be able to compare and view them. To allow this, Haskell allows us automatically derive functions for certain key type classes, namely those in the standard library.</p>
+<p>To do so, we simply dress up the data type definition with</p>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="fu">&gt;</span> <span class="kw">data</span> <span class="dt">Showable</span> <span class="fu">=</span> <span class="dt">A'</span> <span class="fu">|</span> <span class="dt">B'</span> <span class="fu">|</span> <span class="dt">C'</span> <span class="kw">deriving</span> (<span class="dt">Eq</span>, <span class="dt">Show</span>)</code></pre></div>
+<p>and now we have</p>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell">ghci<span class="fu">&gt;</span> <span class="kw">let</span> x' <span class="fu">=</span> <span class="dt">A'</span>
+
+ghci<span class="fu">&gt;</span> <span class="fu">:</span><span class="kw">type</span> x'
+<span class="ot">x' ::</span> <span class="dt">Showable</span>
+
+ghci<span class="fu">&gt;</span> x'
+<span class="dt">A'</span>
+
+ghci<span class="fu">&gt;</span> x' <span class="fu">==</span> x'
+<span class="dt">True</span></code></pre></div>
+<h2 id="standard-typeclass-hierarchy">STANDARD TYPECLASS HIERARCHY</h2>
+<p>Let us now peruse the definition of the <code>Ord</code> typeclass.</p>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell">ghci<span class="fu">&gt;</span> <span class="fu">:</span>info <span class="dt">Ord</span>
+<span class="kw">class</span> <span class="dt">Eq</span> a <span class="ot">=&gt;</span> <span class="dt">Ord</span> a <span class="kw">where</span>
+<span class="ot">  compare ::</span> a <span class="ot">-&gt;</span> a <span class="ot">-&gt;</span> <span class="dt">Ordering</span>
+<span class="ot">  (&lt;) ::</span> a <span class="ot">-&gt;</span> a <span class="ot">-&gt;</span> <span class="dt">Bool</span>
+<span class="ot">  (&lt;=) ::</span> a <span class="ot">-&gt;</span> a <span class="ot">-&gt;</span> <span class="dt">Bool</span>
+<span class="ot">  (&gt;) ::</span> a <span class="ot">-&gt;</span> a <span class="ot">-&gt;</span> <span class="dt">Bool</span>
+<span class="ot">  (&gt;=) ::</span> a <span class="ot">-&gt;</span> a <span class="ot">-&gt;</span> <span class="dt">Bool</span>
+<span class="ot">  max ::</span> a <span class="ot">-&gt;</span> a <span class="ot">-&gt;</span> a
+<span class="ot">  min ::</span> a <span class="ot">-&gt;</span> a <span class="ot">-&gt;</span> a
+  <span class="ot">{-# MINIMAL compare | (&lt;=) #-}</span></code></pre></div>
+<p>There’s quite a bit going on there. A type a can only be deemed an instance of <code>Ord</code> if</p>
+<ul>
+<li>The type is also an instance of <code>Eq</code>, and</li>
+<li>There are functions for ordering values of that type.</li>
+</ul>
+<p>In other words in addition to the ordering operations, we can compare check equality on two <code>Ord</code> values.</p>
+<p>Haskell comes equipped with a rich set of built-in classes.</p>
+<h2 id="standard-typeclass-hierarchy-1">Standard Typeclass Hierarchy</h2>
+<div class="figure">
+<img src="https://nikivazou.github.io/CMSC498V/static/classes.gif" title="Class Hierarchy" alt="alt text" />
+<p class="caption">alt text</p>
+</div>
+<p>In the above picture, there is an edge from <code>Eq</code> to <code>Ord</code> because for something to be an <code>Ord</code> it must also be an <code>Eq</code>. There are a few other ones that we will come to know (and love!) in due course…</p>
+<p>Most of these type classes come with default instances for the basic types. But not all of them</p>
+<p><strong>Q:</strong> Why does Haskell reject the following expression?</p>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell">(<span class="dv">1</span>,<span class="dv">2</span>,<span class="dv">3</span>,<span class="dv">4</span>,<span class="dv">5</span>,<span class="dv">6</span>,<span class="dv">7</span>,<span class="dv">8</span>,<span class="dv">9</span>,<span class="dv">10</span>,<span class="dv">1</span>,<span class="dv">1</span>,<span class="dv">1</span>,<span class="dv">1</span>,<span class="dv">1</span>,<span class="dv">1</span>) <span class="fu">==</span> (<span class="dv">1</span>,<span class="dv">2</span>,<span class="dv">3</span>,<span class="dv">4</span>,<span class="dv">5</span>,<span class="dv">6</span>,<span class="dv">7</span>,<span class="dv">8</span>,<span class="dv">9</span>,<span class="dv">10</span>,<span class="dv">1</span>,<span class="dv">1</span>,<span class="dv">1</span>,<span class="dv">1</span>,<span class="dv">1</span>,<span class="dv">1</span>)</code></pre></div>
+<h2 id="using-typeclasses">Using Typeclasses</h2>
+<p>We have already see how type classes integrate with the rest of the Haskell’s type.</p>
+<p>Recall the <code>insert</code> function</p>
+<div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt;</span> insert x [] <span class="fu">=</span> [x]
+<span class="ot">&gt;</span> insert x (y<span class="fu">:</span>ys)
+<span class="ot">&gt;</span>   <span class="fu">|</span> x <span class="fu">&lt;=</span> y    <span class="fu">=</span> x<span class="fu">:</span>y<span class="fu">:</span>ys
+<span class="ot">&gt;</span>   <span class="fu">|</span> otherwise <span class="fu">=</span> y<span class="fu">:</span>insert x ys</code></pre></div>
+<p>Notice that we didn’t write down the type of the <code>insert</code>. Lets see what the type is</p>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="fu">&lt;</span>ghci <span class="fu">:</span>t insert
+<span class="ot">insert ::</span> <span class="dt">Ord</span> t <span class="ot">=&gt;</span> t <span class="ot">-&gt;</span> [t] <span class="ot">-&gt;</span> [t]</code></pre></div>
+<p>How, did the engine figure this out? Easy enough, if you look at the body of the insert, you’ll see that we compare two key values.</p>
+<h2 id="constraint-propagation">Constraint Propagation</h2>
+<p>Every function that calls <code>insert</code> should propagate the <code>Ord</code> constraint.</p>
+<div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt; insertSort ::</span> <span class="dt">Ord</span> a <span class="ot">=&gt;</span> [a] <span class="ot">-&gt;</span>[a]
+<span class="ot">&gt;</span> insertSort <span class="fu">=</span> foldl (flip insert) []  </code></pre></div>
+<p>Note, that now Haskell is not smart enough to figure out the constraint, so we need an explicit type signature.</p>
+<h2 id="explicit-signatures">Explicit Signatures</h2>
+<p>In the case of <code>insertSort</code> Haskell could have guessed a proper type. But, there are cases when the use of type classes requires explicit annotations (which change the behavior of the code.)</p>
+<p>For example, <code>Read</code> is a built-in typeclass, where any instance a of <code>Read</code> has a function</p>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell">read<span class="ot"> ::</span> (<span class="dt">Read</span> a) <span class="ot">=&gt;</span> <span class="dt">String</span> <span class="ot">-&gt;</span> a</code></pre></div>
+<p>which can parse a string and turn it into an a. Thus, <code>Read</code> is, in a sense, the dual of the <code>Show</code>.</p>
+<p><strong>Q:</strong> What does the expression <code>read &quot;2&quot;</code> evaluate to?</p>
+<p>Haskell is foxed, because it doesn’t know what to convert the string to! Did we want an <code>Int</code> or a <code>Double</code>? Or maybe something else altogether. Thus, we get back the complaint</p>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell">interactive<span class="fu">&gt;:</span><span class="dv">1</span><span class="fu">:</span><span class="dv">0</span><span class="fu">:</span>
+    <span class="dt">Ambiguous</span> <span class="kw">type</span> variable <span class="ot">`a' in the constraint:</span>
+<span class="ot">      `</span><span class="dt">Read</span> a' arising from a use <span class="kw">of</span> <span class="ot">`read' at &lt;interactive&gt;:1:0-9</span>
+<span class="ot">    Probable fix: add a type signature that fixes these type variable(s)</span></code></pre></div>
+<p>which clearly states what the issue is. Thus, here an explicit type annotation is needed to tell it what to convert the string to. Thus, if we play nice and add the types we get</p>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell">ghci<span class="fu">&gt;</span> (read <span class="st">&quot;2&quot;</span>)<span class="ot"> ::</span> <span class="dt">Int</span>
+<span class="dv">2</span></code></pre></div>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell">ghci<span class="fu">&gt;</span> (read <span class="st">&quot;2&quot;</span>)<span class="ot"> ::</span> <span class="dt">Float</span>
+<span class="fl">2.0</span></code></pre></div>
+<p>Note the different results due to the different types.</p>
+<h2 id="instantiating-typeclasses">Instantiating Typeclasses</h2>
+<p>So far we have seen Haskell’s nifty support for overloading by observing that</p>
+<ol style="list-style-type: decimal">
+<li><p>some standard types are instances of standard type classes, and</p></li>
+<li><p>new types can be automatically made instances of standard type classes.</p></li>
+</ol>
+<p>However, in many situations the automatic instantiation doesn’t quite cut it, and instead we need to (and get to!) create our own instances.</p>
+<p>For example suppose you want to compare two tic-tac-toe tiles.</p>
+<div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt;</span> <span class="kw">data</span> <span class="dt">Tile</span> <span class="fu">=</span> <span class="dt">X</span> <span class="fu">|</span> <span class="dt">O</span> <span class="fu">|</span> <span class="dt">EmptyTile</span> 
+<span class="ot">&gt;</span>     <span class="kw">deriving</span> (<span class="dt">Eq</span>)</code></pre></div>
+<p><strong>Q:</strong> What does</p>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell">ghci<span class="fu">&gt;</span> <span class="dt">EmptyTile</span> <span class="fu">==</span> <span class="dt">EmptyTile</span> </code></pre></div>
+<p>evaluate to?</p>
+<p>The equality test is <em>structural</em>, as in, a data type is always equal to itself.</p>
+<p>What is we want to define tile-equality so that comparison with <code>EmptyTile</code> is always <code>False</code>?</p>
+<p>We can write our own tile-equality operator to capture exactly this crazy requirement.</p>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="kw">instance</span> <span class="dt">Eq</span> <span class="dt">Tile</span> <span class="kw">where</span>
+  <span class="dt">X</span> <span class="fu">==</span> <span class="dt">X</span> <span class="fu">=</span> <span class="dt">True</span> 
+  <span class="dt">O</span> <span class="fu">==</span> <span class="dt">O</span> <span class="fu">=</span> <span class="dt">True</span> 
+  _ <span class="fu">==</span> _ <span class="fu">=</span> <span class="dt">False</span> </code></pre></div>
+<p><strong>Q:</strong> Now what does</p>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell">ghci<span class="fu">&gt;</span> <span class="dt">EmptyTile</span> <span class="fu">==</span> <span class="dt">EmptyTile</span> </code></pre></div>
+<p>evaluate to?</p>
+<p>How about</p>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell">ghci<span class="fu">&gt;</span> <span class="dt">EmptyTile</span> <span class="fu">/=</span> <span class="dt">EmptyTile</span> </code></pre></div>
+<p>To undertand how, <code>(/=)</code> is evaluated let us look at the full definition of the <code>Eq</code> typeclass. Ah! the typeclass definition also provides default implementations of each operation (in terms of the other operation.) Thus, all we need to do is define <code>(==)</code> and we will get <code>(/=)</code> (not-equals) for free!</p>
+<p>In general, when instantiating a typeclass, Haskell will check that we have provided a minimal implementation containing enough functions from which the remaining functions can be obtained (via their default implementations.)</p>
+<h2 id="laws">Laws</h2>
+<p>In addition to the explicit type requirements, a typeclass also encodes a set of laws that describe the relationships between the different operations. For example, the intention of the <code>Eq</code> typeclass is that the supplied implementations of <code>(==)</code> and <code>(/=)</code> satisfy the law</p>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell">forall t1 t2, t1 <span class="fu">==</span> t2 <span class="fu">&lt;==&gt;</span> not t1 <span class="fu">/=</span> t2
+forall t1,    t1 <span class="fu">==</span> t1 </code></pre></div>
+<p>Unfortunately, there is no way for Haskell to verify that your implementations satisfy the laws, so this is something to be extra careful about, when using typeclasses.</p>
+<h2 id="type-classes-are-interfaces">Type classes are interfaces</h2>
+<p>Many of you might have experience with object-oriented programming languages like Java. You are in danger! Do not fall in the trap of confusing type classes (in Haskell) with classes (in Java)! They are not very similar, and you do not use them to solve the same problems.</p>
+<p>If anything, type classes correspond to <em>interfaces in Java</em>: Both contain methods without implementation and their type signatures, and instances provide the implementation.</p>
+<p>Classes and objects as in Java do not have a direct correspondence in Haskell, and that is ok, because problems are approached differently. But the Interaction type that we defined last week is, in some sense, an approximation of a class. The concrete Interactions that we defined are instances of this class, and functions like withStartScreen relate to inheritance (or maybe ot the decorator pattern).</p>
+<h2 id="internals-of-type-classes">Internals of Type classes</h2>
+<p>Type classes define interfaces that in Haskell’s terms are called <em>dictionaries</em>.</p>
+<p>For instance, from the <code>Ord</code> class definition the compiler will create a dictionary that stores all the class methods. This dictionary will be just a data type with one field per each defined method:</p>
+<div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt;</span> <span class="kw">data</span> <span class="dt">OrdDict</span> a 
+<span class="ot">&gt;</span>   <span class="fu">=</span> <span class="dt">OrdDict</span> {<span class="ot"> leq ::</span> a <span class="ot">-&gt;</span> a <span class="ot">-&gt;</span> <span class="dt">Bool</span> 
+<span class="ot">&gt;</span>             ,<span class="ot"> gt  ::</span> a <span class="ot">-&gt;</span> a <span class="ot">-&gt;</span> <span class="dt">Bool</span>
+<span class="ot">&gt;</span>             }</code></pre></div>
+<p>This dictionary will be an implicit argument to all the functions that use the class methods. The implicit argument will be automatically filled in by the compiler.</p>
+<p>The compiler will transform our <code>insert</code> function to a function that takes an extra explicit dictionary argument and use this argument to compare values of type <code>a</code>.</p>
+<div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt;</span> insert' dict x []   <span class="fu">=</span> [x]
+<span class="ot">&gt;</span> insert' dict x (y<span class="fu">:</span>ys)
+<span class="ot">&gt;</span>   <span class="fu">|</span> leq dict x y    <span class="fu">=</span> x<span class="fu">:</span>y<span class="fu">:</span>ys
+<span class="ot">&gt;</span>   <span class="fu">|</span> otherwise       <span class="fu">=</span> y<span class="fu">:</span>insert' dict x ys
+<span class="ot">&gt;</span> 
+<span class="ot">&gt; insertSort' ::</span> <span class="dt">OrdDict</span> a <span class="ot">-&gt;</span> [a] <span class="ot">-&gt;</span>[a]
+<span class="ot">&gt;</span> insertSort' dict <span class="fu">=</span> foldl (flip (insert' dict)) []  </code></pre></div>
+<p>Note how <code>insertSort'</code> propagates the dictionary to <code>insert'</code>.</p>
+<p>When we define instances of the <code>Ord</code> class we basically define dictionary values.</p>
+<div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt; intDict ::</span> <span class="dt">OrdDict</span> <span class="dt">Int</span> 
+<span class="ot">&gt;</span> intDict <span class="fu">=</span> <span class="dt">OrdDict</span> (<span class="fu">&lt;=</span>) (<span class="fu">&gt;</span>)</code></pre></div>
+<p>Then, the compiler together with the type inferences figure out how to properly pass around these dictionaries.</p>
+<div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt; insertInt ::</span> [<span class="dt">Int</span>]
+<span class="ot">&gt;</span> insertInt <span class="fu">=</span> insertSort' intDict [<span class="dv">4</span>, <span class="dv">3</span>, <span class="dv">6</span>, <span class="dv">2</span>, <span class="dv">9</span>]</code></pre></div>
+<h2 id="creating-typeclasses">Creating Typeclasses</h2>
+<p>It turns out that typeclasses are useful for many different things. We will see some of those over the next few lectures, but let us conclude today’s class with a quick example that provides a (very) small taste of their capabilities.</p>
+<h2 id="json">JSON</h2>
+<p><em>JavaScript Object Notation</em> or <a href="http://www.json.org/">JSON</a> is a simple format for transferring data around. Here is an example:</p>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell">{ <span class="st">&quot;name&quot;</span>    <span class="fu">:</span> <span class="st">&quot;Niki&quot;</span>
+, <span class="st">&quot;age&quot;</span>     <span class="fu">:</span> <span class="dv">30</span>
+, <span class="st">&quot;likes&quot;</span>   <span class="fu">:</span> [<span class="st">&quot;guacamole&quot;</span>, <span class="st">&quot;coffee&quot;</span>, <span class="st">&quot;cats&quot;</span>]
+, <span class="st">&quot;hates&quot;</span>   <span class="fu">:</span> [ <span class="st">&quot;waiting&quot;</span> , <span class="st">&quot;grapefruit&quot;</span>]
+, <span class="st">&quot;lunches&quot;</span> <span class="fu">:</span> [ {<span class="st">&quot;day&quot;</span> <span class="fu">:</span> <span class="st">&quot;monday&quot;</span>,    <span class="st">&quot;loc&quot;</span> <span class="fu">:</span> <span class="st">&quot;sweet green&quot;</span>}
+              , {<span class="st">&quot;day&quot;</span> <span class="fu">:</span> <span class="st">&quot;tuesday&quot;</span>,   <span class="st">&quot;loc&quot;</span> <span class="fu">:</span> <span class="st">&quot;stamp&quot;</span>}
+              , {<span class="st">&quot;day&quot;</span> <span class="fu">:</span> <span class="st">&quot;wednesday&quot;</span>, <span class="st">&quot;loc&quot;</span> <span class="fu">:</span> <span class="st">&quot;farmers market&quot;</span>}
+              , {<span class="st">&quot;day&quot;</span> <span class="fu">:</span> <span class="st">&quot;thursday&quot;</span>,  <span class="st">&quot;loc&quot;</span> <span class="fu">:</span> <span class="st">&quot;lab&quot;</span>}
+              , {<span class="st">&quot;day&quot;</span> <span class="fu">:</span> <span class="st">&quot;friday&quot;</span>,    <span class="st">&quot;loc&quot;</span> <span class="fu">:</span> <span class="st">&quot;home&quot;</span>} ]
+}</code></pre></div>
+<p>In brief, each JSON object is either - a base value like a string, a number or a boolean, - an (ordered) array of objects, or - a set of string-object pairs.</p>
+<p>Thus, we can encode (a subset of) JSON values with the datatype</p>
+<div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt;</span> <span class="kw">data</span> <span class="dt">JVal</span> <span class="fu">=</span> <span class="dt">JStr</span> <span class="dt">String</span>
+<span class="ot">&gt;</span>           <span class="fu">|</span> <span class="dt">JNum</span> <span class="dt">Double</span>
+<span class="ot">&gt;</span>           <span class="fu">|</span> <span class="dt">JBln</span> <span class="dt">Bool</span>
+<span class="ot">&gt;</span>           <span class="fu">|</span> <span class="dt">JObj</span> [(<span class="dt">String</span>, <span class="dt">JVal</span>)]
+<span class="ot">&gt;</span>           <span class="fu">|</span> <span class="dt">JArr</span> [<span class="dt">JVal</span>]
+<span class="ot">&gt;</span>           <span class="kw">deriving</span> (<span class="dt">Eq</span>, <span class="dt">Ord</span>, <span class="dt">Show</span>)</code></pre></div>
+<p>Thus, the above <code>JSON</code> value would be represented by the <code>JVal</code></p>
+<div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt;</span> js1 <span class="fu">=</span>
+<span class="ot">&gt;</span>   <span class="dt">JObj</span> [(<span class="st">&quot;name&quot;</span>, <span class="dt">JStr</span> <span class="st">&quot;Niki&quot;</span>)
+<span class="ot">&gt;</span>        ,(<span class="st">&quot;age&quot;</span>,  <span class="dt">JNum</span> <span class="dv">30</span>)
+<span class="ot">&gt;</span>        ,(<span class="st">&quot;likes&quot;</span>,   <span class="dt">JArr</span> [ <span class="dt">JStr</span> <span class="st">&quot;guacamole&quot;</span>, <span class="dt">JStr</span> <span class="st">&quot;coffee&quot;</span>, <span class="dt">JStr</span> <span class="st">&quot;cats&quot;</span>])
+<span class="ot">&gt;</span>        ,(<span class="st">&quot;hates&quot;</span>,   <span class="dt">JArr</span> [ <span class="dt">JStr</span> <span class="st">&quot;waiting&quot;</span>  , <span class="dt">JStr</span> <span class="st">&quot;grapefruit&quot;</span>])
+<span class="ot">&gt;</span>        ,(<span class="st">&quot;lunches&quot;</span>, <span class="dt">JArr</span> [ <span class="dt">JObj</span> [(<span class="st">&quot;day&quot;</span>,  <span class="dt">JStr</span> <span class="st">&quot;monday&quot;</span>)
+<span class="ot">&gt;</span>                                 ,(<span class="st">&quot;loc&quot;</span>,  <span class="dt">JStr</span> <span class="st">&quot;sweet green&quot;</span>)]
+<span class="ot">&gt;</span>                          , <span class="dt">JObj</span> [(<span class="st">&quot;day&quot;</span>,  <span class="dt">JStr</span> <span class="st">&quot;tuesday&quot;</span>)
+<span class="ot">&gt;</span>                                 ,(<span class="st">&quot;loc&quot;</span>,  <span class="dt">JStr</span> <span class="st">&quot;farmers market&quot;</span>)]
+<span class="ot">&gt;</span>                          , <span class="dt">JObj</span> [(<span class="st">&quot;day&quot;</span>,  <span class="dt">JStr</span> <span class="st">&quot;wednesday&quot;</span>)
+<span class="ot">&gt;</span>                                 ,(<span class="st">&quot;loc&quot;</span>,  <span class="dt">JStr</span> <span class="st">&quot;farmers market&quot;</span>)]
+<span class="ot">&gt;</span>                          , <span class="dt">JObj</span> [(<span class="st">&quot;day&quot;</span>,  <span class="dt">JStr</span> <span class="st">&quot;thursday&quot;</span>)
+<span class="ot">&gt;</span>                                 ,(<span class="st">&quot;loc&quot;</span>,  <span class="dt">JStr</span> <span class="st">&quot;lab&quot;</span>)]
+<span class="ot">&gt;</span>                          , <span class="dt">JObj</span> [(<span class="st">&quot;day&quot;</span>,  <span class="dt">JStr</span> <span class="st">&quot;friday&quot;</span>)
+<span class="ot">&gt;</span>                                 ,(<span class="st">&quot;loc&quot;</span>,  <span class="dt">JStr</span> <span class="st">&quot;home&quot;</span>)]
+<span class="ot">&gt;</span>                          ])
+<span class="ot">&gt;</span>        ]</code></pre></div>
+<h2 id="serializing-haskell-values-to-json">Serializing Haskell values to JSON</h2>
+<p>Next, suppose that we want to write a small library to serialize Haskell values as <code>JSON</code>. We could write a bunch of functions like</p>
+<div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt; doubleToJSON ::</span> <span class="dt">Double</span> <span class="ot">-&gt;</span> <span class="dt">JVal</span>
+<span class="ot">&gt;</span> doubleToJSON <span class="fu">=</span> <span class="dt">JNum</span></code></pre></div>
+<p>similarly, we have</p>
+<div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt; stringToJSON ::</span> <span class="dt">String</span> <span class="ot">-&gt;</span> <span class="dt">JVal</span>
+<span class="ot">&gt;</span> stringToJSON <span class="fu">=</span> <span class="dt">JStr</span>
+<span class="ot">&gt;</span> 
+<span class="ot">&gt; boolToJSON   ::</span> <span class="dt">Bool</span> <span class="ot">-&gt;</span> <span class="dt">JVal</span>
+<span class="ot">&gt;</span> boolToJSON   <span class="fu">=</span> <span class="dt">JBln</span></code></pre></div>
+<p>But what about collections, namely objects and arrays? We might try</p>
+<div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt; doublesToJSON    ::</span> [<span class="dt">Double</span>] <span class="ot">-&gt;</span> <span class="dt">JVal</span>
+<span class="ot">&gt;</span> doublesToJSON xs <span class="fu">=</span> <span class="dt">JArr</span> (map doubleToJSON xs)
+<span class="ot">&gt;</span> 
+<span class="ot">&gt; boolsToJSON      ::</span> [<span class="dt">Bool</span>] <span class="ot">-&gt;</span> <span class="dt">JVal</span>
+<span class="ot">&gt;</span> boolsToJSON xs   <span class="fu">=</span> <span class="dt">JArr</span> (map boolToJSON xs)
+<span class="ot">&gt;</span> 
+<span class="ot">&gt; stringsToJSON    ::</span> [<span class="dt">String</span>] <span class="ot">-&gt;</span> <span class="dt">JVal</span>
+<span class="ot">&gt;</span> stringsToJSON xs <span class="fu">=</span> <span class="dt">JArr</span> (map stringToJSON xs)</code></pre></div>
+<p>which of course, you could abstract by making the individual-element-converter a parameter</p>
+<div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt; xsToJSON ::</span> (a <span class="ot">-&gt;</span> <span class="dt">JVal</span>) <span class="ot">-&gt;</span> [a] <span class="ot">-&gt;</span> <span class="dt">JVal</span>
+<span class="ot">&gt;</span> xsToJSON f xs <span class="fu">=</span> <span class="dt">JArr</span> (map f xs)
+<span class="ot">&gt;</span> 
+<span class="ot">&gt; xysToJSON ::</span> (a <span class="ot">-&gt;</span> <span class="dt">JVal</span>) <span class="ot">-&gt;</span> [(<span class="dt">String</span>, a)] <span class="ot">-&gt;</span> <span class="dt">JVal</span>
+<span class="ot">&gt;</span> xysToJSON f kvs <span class="fu">=</span> <span class="dt">JObj</span> [ (k, f v) <span class="fu">|</span> (k, v) <span class="ot">&lt;-</span> kvs ]</code></pre></div>
+<p>but still, this is getting rather tedious, since we have to redefine versions for each Haskell type, and instantiate them by hand for each conversion</p>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell">ghci<span class="fu">&gt;</span> doubleToJSON <span class="dv">4</span>
+<span class="dt">JNum</span> <span class="fl">4.0</span>
+
+ghci<span class="fu">&gt;</span> xsToJSON stringToJSON [<span class="st">&quot;coffee&quot;</span>, <span class="st">&quot;guacamole&quot;</span>, <span class="st">&quot;cats&quot;</span>]
+<span class="dt">JArr</span> [<span class="dt">JStr</span> <span class="st">&quot;coffee&quot;</span>,<span class="dt">JStr</span> <span class="st">&quot;guacamole&quot;</span>,<span class="dt">JStr</span> <span class="st">&quot;cats&quot;</span>]
+
+ghci<span class="fu">&gt;</span> xysToJSON stringToJSON [(<span class="st">&quot;day&quot;</span>, <span class="st">&quot;monday&quot;</span>), (<span class="st">&quot;loc&quot;</span>, <span class="st">&quot;zanzibar&quot;</span>)]
+<span class="dt">JObj</span> [(<span class="st">&quot;day&quot;</span>,<span class="dt">JStr</span> <span class="st">&quot;monday&quot;</span>),(<span class="st">&quot;loc&quot;</span>,<span class="dt">JStr</span> <span class="st">&quot;zanzibar&quot;</span>)]</code></pre></div>
+<p>and this gets more hideous when you have richer objects like</p>
+<div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt;</span> lunches <span class="fu">=</span> [ [(<span class="st">&quot;day&quot;</span>, <span class="st">&quot;monday&quot;</span>),    (<span class="st">&quot;loc&quot;</span>, <span class="st">&quot;sweet green&quot;</span>)]
+<span class="ot">&gt;</span>           , [(<span class="st">&quot;day&quot;</span>, <span class="st">&quot;tuesday&quot;</span>),   (<span class="st">&quot;loc&quot;</span>, <span class="st">&quot;stamp&quot;</span>)]
+<span class="ot">&gt;</span>           , [(<span class="st">&quot;day&quot;</span>, <span class="st">&quot;wednesday&quot;</span>), (<span class="st">&quot;loc&quot;</span>, <span class="st">&quot;farmers market&quot;</span>)]
+<span class="ot">&gt;</span>           , [(<span class="st">&quot;day&quot;</span>, <span class="st">&quot;thursday&quot;</span>),  (<span class="st">&quot;loc&quot;</span>, <span class="st">&quot;lab&quot;</span>)]
+<span class="ot">&gt;</span>           , [(<span class="st">&quot;day&quot;</span>, <span class="st">&quot;friday&quot;</span>),    (<span class="st">&quot;loc&quot;</span>, <span class="st">&quot;home&quot;</span>)]
+<span class="ot">&gt;</span>           ]</code></pre></div>
+<p>because we have to go through gymnastics like</p>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell">ghci<span class="fu">&gt;</span> xsToJSON (xysToJSON stringToJSON) lunches
+<span class="dt">JArr</span> [<span class="dt">JObj</span> [(<span class="st">&quot;day&quot;</span>,<span class="dt">JStr</span> <span class="st">&quot;monday&quot;</span>),(<span class="st">&quot;loc&quot;</span>,<span class="dt">JStr</span> <span class="st">&quot;sweet green&quot;</span>)],<span class="dt">JObj</span> [(<span class="st">&quot;day&quot;</span>,<span class="dt">JStr</span> <span class="st">&quot;tuesday&quot;</span>),(<span class="st">&quot;loc&quot;</span>,<span class="dt">JStr</span> <span class="st">&quot;stamp&quot;</span>)]]</code></pre></div>
+<p>Ugh! So much for readability. Isn’t there a better way? Is it too much to ask for a magical <code>toJSON</code> that just works?</p>
+<h2 id="type-classes-to-the-rescue">Type classes to the rescue!</h2>
+<p>Of course there is a better way, and the the route is paved by typeclasses!</p>
+<p>Lets define a typeclass that describes any type that can be converted to <code>JSON</code>.</p>
+<div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt;</span> <span class="kw">class</span> <span class="dt">JSON</span> a <span class="kw">where</span>
+<span class="ot">&gt;   toJSON ::</span> a <span class="ot">-&gt;</span> <span class="dt">JVal</span></code></pre></div>
+<p>Easy enough. Now, we can make all the above instances of <code>JSON</code> like so</p>
+<div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt;</span> <span class="kw">instance</span> <span class="dt">JSON</span> <span class="dt">Double</span> <span class="kw">where</span>
+<span class="ot">&gt;</span>   toJSON <span class="fu">=</span> <span class="dt">JNum</span>
+<span class="ot">&gt;</span> 
+<span class="ot">&gt;</span> <span class="kw">instance</span> <span class="dt">JSON</span> <span class="dt">Bool</span> <span class="kw">where</span>
+<span class="ot">&gt;</span>   toJSON <span class="fu">=</span> <span class="dt">JBln</span>
+<span class="ot">&gt;</span> 
+<span class="ot">&gt;</span> <span class="kw">instance</span> <span class="dt">JSON</span> <span class="dt">String</span> <span class="kw">where</span>
+<span class="ot">&gt;</span>   toJSON <span class="fu">=</span> <span class="dt">JStr</span></code></pre></div>
+<p>Now, we can just say</p>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell">ghci<span class="fu">&gt;</span> toJSON <span class="dv">4</span>
+<span class="dt">JNum</span> <span class="fl">4.0</span>
+
+ghci<span class="fu">&gt;</span> toJSON <span class="dt">True</span>
+<span class="dt">JBln</span> <span class="dt">True</span>
+
+ghci<span class="fu">&gt;</span> toJSON <span class="st">&quot;guacamole&quot;</span>
+<span class="dt">JStr</span> <span class="st">&quot;guacamole&quot;</span></code></pre></div>
+<h2 id="bootstrapping-instances">Bootstrapping Instances</h2>
+<p>The real fun begins when we get Haskell to automatically bootstrap the above functions to work for lists and association lists!</p>
+<div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt;</span> <span class="kw">instance</span> <span class="ot">{-# OVERLAPS #-}</span> <span class="dt">JSON</span> a <span class="ot">=&gt;</span> <span class="dt">JSON</span> [a] <span class="kw">where</span>
+<span class="ot">&gt;</span>   toJSON xs <span class="fu">=</span> <span class="dt">JArr</span> [toJSON x <span class="fu">|</span> x <span class="ot">&lt;-</span> xs]</code></pre></div>
+<p>Whoa!</p>
+<p>The above says, if a is an instance of <code>JSON</code>, that is, if you can convert a to <code>JVal</code> then here’s a generic recipe to convert lists of a values!</p>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell">ghci<span class="fu">&gt;</span> toJSON [<span class="dt">True</span>, <span class="dt">False</span>, <span class="dt">True</span>]
+<span class="dt">JArr</span> [<span class="dt">JBln</span> <span class="dt">True</span>,<span class="dt">JBln</span> <span class="dt">False</span>,<span class="dt">JBln</span> <span class="dt">True</span>]
+
+ghci<span class="fu">&gt;</span> toJSON [<span class="st">&quot;cat&quot;</span>, <span class="st">&quot;dog&quot;</span>, <span class="st">&quot;Mouse&quot;</span>]
+<span class="dt">JArr</span> [<span class="dt">JStr</span> <span class="st">&quot;cat&quot;</span>,<span class="dt">JStr</span> <span class="st">&quot;dog&quot;</span>,<span class="dt">JStr</span> <span class="st">&quot;Mouse&quot;</span>]
+
+ghci<span class="fu">&gt;</span> toJSON [[<span class="st">&quot;cat&quot;</span>, <span class="st">&quot;dog&quot;</span>], [<span class="st">&quot;mouse&quot;</span>, <span class="st">&quot;rabbit&quot;</span>]]
+<span class="dt">JArr</span> [<span class="dt">JArr</span> [<span class="dt">JStr</span> <span class="st">&quot;cat&quot;</span>,<span class="dt">JStr</span> <span class="st">&quot;dog&quot;</span>],<span class="dt">JArr</span> [<span class="dt">JStr</span> <span class="st">&quot;mouse&quot;</span>,<span class="dt">JStr</span> <span class="st">&quot;rabbit&quot;</span>]]</code></pre></div>
+<p>Of course, we can pull the same trick with key-value lists</p>
+<div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt;</span> <span class="kw">instance</span> (<span class="dt">JSON</span> a) <span class="ot">=&gt;</span> <span class="dt">JSON</span> [(<span class="dt">String</span>, a)] <span class="kw">where</span>
+<span class="ot">&gt;</span>   toJSON kvs <span class="fu">=</span> <span class="dt">JObj</span> [ (k, toJSON v) <span class="fu">|</span> (k, v) <span class="ot">&lt;-</span> kvs ]</code></pre></div>
+<p>after which, we are all set!</p>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell">ghci<span class="fu">&gt;</span> toJSON lunches
+<span class="dt">JArr</span> [<span class="dt">JObj</span> [(<span class="st">&quot;day&quot;</span>,<span class="dt">JStr</span> <span class="st">&quot;monday&quot;</span>),(<span class="st">&quot;loc&quot;</span>,<span class="dt">JStr</span> <span class="st">&quot;stamp&quot;</span>)],<span class="dt">JObj</span> [(<span class="st">&quot;day&quot;</span>,<span class="dt">JStr</span> <span class="st">&quot;tuesday&quot;</span>),(<span class="st">&quot;loc&quot;</span>,<span class="dt">JStr</span> <span class="st">&quot;stamp&quot;</span>)]]</code></pre></div>
+<p>It is also useful to bootstrap the serialization for tuples (upto some fixed size) so we can easily write “non-uniform” <code>JSON</code> objects where keys are bound to values with different shapes.</p>
+<div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt;</span> <span class="kw">instance</span> (<span class="dt">JSON</span> a, <span class="dt">JSON</span> b) <span class="ot">=&gt;</span> <span class="dt">JSON</span> ((<span class="dt">String</span>, a), (<span class="dt">String</span>, b)) <span class="kw">where</span>
+<span class="ot">&gt;</span>   toJSON ((k1, v1), (k2, v2)) <span class="fu">=</span>
+<span class="ot">&gt;</span>     <span class="dt">JObj</span> [(k1, toJSON v1), (k2, toJSON v2)]
+<span class="ot">&gt;</span> 
+<span class="ot">&gt;</span> <span class="kw">instance</span> (<span class="dt">JSON</span> a, <span class="dt">JSON</span> b, <span class="dt">JSON</span> c) <span class="ot">=&gt;</span> <span class="dt">JSON</span> ((<span class="dt">String</span>, a), (<span class="dt">String</span>, b), (<span class="dt">String</span>, c)) <span class="kw">where</span>
+<span class="ot">&gt;</span>   toJSON ((k1, v1), (k2, v2), (k3, v3)) <span class="fu">=</span>
+<span class="ot">&gt;</span>     <span class="dt">JObj</span> [(k1, toJSON v1), (k2, toJSON v2), (k3, toJSON v3)]
+<span class="ot">&gt;</span> 
+<span class="ot">&gt;</span> <span class="kw">instance</span> (<span class="dt">JSON</span> a, <span class="dt">JSON</span> b, <span class="dt">JSON</span> c, <span class="dt">JSON</span> d) <span class="ot">=&gt;</span> <span class="dt">JSON</span> ((<span class="dt">String</span>, a), (<span class="dt">String</span>, b), (<span class="dt">String</span>, c), (<span class="dt">String</span>,d)) <span class="kw">where</span>
+<span class="ot">&gt;</span>   toJSON ((k1, v1), (k2, v2), (k3, v3), (k4, v4)) <span class="fu">=</span>
+<span class="ot">&gt;</span>     <span class="dt">JObj</span> [(k1, toJSON v1), (k2, toJSON v2), (k3, toJSON v3), (k4, toJSON v4)]
+<span class="ot">&gt;</span> 
+<span class="ot">&gt;</span> <span class="kw">instance</span> (<span class="dt">JSON</span> a, <span class="dt">JSON</span> b, <span class="dt">JSON</span> c, <span class="dt">JSON</span> d, <span class="dt">JSON</span> e) <span class="ot">=&gt;</span> <span class="dt">JSON</span> ((<span class="dt">String</span>, a), (<span class="dt">String</span>, b), (<span class="dt">String</span>, c), (<span class="dt">String</span>,d), (<span class="dt">String</span>, e)) <span class="kw">where</span>
+<span class="ot">&gt;</span>   toJSON ((k1, v1), (k2, v2), (k3, v3), (k4, v4), (k5, v5)) <span class="fu">=</span>
+<span class="ot">&gt;</span>     <span class="dt">JObj</span> [(k1, toJSON v1), (k2, toJSON v2), (k3, toJSON v3), (k4, toJSON v4), (k5, toJSON v5)]</code></pre></div>
+<p>Now, we can simply write</p>
+<div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt;</span> hs <span class="fu">=</span> ((<span class="st">&quot;name&quot;</span>   , <span class="st">&quot;Niki&quot;</span>)
+<span class="ot">&gt;</span>      ,(<span class="st">&quot;age&quot;</span>    , <span class="dv">30</span><span class="ot"> ::</span> <span class="dt">Double</span>)
+<span class="ot">&gt;</span>      ,(<span class="st">&quot;likes&quot;</span>  , [<span class="st">&quot;guacamole&quot;</span>, <span class="st">&quot;coffee&quot;</span>, <span class="st">&quot;cats&quot;</span>])
+<span class="ot">&gt;</span>      ,(<span class="st">&quot;hates&quot;</span>  , [<span class="st">&quot;waiting&quot;</span>, <span class="st">&quot;grapefruit&quot;</span>])
+<span class="ot">&gt;</span>      ,(<span class="st">&quot;lunches&quot;</span>, lunches)
+<span class="ot">&gt;</span>      )</code></pre></div>
+<p>which is a Haskell value that describes our running <code>JSON</code> example, and can convert it directly like so</p>
+<div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt;</span> js2 <span class="fu">=</span> toJSON hs</code></pre></div>
+<p>This value is exactly equal to the old “hand-serialized” JSON object js1.</p>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell">ghci<span class="fu">&gt;</span> js1 <span class="fu">==</span> js2
+<span class="dt">True</span></code></pre></div>
+<p>Thats it for today. We will see much more typeclass awesomeness in the next few lectures…</p>
+        </div>
+        <div id="footer">
+            Site proudly generated by
+            <a href="http://jaspervdj.be/hakyll">Hakyll</a>
+        </div>
+    </body>
+</html>
