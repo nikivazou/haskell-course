@@ -54,6 +54,28 @@ It seems that both `(*)` together with `1` and `(++)` along with `[]` share some
 **Q:** Can you write down the common properties in Haskell terms?
 
 
+(Multiplication , 1 )
+
+< x ++ [] = x 
+< [] ++ x = x
+< x ++ (y ++ z) = (x ++ y) ++ z 
+< 
+< x * y == y * x 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 - The function takes two parameters.
 
 - The parameters and the returned value have the same type.
@@ -217,6 +239,21 @@ It takes a list of lists and flattens it,
 because that's the equivalent of doing `(++)` between all the adjecent lists in a list.
 
 **Q:** Do the monoid laws hold for the list instance?
+
+< Assumption 
+< [] ++ xs = xs 
+< (y:ys) ++ xs = y:(ys ++ xs)
+
+
+< GOAL: [] ++ xs = xs 
+< -- trivial 
+< GOAL: xs ++ [] = xs 
+< -- by structural induction 
+< 
+< []     ++ [] = [] 
+< (x:xs) ++ [] = x:(xs++[])
+<                  --  Inductive Hypothesis
+<                  = x:xs
 
 Notice that monoids don't require that `a <> b` be equal to `b <> a`. In the case of the list, they clearly aren't:
 
@@ -623,7 +660,7 @@ namely a `Bool` wrapped in `Any`.
 
 < ghci> getAny $ foldMap (\x -> Any $ x > 15) testList 
 
-**Q:** What is the value of 
+**Q:** What is the value of  
 
 < ghci> foldMap (\x -> [x]) testList 
 
