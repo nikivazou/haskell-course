@@ -304,14 +304,14 @@ ghci<span class="fu">&gt;</span> length (<span class="dt">Product</span> <span c
 <h2 id="foldmap-mapreduce"><code>foldMap</code> = <code>mapReduce</code></h2>
 <p><code>foldMap</code> might be a function difficult to digest, but as we shall now see it is the heart of the more famous function <a href="https://en.wikipedia.org/wiki/MapReduce">mapReduce</a>.</p>
 <div class="figure">
-<img src="https://nikivazou.github.io/CMSC498V/static/mapReduce.jpeg" alt="alt text" />
+<img src="https://clojurebridgelondon.github.io/workshop/images/map-reduce-sandwich.png" title="Map Reduce Sandwich" alt="alt text" />
 <p class="caption">alt text</p>
 </div>
 <p>MapReduce applies a function <code>f</code> to its input in parallel.</p>
 <ul>
-<li>First, we split the input into chunks (here the sandwitch ingredients).</li>
+<li>First, we split the input into chunks (here the sandwich ingredients).</li>
 <li>Then, we apply <code>f</code> in parallel to each chunk (here cutting the ingredients).</li>
-<li>Finally, we combine all the mapped chunks (here we eat/serve the sandwitchs).</li>
+<li>Finally, we combine all the mapped chunks (here we eat/serve the sandwichs).</li>
 </ul>
 <p>Note that combining or reducing the mapped chunks is called folding in the functional world. Thus, <code>mapReduce</code> is basically <code>foldMap</code>, if only we had a chunking function.</p>
 <p>Let’s then use the type class magic to define our missing component, a <code>chunk</code> function.</p>

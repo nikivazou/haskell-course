@@ -639,13 +639,13 @@ What's cool is that all of these trick aren't limited to the `List`, they work o
 `foldMap` might be a function difficult to digest, but as we shall now see it is the heart 
 of the more famous function [mapReduce](https://en.wikipedia.org/wiki/MapReduce). 
 
-![alt text](https://nikivazou.github.io/CMSC498V/static/mapReduce.jpeg)  
+![alt text](https://clojurebridgelondon.github.io/workshop/images/map-reduce-sandwich.png "Map Reduce Sandwich")  
 
 MapReduce applies a function `f` to its input in parallel. 
 
-- First, we split the input into chunks (here the sandwitch ingredients). 
+- First, we split the input into chunks (here the sandwich ingredients). 
 - Then, we apply `f` in parallel to each chunk (here cutting the ingredients).
-- Finally, we combine all the mapped chunks (here we eat/serve the sandwitchs).
+- Finally, we combine all the mapped chunks (here we eat/serve the sandwichs).
 
 Note that combining or reducing the mapped chunks is 
 called folding in the functional world. 
