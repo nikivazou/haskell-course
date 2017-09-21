@@ -171,7 +171,7 @@ Haskell comes equipped with a rich set of built-in classes.
 Standard Typeclass Hierarchy
 -----------------------------
 
-![alt text](https://nikivazou.github.io/CMSC498V/static/classes.gif "Class Hierarchy")	
+![alt text](http://ucsd-pl.github.io/cse230/static/classes.gif "Class Hierarchy")	
 
 In the above picture, there is an edge from `Eq` to `Ord` because for something to be an `Ord` it must also be an `Eq`. There are a few other ones that we will come to know (and love!) in due course…
 
