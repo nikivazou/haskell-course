@@ -61,7 +61,7 @@ ghci<span class="fu">&gt;</span> (<span class="st">&quot;la&quot;</span> <span c
 <p>We call this property <em>associativity</em>. <code>(*)</code> is associative, and so is <code>(++)</code>, but <code>(-)</code>, for example, is not. The expressions <code>(5 - 3) - 4</code> and <code>5 - (3 - 4)</code> result in different numbers.</p>
 <p>By noticing and writing down these properties, we have chanced upon monoids! A monoid is when you have an associative binary function and a value which acts as an identity with respect to that function. When something acts as an identity with respect to a function, it means that when called with that function and some other value, the result is always equal to that other value. <code>1</code> is the identity with respect to <code>(*)</code> and <code>([])</code> is the identity with respect to <code>(++)</code>. There are a lot of other monoids to be found in the world of Haskell, which is why the <code>Monoid</code> type class exists. It’s for types which can act like monoids. Let’s see how the type class is defined:</p>
 <div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="kw">class</span> <span class="dt">Monoid</span> m <span class="kw">where</span>  
-<span class="ot">    mempty ::</span> m  
+<span class="ot">    mempty  ::</span> m  
 <span class="ot">    mappend ::</span> m <span class="ot">-&gt;</span> m <span class="ot">-&gt;</span> m  
 <span class="ot">    mconcat ::</span> [m] <span class="ot">-&gt;</span> m  
     mconcat <span class="fu">=</span> foldr mappend mempty  </code></pre></div>
@@ -304,7 +304,7 @@ ghci<span class="fu">&gt;</span> length (<span class="dt">Product</span> <span c
 <h2 id="foldmap-mapreduce"><code>foldMap</code> = <code>mapReduce</code></h2>
 <p><code>foldMap</code> might be a function difficult to digest, but as we shall now see it is the heart of the more famous function <a href="https://en.wikipedia.org/wiki/MapReduce">mapReduce</a>.</p>
 <div class="figure">
-<img src="https://nikivazou.github.io/CMSC498V/static/mapReduce.jpeg" title="MapReduce Sandwitch" alt="alt text" />
+<img src="https://nikivazou.github.io/CMSC498V/static/mapReduce.jpeg" alt="alt text" />
 <p class="caption">alt text</p>
 </div>
 <p>MapReduce applies a function <code>f</code> to its input in parallel.</p>

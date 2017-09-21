@@ -87,7 +87,7 @@ which is why the `Monoid` type class exists.
 It's for types which can act like monoids. Let's see how the type class is defined:
 
 < class Monoid m where  
-<     mempty :: m  
+<     mempty  :: m  
 <     mappend :: m -> m -> m  
 <     mconcat :: [m] -> m  
 <     mconcat = foldr mappend mempty  
@@ -639,7 +639,7 @@ What's cool is that all of these trick aren't limited to the `List`, they work o
 `foldMap` might be a function difficult to digest, but as we shall now see it is the heart 
 of the more famous function [mapReduce](https://en.wikipedia.org/wiki/MapReduce). 
 
-![alt text](https://nikivazou.github.io/CMSC498V/static/mapReduce.jpeg "MapReduce Sandwitch")  
+![alt text](https://nikivazou.github.io/CMSC498V/static/mapReduce.jpeg)  
 
 MapReduce applies a function `f` to its input in parallel. 
 
