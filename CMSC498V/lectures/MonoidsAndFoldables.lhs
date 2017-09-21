@@ -592,10 +592,6 @@ So if we just implement `foldMap` for some type, we get `length`, `foldr` and `f
 
 \begin{code}
 data List a = N | C a (List a)
-
-instance Foldable List where
-  foldMap _ N = mempty 
-  foldMap f (C x xs) = f x <> foldMap f xs 
 \end{code}
 
 
@@ -603,10 +599,11 @@ Now we get all the folding functions for free!
 Assuming a test toy list
 
 \begin{code}
-testList = C 1 $ C 42 $ C 12 N
+testList = [1, 42, 12]
 \end{code}
 
 You can fold it or get its legth. 
+
 < ghci> foldl (+) 0 testList
 < 55  
 < ghci> foldl (*) 1 testList  

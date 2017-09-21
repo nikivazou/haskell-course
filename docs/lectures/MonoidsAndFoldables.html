@@ -282,16 +282,14 @@ ghci<span class="fu">&gt;</span> length (<span class="dt">Product</span> <span c
 <div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="ot">foldMap ::</span> (<span class="dt">Monoid</span> m, <span class="dt">Foldable</span> t) <span class="ot">=&gt;</span> (a <span class="ot">-&gt;</span> m) <span class="ot">-&gt;</span> t a <span class="ot">-&gt;</span> m  </code></pre></div>
 <p>Its first parameter is a function that takes a value of the type that our foldable structure contains (denoted here with <code>a</code>) and returns a monoid value. Its second parameter is a foldable structure that contains values of type <code>a</code>. It maps that function over the foldable structure, thus producing a foldable structure that contains monoid values. Then, by doing <code>mappend</code> between those monoid values, it joins them all into a single monoid value. This function may sound kind of odd at the moment, but we’ll see that it’s very easy to implement. What’s also cool is that implementing this function is all it takes for our type to be made an instance of Foldable. So if we just implement <code>foldMap</code> for some type, we get <code>length</code>, <code>foldr</code> and <code>foldl</code> on that type for free!</p>
 <p><strong>Q:</strong> Define the <code>Foldable</code> instance for the below <code>List</code> type.</p>
-<div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt;</span> <span class="kw">data</span> <span class="dt">List</span> a <span class="fu">=</span> <span class="dt">N</span> <span class="fu">|</span> <span class="dt">C</span> a (<span class="dt">List</span> a)
-<span class="ot">&gt;</span> 
-<span class="ot">&gt;</span> <span class="kw">instance</span> <span class="dt">Foldable</span> <span class="dt">List</span> <span class="kw">where</span>
-<span class="ot">&gt;</span>   foldMap _ <span class="dt">N</span> <span class="fu">=</span> mempty 
-<span class="ot">&gt;</span>   foldMap f (<span class="dt">C</span> x xs) <span class="fu">=</span> f x <span class="fu">&lt;&gt;</span> foldMap f xs </code></pre></div>
+<div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt;</span> <span class="kw">data</span> <span class="dt">List</span> a <span class="fu">=</span> <span class="dt">N</span> <span class="fu">|</span> <span class="dt">C</span> a (<span class="dt">List</span> a)</code></pre></div>
 <p>Now we get all the folding functions for free! Assuming a test toy list</p>
-<div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt;</span> testList <span class="fu">=</span> <span class="dt">C</span> <span class="dv">1</span> <span class="fu">$</span> <span class="dt">C</span> <span class="dv">42</span> <span class="fu">$</span> <span class="dt">C</span> <span class="dv">12</span> <span class="dt">N</span></code></pre></div>
-<p>You can fold it or get its legth. &lt; ghci&gt; foldl (+) 0 testList &lt; 55<br />
-&lt; ghci&gt; foldl (*) 1 testList<br />
-&lt; 504</p>
+<div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt;</span> testList <span class="fu">=</span> [<span class="dv">1</span>, <span class="dv">42</span>, <span class="dv">12</span>]</code></pre></div>
+<p>You can fold it or get its legth.</p>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell">ghci<span class="fu">&gt;</span> foldl (<span class="fu">+</span>) <span class="dv">0</span> testList
+<span class="dv">55</span>  
+ghci<span class="fu">&gt;</span> foldl (<span class="fu">*</span>) <span class="dv">1</span> testList  
+<span class="dv">504</span>  </code></pre></div>
 <p>And also, <code>foldMap</code> isn’t only useful for making new instances of <code>Foldable</code>; it comes in handy for reducing our structure to a single monoid value. For instance, if we want to know if any number in our tree is equal to <code>42</code>, we can do this:</p>
 <div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell">ghci<span class="fu">&gt;</span> getAny <span class="fu">$</span> foldMap (\x <span class="ot">-&gt;</span> <span class="dt">Any</span> <span class="fu">$</span> x <span class="fu">==</span> <span class="dv">42</span>) testList  
 <span class="dt">True</span>  </code></pre></div>
