@@ -23,9 +23,326 @@
         <div id="content">
             <h1 id="monoids-foldables">Monoids &amp; Foldables</h1>
 <p>This lecture is stolen from <a href="http://learnyouahaskell.com/functors-applicative-functors-and-monoids">Learn you a Haskell for Great Good!</a>.</p>
-<p>Haskell’s combination of purity, higher order functions, parameterized algebraic data types, and typeclasses allows us to implement <em>polymorphism</em> on a much higher level than possible in other languages. We don’t have to think about types belonging to a big hierarchy of types. Instead, we think about what the types can act like and then connect them with the appropriate typeclasses. An <code>Int</code> can act like a lot of things. It can act like an equatable thing, like an ordered thing, like an enumerable thing, etc.</p>
-<p>Typeclasses are <em>open</em>, which means that we can define our own data type, think about what it can act like and connect it with the typeclasses that define its behaviors. Because of that and because of Haskell’s great type system that allows us to know a lot about a function just by knowing its type declaration, we can define typeclasses that define behavior that’s very general and abstract (using terminology from the scary <a href="https://en.wikipedia.org/wiki/Category_theory">Category Theory</a> ). We’ve met typeclasses that define operations for seeing if two things are equal or comparing two things by some ordering. Those are very abstract and elegant behaviors, but we just don’t think of them as anything very special because we’ve been dealing with them for most of our lives. We recently met functors, which are basically things that can be mapped over. That’s an example of a useful and yet still pretty abstract property that typeclasses can describe. In this chapter, we’ll take a closer look at functors, along with slightly stronger and more useful versions of functors called applicative functors. We’ll also take a look at monoids, which are sort of like socks.</p>
-<div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt;</span> <span class="kw">module</span> <span class="dt">MonoidsAndFoldables</span> <span class="kw">where</span></code></pre></div>
+<p>Haskell’s combination of purity, higher order functions, parameterized algebraic data types, and typeclasses allows us to implement <em>polymorphism</em> on a much higher level than possible in other languages. It allows us to abstract over <em>properties of functions</em> (what we call class lows)! We don’t have to think about types belonging to a big hierarchy of types. Instead, we think about what the types can act like and then connect them with the appropriate typeclasses. An <code>Int</code> can act like a lot of things. It can act like an equatable thing, like an ordered thing, like an enumerable thing, etc.</p>
+<p>Typeclasses are <em>open</em>, which means that we can define our own data type, think about what it can act like and connect it with the typeclasses that define its behaviors. Because of that and because of Haskell’s great type system that allows us to know a lot about a function just by knowing its type declaration, we can define typeclasses that define behavior that’s very general and abstract (using terminology from the scary <a href="https://en.wikipedia.org/wiki/Category_theory">Category Theory</a>). We’ve met typeclasses that define operations for seeing if two things are equal,comparing two things by some ordering or turning things into a <code>JSon</code>. Those are very abstract and elegant behaviors, but we just don’t think of them as anything very special because we’ve been dealing with them for most of our lives. Our goal in the next lectures it to understand the abstract class of Monads. The path to Monads goes throught the classes of functors and applicatives. But let’s start today with a simpler class: monoids, which are sort of like socks.</p>
+<div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt;</span> <span class="kw">module</span> <span class="dt">MonoidsAndFoldables</span> <span class="kw">where</span>
+<span class="ot">&gt;</span> 
+<span class="ot">&gt;</span> <span class="kw">import </span><span class="dt">Data.Monoid</span>   <span class="kw">hiding</span> (<span class="dt">Any</span>(..), <span class="dt">All</span>(..))
+<span class="ot">&gt;</span> <span class="kw">import </span><span class="dt">Data.Foldable</span> <span class="kw">hiding</span> (sum)
+<span class="ot">&gt;</span> <span class="kw">import </span><span class="dt">Prelude</span>       <span class="kw">hiding</span> (sum)</code></pre></div>
+<h2 id="monoids">Monoids</h2>
+<p>Type classes in Haskell are used to present an interface for types that have some behavior in common. We started out with simple type classes like Eq, which is for types whose values can be equated, and Ord, which is for things that can be put in an order and then moved on to more interesting ones.</p>
+<p>When we make a type, we think about which behaviors it supports, i.e. what it can act like and then based on that we decide which type classes to make it an instance of. If it makes sense for values of our type to be equated, we make it an instance of the Eq type class.</p>
+<p>Now consider the following: <code>(*)</code> is a function that takes two numbers and multiplies them. If we multiply some number with an <code>1</code>, the result is always equal to that number. It doesn’t matter if we do <code>1 * x</code> or <code>x * 1</code>, the result is always <code>x</code>. <em>Similarly</em>, <code>(++)</code> is also a function which takes two things and returns a third. Only instead of multiplying numbers, it takes two lists and concatenates them. And much like <code>(*)</code>, it also has a certain value which doesn’t change the other one when used with <code>(++)</code>. That value is the empty list: <code>[]</code>.</p>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell">ghci<span class="fu">&gt;</span> <span class="dv">4</span> <span class="fu">*</span> <span class="dv">1</span>  
+<span class="dv">4</span>  
+ghci<span class="fu">&gt;</span> <span class="dv">1</span> <span class="fu">*</span> <span class="dv">9</span>  
+<span class="dv">9</span>  
+ghci<span class="fu">&gt;</span> [<span class="dv">1</span>,<span class="dv">2</span>,<span class="dv">3</span>] <span class="fu">++</span> []  
+[<span class="dv">1</span>,<span class="dv">2</span>,<span class="dv">3</span>]  
+ghci<span class="fu">&gt;</span> [] <span class="fu">++</span> [<span class="fl">0.5</span>, <span class="fl">2.5</span>]  
+[<span class="fl">0.5</span>,<span class="fl">2.5</span>]  </code></pre></div>
+<p>It seems that both <code>(*)</code> together with <code>1</code> and <code>(++)</code> along with <code>[]</code> share some common properties.</p>
+<p><strong>Q:</strong> Can you write down the common properties in Haskell terms?</p>
+<ul>
+<li><p>The function takes two parameters.</p></li>
+<li><p>The parameters and the returned value have the same type.</p></li>
+<li><p>There exists such a value that doesn’t change other values when used with the binary function.</p></li>
+</ul>
+<p>There’s another thing that these two operations have in common that may not be as obvious as our previous observations: when we have three or more values and we want to use the binary function to reduce them to a single result, the order in which we apply the binary function to the values doesn’t matter. It doesn’t matter if we do <code>(3 * 4) * 5</code> or <code>3 * (4 * 5)</code>. Either way, the result is <code>60</code>. The same goes for <code>(++)</code>:</p>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell">ghci<span class="fu">&gt;</span> (<span class="dv">3</span> <span class="fu">*</span> <span class="dv">2</span>) <span class="fu">*</span> (<span class="dv">8</span> <span class="fu">*</span> <span class="dv">5</span>)  
+<span class="dv">240</span>  
+ghci<span class="fu">&gt;</span> <span class="dv">3</span> <span class="fu">*</span> (<span class="dv">2</span> <span class="fu">*</span> (<span class="dv">8</span> <span class="fu">*</span> <span class="dv">5</span>))  
+<span class="dv">240</span>  
+ghci<span class="fu">&gt;</span> <span class="st">&quot;la&quot;</span> <span class="fu">++</span> (<span class="st">&quot;di&quot;</span> <span class="fu">++</span> <span class="st">&quot;da&quot;</span>)  
+<span class="st">&quot;ladida&quot;</span>  
+ghci<span class="fu">&gt;</span> (<span class="st">&quot;la&quot;</span> <span class="fu">++</span> <span class="st">&quot;di&quot;</span>) <span class="fu">++</span> <span class="st">&quot;da&quot;</span>  
+<span class="st">&quot;ladida&quot;</span>  </code></pre></div>
+<p>We call this property <em>associativity</em>. <code>(*)</code> is associative, and so is <code>(++)</code>, but <code>(-)</code>, for example, is not. The expressions <code>(5 - 3) - 4</code> and <code>5 - (3 - 4)</code> result in different numbers.</p>
+<p>By noticing and writing down these properties, we have chanced upon monoids! A monoid is when you have an associative binary function and a value which acts as an identity with respect to that function. When something acts as an identity with respect to a function, it means that when called with that function and some other value, the result is always equal to that other value. <code>1</code> is the identity with respect to <code>(*)</code> and <code>([])</code> is the identity with respect to <code>(++)</code>. There are a lot of other monoids to be found in the world of Haskell, which is why the <code>Monoid</code> type class exists. It’s for types which can act like monoids. Let’s see how the type class is defined:</p>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="kw">class</span> <span class="dt">Monoid</span> m <span class="kw">where</span>  
+<span class="ot">    mempty ::</span> m  
+<span class="ot">    mappend ::</span> m <span class="ot">-&gt;</span> m <span class="ot">-&gt;</span> m  
+<span class="ot">    mconcat ::</span> [m] <span class="ot">-&gt;</span> m  
+    mconcat <span class="fu">=</span> foldr mappend mempty  </code></pre></div>
+<p>The <code>Monoid</code> type class is defined in <code>import Data.Monoid</code>. Let’s take some time and get properly acquainted with it.</p>
+<p>The first function is <code>mempty</code>. It’s not really a function, since it doesn’t take parameters, so it’s a polymorphic constant, kind of like <code>minBound</code> from <code>Bounded</code>. <code>mempty</code> represents the identity value for a particular monoid.</p>
+<p>Next up, we have <code>mappend</code>, which, as you’ve probably guessed, is the binary function. It takes two values of the same type and returns a value of that type as well. It’s worth noting that the decision to name <code>mappend</code> as it’s named was kind of unfortunate, because it implies that we’re appending two things in some way. While <code>(++)</code> does take two lists and append one to the other, <code>(*)</code> doesn’t really do any appending, it just multiplies two numbers together. When we meet other instances of <code>Monoid</code>, we’ll see that most of them don’t append values either, so avoid thinking in terms of appending and just think in terms of <code>mappend</code> being a binary function that takes two monoid values and returns a third.</p>
+<p>The last function in this type class definition is the default function <code>mconcat</code>. It takes a list of monoid values and reduces them to a single value by doing <code>mappend</code> between the list’s elements. It has a default implementation, which just takes mempty as a starting value and folds the list from the right with mappend. Because the default implementation is fine for most instances, we won’t concern ourselves with <code>mconcat</code> too much from now on. When making a type an instance of <code>Monoid</code>, it suffices to just implement <code>mempty</code> and <code>mappend</code>.</p>
+<p><strong>Q:</strong> Can you think of a reason why we would not use the default implementation of <code>mconat</code>?</p>
+<!---
+The reason `mconcat` is there at all is because for some instances, there might be a more efficient way to implement mconcat, but for most instances the default implementation is just fine.
+-->
+<h2 id="monoid-laws">Monoid Laws</h2>
+<p>Before moving on to specific instances of <code>Monoid</code>, let’s take a brief look at the monoid laws. We mentioned that there has to be a value that acts as the identity with respect to the binary function and that the binary function has to be associative. It’s possible to make instances of Monoid that don’t follow these rules, but such instances are of no use to anyone because when using the <code>Monoid</code> type class, we rely on its instances acting like monoids. Otherwise, what’s the point? That’s why when making instances, we have to make sure they follow these laws:</p>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell">mempty <span class="ot">`mappend`</span> x <span class="fu">=</span> x
+x <span class="ot">`mappend`</span> mempty <span class="fu">=</span> x
+(x <span class="ot">`mappend`</span> y) <span class="ot">`mappend`</span> z <span class="fu">=</span> x <span class="ot">`mappend`</span> (y <span class="ot">`mappend`</span> z)</code></pre></div>
+<p>The first two state that mempty has to act as the identity with respect to mappend and the third says that mappend has to be associative <em>i.e.,</em> that it the order in which we use mappend to reduce several monoid values into one doesn’t matter. Haskell <em>doesn’t enforce these laws</em>, so we as the programmer have to be careful that our instances do indeed obey them.</p>
+<h2 id="lists-are-monoids">Lists are monoids</h2>
+<p>Yes, lists are monoids! Like we’ve seen, the <code>(++)</code> function and the empty list <code>[]</code> form a monoid. The instance is very simple:</p>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="kw">instance</span> <span class="dt">Monoid</span> [a] <span class="kw">where</span>  
+    mempty  <span class="fu">=</span> []  
+    mappend <span class="fu">=</span> (<span class="fu">++</span>)  </code></pre></div>
+<p>Lists are an instance of the <code>Monoid</code> type class regardless of the type of the elements they hold.</p>
+<p>Giving this a test run, we encounter no surprises:</p>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell">ghci<span class="fu">&gt;</span> [<span class="dv">1</span>,<span class="dv">2</span>,<span class="dv">3</span>] <span class="ot">`mappend`</span> [<span class="dv">4</span>,<span class="dv">5</span>,<span class="dv">6</span>]  
+[<span class="dv">1</span>,<span class="dv">2</span>,<span class="dv">3</span>,<span class="dv">4</span>,<span class="dv">5</span>,<span class="dv">6</span>]  
+ghci<span class="fu">&gt;</span> (<span class="st">&quot;one&quot;</span> <span class="ot">`mappend`</span> <span class="st">&quot;two&quot;</span>) <span class="ot">`mappend`</span> <span class="st">&quot;tree&quot;</span>  
+<span class="st">&quot;onetwotree&quot;</span>  
+ghci<span class="fu">&gt;</span> <span class="st">&quot;one&quot;</span> <span class="ot">`mappend`</span> (<span class="st">&quot;two&quot;</span> <span class="ot">`mappend`</span> <span class="st">&quot;tree&quot;</span>)  
+<span class="st">&quot;onetwotree&quot;</span>  
+ghci<span class="fu">&gt;</span> <span class="st">&quot;one&quot;</span> <span class="ot">`mappend`</span> <span class="st">&quot;two&quot;</span> <span class="ot">`mappend`</span> <span class="st">&quot;tree&quot;</span>  
+<span class="st">&quot;onetwotree&quot;</span>  
+ghci<span class="fu">&gt;</span> <span class="st">&quot;pang&quot;</span> <span class="ot">`mappend`</span> mempty  
+<span class="st">&quot;pang&quot;</span>  
+ghci<span class="fu">&gt;</span> mconcat [[<span class="dv">1</span>,<span class="dv">2</span>],[<span class="dv">3</span>,<span class="dv">6</span>],[<span class="dv">9</span>]]  
+[<span class="dv">1</span>,<span class="dv">2</span>,<span class="dv">3</span>,<span class="dv">6</span>,<span class="dv">9</span>]  </code></pre></div>
+<p><strong>Q:</strong> What is the type of <code>mempty</code>?</p>
+<p><strong>Note on associativity:</strong> Using <code>mappend</code> as an infix operator saves parethesis! The following</p>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell">mappend <span class="st">&quot;123&quot;</span> mappend <span class="st">&quot;234&quot;</span> <span class="st">&quot;33&quot;</span></code></pre></div>
+<p>attempts to pass the second <code>mappend</code> as an argument to the first leading to a weird type error! There are two solutions, either use the dollar operator or use <code>mappend</code> as an infix operator.</p>
+<p>Haskell defaults infix operators to be left associative, that is the following two expressions are equal</p>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="st">&quot;one&quot;</span> <span class="ot">`mappend`</span> <span class="st">&quot;two&quot;</span> <span class="ot">`mappend`</span> <span class="st">&quot;tree&quot;</span> 
+(<span class="st">&quot;one&quot;</span> <span class="ot">`mappend`</span> <span class="st">&quot;two&quot;</span>) <span class="ot">`mappend`</span> <span class="st">&quot;tree&quot;</span> </code></pre></div>
+<p><strong>Haskell it up!</strong> Even when using <code>mappend</code> as infix the code has too many characters for a Haskell program. To save up characters the <code>Monoid</code> library provides an infix operator <code>(&lt;&gt;)</code> that acts exactly like <code>mappend</code>.</p>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="kw">infixr</span> <span class="dv">6</span> <span class="fu">&lt;&gt;</span>
+<span class="ot">(&lt;&gt;) ::</span> <span class="dt">Monoid</span> m <span class="ot">=&gt;</span> m <span class="ot">-&gt;</span> m <span class="ot">-&gt;</span> m
+(<span class="fu">&lt;&gt;</span>) <span class="fu">=</span> mappend</code></pre></div>
+<p>Using <code>(&lt;&gt;)</code> now we can instead write</p>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell">ghci<span class="fu">&gt;</span> <span class="st">&quot;one&quot;</span> <span class="fu">&lt;&gt;</span> <span class="st">&quot;two&quot;</span> <span class="fu">&lt;&gt;</span> <span class="st">&quot;tree&quot;</span>  </code></pre></div>
+<p>saving <code>7</code> characters at each <code>mappend</code> call!</p>
+<p>To use <code>mempty</code> as the monoid list identity we have to write an explicit type annotation, because if we just did <code>mempty</code>, GHCi wouldn’t know which instance to use, so we had to say we want the list instance. We were able to use the general type of <code>[a]</code> (as opposed to specifying <code>[Int]</code> or <code>[String]</code>) because the empty list can act as if it contains any type.</p>
+<p>Because <code>mconcat</code> has a default implementation, we get it for free when we make something an instance of <code>Monoid</code>! In the case of the list, <code>mconcat</code> turns out to be just concat. It takes a list of lists and flattens it, because that’s the equivalent of doing <code>(++)</code> between all the adjecent lists in a list.</p>
+<p><strong>Q:</strong> Do the monoid laws hold for the list instance?</p>
+<p>Notice that monoids don’t require that <code>a &lt;&gt; b</code> be equal to <code>b &lt;&gt; a</code>. In the case of the list, they clearly aren’t:</p>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell">ghci<span class="fu">&gt;</span> <span class="st">&quot;one&quot;</span> <span class="fu">&lt;&gt;</span> <span class="st">&quot;two&quot;</span>  
+<span class="st">&quot;onetwo&quot;</span>  
+ghci<span class="fu">&gt;</span> <span class="st">&quot;two&quot;</span> <span class="fu">&lt;&gt;</span> <span class="st">&quot;one&quot;</span>  
+<span class="st">&quot;twoone&quot;</span>  </code></pre></div>
+<p>And that’s okay. The fact that for multiplication <code>3 * 5</code> and <code>5 * 3</code> are the same is just a property of multiplication, but it doesn’t hold for all (and indeed, most) monoids. In fact, we call the monoids that satisfy the property <code>x &lt;&gt; y == y &lt;&gt; x</code> commutative monoids.</p>
+<h2 id="the-newtype-keyword">The <code>newtype</code> keyword</h2>
+<p>We already examined one way for numbers to be considered monoids. Just have the binary function be <code>(*)</code> and the identity value <code>1</code>. It turns out that that’s not the only way for numbers to be monoids!</p>
+<p><strong>Q:</strong> Can you think of another famous binary operator on numbers with an identity element?</p>
+<p>Another way is to have the binary function be <code>(+)</code> and the identity value <code>0</code>:</p>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell">ghci<span class="fu">&gt;</span> <span class="dv">0</span> <span class="fu">+</span> <span class="dv">4</span>  
+<span class="dv">4</span>  
+ghci<span class="fu">&gt;</span> <span class="dv">5</span> <span class="fu">+</span> <span class="dv">0</span>  
+<span class="dv">5</span>  
+ghci<span class="fu">&gt;</span> (<span class="dv">1</span> <span class="fu">+</span> <span class="dv">3</span>) <span class="fu">+</span> <span class="dv">5</span>  
+<span class="dv">9</span>  
+ghci<span class="fu">&gt;</span> <span class="dv">1</span> <span class="fu">+</span> (<span class="dv">3</span> <span class="fu">+</span> <span class="dv">5</span>)  
+<span class="dv">9</span>  </code></pre></div>
+<p>The monoid laws hold, because if you add <code>0</code> to any number, the result is that number. And addition is also associative, so we get no problems there. So now that there are two equally valid ways for numbers to be monoids, which way do choose? Well, we don’t have to.</p>
+<p>We can use the <code>newtype</code> keyword to define multiple monoid instances for numbers!</p>
+<p>So far, we’ve learned how to make our own algebraic data types by using the <code>data</code> keyword. We’ve also learned how to give existing types synonyms with the <code>type</code> keyword. Now, we’ll be taking a look at how to make new types out of existing data types by using the <code>newtype</code> keyword and why we’d want to do that in the first place.</p>
+<p>To be able to use numbers as monoids both on <code>(*)</code> and <code>(+)</code> we can define two different data types that wrap numbers.</p>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="kw">data</span> <span class="dt">Prods</span> <span class="fu">=</span> <span class="dt">Prods</span> {<span class="ot">getProd ::</span> <span class="dt">Int</span>} 
+<span class="kw">data</span> <span class="dt">Sums</span>  <span class="fu">=</span> <span class="dt">Sums</span>  {<span class="ot">getSum  ::</span> <span class="dt">Int</span>} </code></pre></div>
+<p>We defined two data types that have just one value constructor and that value constructor has just one field that is a list of things.</p>
+<p>The <code>newtype</code> keyword in Haskell is made exactly the cases when we want to just take <em>one</em> type and wrap it in something to present it as another type. In a real application, <code>Prods</code> and <code>Sums</code> would be defined like this:</p>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="kw">newtype</span> <span class="dt">Prods</span> <span class="fu">=</span> <span class="dt">Prods</span> {<span class="ot">getProd ::</span> <span class="dt">Int</span>} 
+<span class="kw">newtype</span> <span class="dt">Sums</span>  <span class="fu">=</span> <span class="dt">Sums</span>  {<span class="ot">getSum  ::</span> <span class="dt">Int</span>} </code></pre></div>
+<p>Instead of the <code>data</code> keyword, the <code>newtype</code> keyword is used. Now why is that? Well for one, <code>newtype</code> is <em>faster</em>. If you use the <code>data</code> keyword to wrap a type, there’s some overhead to all that wrapping and unwrapping when your program is running. But if you use <code>newtype</code>, Haskell knows that you’re just using it to wrap an existing type into a new type (hence the name), because you want it to be the same internally but have a different type. With that in mind, Haskell can <em>get rid of</em> the wrapping and unwrapping once it resolves which value is of what type.</p>
+<p>So why not just use <code>newtype</code> all the time instead of <code>data</code> then? Well, when you make a new type from an existing type by using the newtype keyword, you can only have one value constructor and that value constructor can only have one field. But with <code>data</code>, you can make data types that have several value constructors and each constructor can have zero or more fields:</p>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="kw">data</span> <span class="dt">Tile</span> <span class="fu">=</span> <span class="dt">X</span> <span class="fu">|</span> <span class="dt">O</span> <span class="fu">|</span> <span class="dt">EmptyTile</span>   </code></pre></div>
+<p>When using <code>newtype</code>, you’re restricted to just one constructor with one field.</p>
+<p>We can also use the <code>deriving</code> keyword with <code>newtype</code> just like we would with <code>data</code>. We can derive instances for <code>Eq</code>, <code>Ord</code>, and Show. If we derive the instance for a type class, the type that we’re wrapping has to be in that type class to begin with. It makes sense, because <code>newtype</code> just wraps an existing type. So now if we do the following, we can print and equate values of our new type:</p>
+<div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt;</span> <span class="kw">newtype</span> <span class="dt">Prods</span> <span class="fu">=</span> <span class="dt">Prods</span> {<span class="ot">getProd ::</span> <span class="dt">Int</span>} <span class="kw">deriving</span> (<span class="dt">Eq</span>, <span class="dt">Ord</span>, <span class="dt">Show</span>) 
+<span class="ot">&gt;</span> <span class="kw">newtype</span> <span class="dt">Sums</span>  <span class="fu">=</span> <span class="dt">Sums</span>  {<span class="ot">getSum  ::</span> <span class="dt">Int</span>} <span class="kw">deriving</span> (<span class="dt">Eq</span>, <span class="dt">Ord</span>, <span class="dt">Show</span>)</code></pre></div>
+<p>Let’s give that a go:</p>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell">ghci<span class="fu">&gt;</span> <span class="dt">Prods</span> <span class="dv">42</span>
+<span class="dt">Prods</span> {getProd <span class="fu">=</span> <span class="dv">42</span>}
+ghci<span class="fu">&gt;</span> <span class="dt">Prods</span> <span class="dv">42</span> <span class="fu">==</span> <span class="dt">Prods</span>  <span class="dv">42</span>  
+<span class="dt">True</span>  
+ghci<span class="fu">&gt;</span> <span class="dt">Prods</span> <span class="dv">42</span> <span class="fu">&lt;</span>  <span class="dt">Prods</span>  <span class="dv">42</span>
+<span class="dt">False</span>  </code></pre></div>
+<p>In this particular newtype, the value constructor has the following type:</p>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="dt">Prods</span><span class="ot"> ::</span> <span class="dt">Int</span> <span class="ot">-&gt;</span> <span class="dt">Prods</span></code></pre></div>
+<p>It takes an <code>Int</code> value, such as <code>42</code> and returns a <code>Prods</code> value. From the above examples where we used the <code>Prods</code> value constructor, we see that really is the case. Conversely, the <code>getProd</code> function, which was generated for us because we used record syntax in our <code>newtype</code>, has this type:</p>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="ot">getProd ::</span> <span class="dt">Prods</span> <span class="ot">-&gt;</span> <span class="dt">Int</span></code></pre></div>
+<p>It takes a <code>Prods</code> value and converts it to an <code>Int</code> value. You can think of this as wrapping and unwrapping, but you can also think of it as converting values from one type to the other.</p>
+<h2 id="on-newtype-laziness">On newtype laziness</h2>
+<p>We mentioned that <code>newtype</code> is usually faster than <code>data</code>. The only thing that can be done with <code>newtype</code> is turning an existing type into a new type, so internally, Haskell can represent the values of types defined with newtype just like the original ones, only it has to keep in mind that the their types are now distinct. This fact means that not only is newtype faster, it’s also <em>lazier</em>. Let’s take a look at what this means.</p>
+<p>Haskell is lazy by default, which means that only when we try to actually print the results of our functions will any computation take place. Furthemore, only those computations that are necessary for our function to tell us the result will get carried out. The <code>undefined</code> value in Haskell represents an erronous computation. If we try to evaluate it (that is, force Haskell to actually compute it) by printing it to the terminal, Haskell will throw a hissy fit (technically referred to as an exception):</p>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell">ghci<span class="fu">&gt;</span> undefined  
+<span class="fu">***</span> <span class="dt">Exception</span><span class="fu">:</span> Prelude.undefined  </code></pre></div>
+<p>However, if we make a list that has some <code>undefined</code> values in it but request only the head of the list, which is not <code>undefined</code>, everything will go smoothly because Haskell doesn’t really need to evaluate any other elements in a list if we only want to see what the first element is:</p>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell">ghci<span class="fu">&gt;</span> head [<span class="dv">3</span>,<span class="dv">4</span>,<span class="dv">5</span>,undefined,<span class="dv">2</span>,undefined]  
+<span class="dv">3</span> </code></pre></div>
+<p>Now consider the following type:</p>
+<div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt;</span> <span class="kw">data</span> <span class="dt">DataBool</span> <span class="fu">=</span> <span class="dt">DataBool</span> {<span class="ot"> getDataBool ::</span> <span class="dt">Bool</span> }  </code></pre></div>
+<p>It’s your run-of-the-mill algebraic data type that was defined with the data keyword. It has one value constructor, which has one field whose type is <code>Bool</code>. Let’s make a function that pattern matches on a <code>DataBool</code> and returns the value “hello” regardless of whether the <code>Bool</code> inside the <code>DataBool</code> was <code>True</code> or <code>False</code>:</p>
+<div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt; helloMe ::</span> <span class="dt">DataBool</span> <span class="ot">-&gt;</span> <span class="dt">String</span>  
+<span class="ot">&gt;</span> helloMe (<span class="dt">DataBool</span> _) <span class="fu">=</span> <span class="st">&quot;hello&quot;</span>  </code></pre></div>
+<p>Instead of applying this function to a normal <code>DataBool</code>, let’s throw it a curveball and apply it to <code>undefined</code>!</p>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell">ghci<span class="fu">&gt;</span> helloMe undefined  
+<span class="fu">***</span> <span class="dt">Exception</span><span class="fu">:</span> Prelude.undefined  </code></pre></div>
+<p>Yikes! An exception! Now why did this exception happen? Types defined with the data keyword can have multiple value constructors (even though <code>DataBool</code> only has one). So in order to see if the value given to our function conforms to the <code>(DataBool _)</code> pattern, Haskell has to evaluate the value just enough to see which value constructor was used when we made the value. And when we try to evaluate an <code>undefined</code> value, even a little, an exception is thrown.</p>
+<p>Instead of using the <code>data</code> keyword for <code>NewTypeBool</code>, let’s try using <code>newtype</code>:</p>
+<div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt;</span> <span class="kw">newtype</span> <span class="dt">NewTypeBool</span> <span class="fu">=</span> <span class="dt">NewTypeBool</span> {<span class="ot"> getCoolBool ::</span> <span class="dt">Bool</span> }  </code></pre></div>
+<p>Let’s now use <code>NewTypeBool</code> to define again the <code>helloMe</code> function.</p>
+<div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt; helloMe' ::</span> <span class="dt">NewTypeBool</span> <span class="ot">-&gt;</span> <span class="dt">String</span>  
+<span class="ot">&gt;</span> helloMe' (<span class="dt">NewTypeBool</span> _) <span class="fu">=</span> <span class="st">&quot;hello&quot;</span>  </code></pre></div>
+<p>Let’s do the same thing here and apply <code>helloMe'</code> to an <code>undefined</code> value:</p>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell">ghci<span class="fu">&gt;</span> helloMe' undefined  
+<span class="st">&quot;hello&quot;</span>  </code></pre></div>
+<p><strong>Q:</strong> It worked! Hmmm, why is that?</p>
+<p>Well, like we’ve said, when we use <code>newtype</code>, Haskell can internally represent the values of the new type in the same way as the original values. It doesn’t have to add another box around them, it just has to be aware of the values being of different types. And because Haskell knows that types made with the <code>newtype</code> keyword can only have <em>one constructor</em>, it doesn’t have to evaluate the value passed to the function to make sure that it conforms to the <code>(NewTypeBool _)</code> pattern because <code>newtype</code> types can only have one possible value constructor and one field!</p>
+<p>This difference in behavior may seem trivial, but it’s actually pretty important because it helps us realize that even though types defined with <code>data</code> and <code>newtype</code> behave similarly from the programmer’s point of view because they both have value constructors and fields, they are actually two different mechanisms. Whereas <code>data</code> can be used to make your own types from scratch, <code>newtype</code> is for making a completely new type out of an existing type. Pattern matching on <code>newtype</code> values isn’t like taking something out of a box (like it is with data), it’s more about making a direct conversion from one type to another.</p>
+<h2 id="type-vs.-newtype-vs.-data"><code>type</code> vs. <code>newtype</code> vs. <code>data</code></h2>
+<p>At this point, you may be a bit confused about what exactly the difference between <code>type</code>, <code>data</code> and <code>newtype</code> is, so let’s refresh our memory a bit.</p>
+<ul>
+<li>The <code>type</code> keyword is for making type synonyms. What that means is that we just give another name to an already existing type so that the type is easier to refer to. Say we did the following:</li>
+</ul>
+<div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt;</span> <span class="kw">type</span> <span class="dt">Move</span> <span class="fu">=</span> (<span class="dt">Int</span>,<span class="dt">Int</span>) </code></pre></div>
+<p>All this does is to allow us to refer to the <code>(Int,Int)</code> type as <code>Move</code>. They can be used interchangeably. We don’t get an <code>Move</code> value constructor or anything like that. Because <code>Move</code> and <code>(Int,Int)</code> are only two ways to refer to the same type, it doesn’t matter which name we use in our type annotations:</p>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell">ghci<span class="fu">&gt;</span> ((<span class="dv">1</span>,<span class="dv">2</span>)<span class="ot"> ::</span> <span class="dt">Move</span>) <span class="fu">&lt;</span> ((<span class="dv">3</span>,<span class="dv">4</span>)<span class="ot"> ::</span> (<span class="dt">Int</span>,<span class="dt">Int</span>))  
+<span class="dt">True</span>  </code></pre></div>
+<p>We use type synonyms when we want to make our type signatures more descriptive by giving types names that tell us something about their purpose in the context of the functions where they’re being used.</p>
+<ul>
+<li>The <code>newtype</code> keyword is for taking existing types and wrapping them in new types, mostly so that it’s easier to make them instances of certain type classes and in libraries to hide the internal details of the implementation. When we use <code>newtype</code> to wrap an existing type, the type that we get is separate from the original type. If we make the following newtype:</li>
+</ul>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="kw">newtype</span> <span class="dt">Move</span> <span class="fu">=</span> <span class="dt">Move</span> {<span class="ot"> getMove ::</span> (<span class="dt">Int</span>,<span class="dt">Int</span>) }</code></pre></div>
+<p>We can’t use <code>(&lt;)</code> to compare <code>Move</code> with <code>(Int,Int)</code> We cannot even compare <code>Move</code> with <code>Move</code> unless we define an <code>Ord</code> instance on <code>Move</code>.</p>
+<p>When we use record syntax in our <code>newtype</code> declarations, we get functions for converting between the new type and the original type: namely the value constructor of our <code>newtype</code> and the function for extracting the value in its field. The new type also isn’t automatically made an instance of the type classes that the original type belongs to, so we have to derive or manually write the same or a new instance.</p>
+<p>In practice, you can think of <code>newtype</code> declarations as <code>data</code> declarations that can only have <em>one constructor</em> and <em>one field</em>. If you catch yourself writing such a <code>data</code> declaration, consider using <code>newtype</code>.</p>
+<ul>
+<li>The <code>data</code> keyword is for making your own data types and with them, you can go hog wild. They can have as many constructors and fields as you wish and can be used to implement any algebraic data type by yourself. Everything from lists and Maybe-like types to trees.</li>
+</ul>
+<p>If you just want your type signatures to look cleaner and be more descriptive, you probably want type synonyms. If you want to take an existing type and wrap it in a new type in order to make it an instance of a type class, chances are you’re looking for a newtype. And if you want to make something completely new, odds are good that you’re looking for the data keyword.</p>
+<h2 id="using-newtype-to-make-type-class-instances">Using <code>newtype</code> to make type class instances</h2>
+<p>Now that we know all about <code>newtype</code>, lets go back to monoids on numbers! We use <code>newtype</code> to define multiple instances of the same type class for the same type: we can wrap that type in a <code>newtype</code> and then make the new type an instance of the type class in a different way. We can have our cake and eat it too.</p>
+<p>The <code>Data.Monoid</code> module exports two types for this, namely <code>Product</code> and <code>Sum</code>. <code>Product</code> is defined like this:</p>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="kw">newtype</span> <span class="dt">Product</span> a <span class="fu">=</span>  <span class="dt">Product</span> {<span class="ot"> getProduct ::</span> a }  
+    <span class="kw">deriving</span> (<span class="dt">Eq</span>, <span class="dt">Ord</span>, <span class="dt">Read</span>, <span class="dt">Show</span>)  </code></pre></div>
+<p>Simple, just a newtype wrapper with one type parameter along with some derived instances. Its instance for <code>Monoid</code> goes a little something like this:</p>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="kw">instance</span> <span class="dt">Num</span> a <span class="ot">=&gt;</span> <span class="dt">Monoid</span> (<span class="dt">Product</span> a) <span class="kw">where</span>  
+    mempty <span class="fu">=</span> <span class="dt">Product</span> <span class="dv">1</span>  
+    <span class="dt">Product</span> x <span class="ot">`mappend`</span> <span class="dt">Product</span> y <span class="fu">=</span> <span class="dt">Product</span> (x <span class="fu">*</span> y)  </code></pre></div>
+<p><code>mempty</code> is just <code>1</code> wrapped in a <code>Product</code> constructor. <code>mappend</code> pattern matches on the <code>Product</code> constructor, multiplies the two numbers and then wraps the resulting number back. As you can see, there’s a <code>Num a</code> class constraint. So this means that <code>Product a</code> is an instance of <code>Monoid</code> for all <code>a</code>’s that are already an instance of <code>Num</code>.</p>
+<p><strong>Q:</strong> We saw that we can use <code>(&lt;&gt;)</code> instead of <code>mappend</code> to append monoids. Can we use <code>(&lt;&gt;)</code> instead of <code>mappend</code> in the monoid instance definition?</p>
+<p>To use <code>Product a</code> as a monoid, we have to do some newtype wrapping and unwrapping:</p>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell">ghci<span class="fu">&gt;</span> getProduct <span class="fu">$</span> <span class="dt">Product</span> <span class="dv">3</span> <span class="fu">&lt;&gt;</span> <span class="dt">Product</span> <span class="dv">9</span>  
+<span class="dv">27</span>  
+ghci<span class="fu">&gt;</span> getProduct <span class="fu">$</span> <span class="dt">Product</span> <span class="dv">3</span> <span class="fu">&lt;&gt;</span> mempty  
+<span class="dv">3</span>  
+ghci<span class="fu">&gt;</span> getProduct <span class="fu">$</span> <span class="dt">Product</span> <span class="dv">3</span> <span class="fu">&lt;&gt;</span> <span class="dt">Product</span> <span class="dv">4</span> <span class="fu">&lt;&gt;</span> <span class="dt">Product</span> <span class="dv">2</span>  
+<span class="dv">24</span>  
+ghci<span class="fu">&gt;</span> getProduct <span class="fu">.</span> mconcat <span class="fu">.</span> map <span class="dt">Product</span> <span class="fu">$</span> [<span class="dv">3</span>,<span class="dv">4</span>,<span class="dv">2</span>]  
+<span class="dv">24</span>  </code></pre></div>
+<p>This is nice as a showcase of the <code>Monoid</code> type class, but no one in their right mind would use this way of multiplying numbers instead of just writing <code>3 * 9</code> and <code>3 * 1</code>. But a bit later, we’ll see how these <code>Monoid</code> instances that may seem trivial at this time can come in handy.</p>
+<p><code>Sum</code> is defined like <code>Product</code> and the instance is similar as well. We use it in the same way:</p>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell">ghci<span class="fu">&gt;</span> getSum <span class="fu">$</span> <span class="dt">Sum</span> <span class="dv">2</span> <span class="fu">&lt;&gt;</span> <span class="dt">Sum</span> <span class="dv">9</span>  
+<span class="dv">11</span>  
+ghci<span class="fu">&gt;</span> getSum <span class="fu">$</span> mempty <span class="fu">&lt;&gt;</span> <span class="dt">Sum</span> <span class="dv">3</span>  
+<span class="dv">3</span>  
+ghci<span class="fu">&gt;</span> getSum <span class="fu">.</span> mconcat <span class="fu">.</span> map <span class="dt">Sum</span> <span class="fu">$</span> [<span class="dv">1</span>,<span class="dv">2</span>,<span class="dv">3</span>]  
+<span class="dv">6</span>  </code></pre></div>
+<h2 id="any-and-all">Any and All</h2>
+<p>Another type which can act like a monoid in two distinct but equally valid ways is <code>Bool</code>. The first way is to have the or function <code>(||)</code> act as the binary function along with <code>False</code> as the identity value. The way or works in logic is that if any of its two parameters is <code>True</code>, it returns <code>True</code>, otherwise it returns <code>False</code>. So if we use <code>False</code> as the identity value, it will return <code>False</code> when or-ed with <code>False</code> and <code>True</code> when or-ed with <code>True</code>.</p>
+<p><strong>Q:</strong> Let’s define an <code>Any</code> new type and its <code>Monoid</code> instance, so that</p>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell">ghci<span class="fu">&gt;</span> getAny <span class="fu">$</span> <span class="dt">Any</span> <span class="dt">True</span> <span class="fu">&lt;&gt;</span> <span class="dt">Any</span> <span class="dt">False</span>  
+<span class="dt">True</span>  
+ghci<span class="fu">&gt;</span> getAny <span class="fu">$</span> mempty <span class="fu">&lt;&gt;</span> <span class="dt">Any</span> <span class="dt">True</span>  
+<span class="dt">True</span>  
+ghci<span class="fu">&gt;</span> getAny <span class="fu">.</span> mconcat <span class="fu">.</span> map <span class="dt">Any</span> <span class="fu">$</span> [<span class="dt">False</span>, <span class="dt">False</span>, <span class="dt">False</span>, <span class="dt">True</span>]  
+<span class="dt">True</span>  
+ghci<span class="fu">&gt;</span> getAny <span class="fu">$</span> mempty <span class="fu">&lt;&gt;</span> mempty  
+<span class="dt">False</span>  </code></pre></div>
+<p>The other way for <code>Bool</code> to be an instance of <code>Monoid</code> is to kind of do the opposite: have <code>(&amp;&amp;)</code> be the binary function and then make <code>True</code> the identity value. Logical <code>and</code> will return <code>True</code> only if both of its parameters are <code>True</code>. This is the newtype declaration, nothing fancy:</p>
+<p><strong>Q:</strong> Let’s define an <code>All</code> new type and its <code>Monoid</code> instance, so that</p>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell">ghci<span class="fu">&gt;</span> getAll <span class="fu">$</span> mempty <span class="fu">&lt;&gt;</span> <span class="dt">All</span> <span class="dt">True</span>  
+<span class="dt">True</span>  
+ghci<span class="fu">&gt;</span> getAll <span class="fu">$</span> mempty <span class="fu">&lt;&gt;</span> <span class="dt">All</span> <span class="dt">False</span>  
+<span class="dt">False</span>  
+ghci<span class="fu">&gt;</span> getAll <span class="fu">.</span> mconcat <span class="fu">.</span> map <span class="dt">All</span> <span class="fu">$</span> [<span class="dt">True</span>, <span class="dt">True</span>, <span class="dt">True</span>]  
+<span class="dt">True</span>  
+ghci<span class="fu">&gt;</span> getAll <span class="fu">.</span> mconcat <span class="fu">.</span> map <span class="dt">All</span> <span class="fu">$</span> [<span class="dt">True</span>, <span class="dt">True</span>, <span class="dt">False</span>]  
+<span class="dt">False</span>  </code></pre></div>
+<p>Just like with multiplication and addition, we usually explicitly state the binary functions instead of wrapping them in newtypes and then using <code>mappend</code> and <code>mempty</code>. <code>mconcat</code> seems useful for <code>Any</code> and <code>All</code>, but usually it’s easier to use the or and and functions, which take lists of <code>Bool</code>s and return <code>True</code> if any of them are <code>True</code> or if all of them are <code>True</code>, respectively.</p>
+<h2 id="using-monoids-to-fold-data-structures">Using monoids to fold data structures</h2>
+<p>One of the more interesting ways to put monoids to work is to make them help us define folds over various data structures. So far, we’ve only done folds over lists, but lists aren’t the only data structure that can be folded over. We can define folds over almost any data structure. As you will see in your homework, <code>Trees</code> lend themselves well to folding.</p>
+<p>Because there are so many data structures that work nicely with folds, the <code>Foldable</code> type class was introduced. Folds can be found in <code>Data.Foldable</code> and because it export functions whose names clash with the ones from the Prelude, it’s best imported qualified (and served with basil):</p>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="kw">import qualified</span> <span class="dt">Data.Foldable</span> <span class="kw">as</span> <span class="dt">F</span>  </code></pre></div>
+<p>To save ourselves precious keystrokes, we’ve chosen to import it qualified as <code>F</code>.</p>
+<p>Alright, so what are some of the functions that this type class defines?</p>
+<p>When we introduced recusion over lists, we saw the functions <code>foldl</code> and <code>length</code>, But what are the real types of these functions?</p>
+<p>Well, among them are foldr, foldl, foldr1 and foldl1. Huh? But we already know these functions, what’s so new about this? Let’s compare the types of Foldable’s foldr and the foldr from the Prelude to see how they differ:</p>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell">ghci<span class="fu">&gt;</span> <span class="fu">:</span>t length  
+length<span class="ot"> ::</span> <span class="dt">Foldable</span> t <span class="ot">=&gt;</span> t a <span class="ot">-&gt;</span> <span class="dt">Int</span>
+ghci<span class="fu">&gt;</span> <span class="fu">:</span>t foldl
+foldl<span class="ot"> ::</span> <span class="dt">Foldable</span> t <span class="ot">=&gt;</span> (b <span class="ot">-&gt;</span> a <span class="ot">-&gt;</span> b) <span class="ot">-&gt;</span> b <span class="ot">-&gt;</span> t a <span class="ot">-&gt;</span> b  </code></pre></div>
+<p>Ah! So <code>length</code> and <code>foldl</code> is not defined only over lists, but instead over <em>any type</em> that can be folded up! Okay then, what are some other data structures that support folds? Well, there’s the Maybe we all know and love!</p>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell">ghci<span class="fu">&gt;</span> foldl (<span class="fu">+</span>) <span class="dv">2</span> (<span class="dt">Product</span> <span class="dv">42</span>)  
+<span class="dv">44</span>
+ghci<span class="fu">&gt;</span> length (<span class="dt">Product</span> <span class="dv">42</span>) 
+<span class="dv">1</span>  </code></pre></div>
+<p>Combining folds and monoids we get the <code>foldMap</code> function, which is also a part of the <code>Foldable</code> type class. The <code>foldMap</code> function has the following type:</p>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="ot">foldMap ::</span> (<span class="dt">Monoid</span> m, <span class="dt">Foldable</span> t) <span class="ot">=&gt;</span> (a <span class="ot">-&gt;</span> m) <span class="ot">-&gt;</span> t a <span class="ot">-&gt;</span> m  </code></pre></div>
+<p>Its first parameter is a function that takes a value of the type that our foldable structure contains (denoted here with <code>a</code>) and returns a monoid value. Its second parameter is a foldable structure that contains values of type <code>a</code>. It maps that function over the foldable structure, thus producing a foldable structure that contains monoid values. Then, by doing <code>mappend</code> between those monoid values, it joins them all into a single monoid value. This function may sound kind of odd at the moment, but we’ll see that it’s very easy to implement. What’s also cool is that implementing this function is all it takes for our type to be made an instance of Foldable. So if we just implement <code>foldMap</code> for some type, we get <code>length</code>, <code>foldr</code> and <code>foldl</code> on that type for free!</p>
+<p><strong>Q:</strong> Define the <code>Foldable</code> instance for the below <code>List</code> type.</p>
+<div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt;</span> <span class="kw">data</span> <span class="dt">List</span> a <span class="fu">=</span> <span class="dt">N</span> <span class="fu">|</span> <span class="dt">C</span> a (<span class="dt">List</span> a)
+<span class="ot">&gt;</span> 
+<span class="ot">&gt;</span> <span class="kw">instance</span> <span class="dt">Foldable</span> <span class="dt">List</span> <span class="kw">where</span>
+<span class="ot">&gt;</span>   foldMap _ <span class="dt">N</span> <span class="fu">=</span> mempty 
+<span class="ot">&gt;</span>   foldMap f (<span class="dt">C</span> x xs) <span class="fu">=</span> f x <span class="fu">&lt;&gt;</span> foldMap f xs </code></pre></div>
+<p>Now we get all the folding functions for free! Assuming a test toy list</p>
+<div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt;</span> testList <span class="fu">=</span> <span class="dt">C</span> <span class="dv">1</span> <span class="fu">$</span> <span class="dt">C</span> <span class="dv">42</span> <span class="fu">$</span> <span class="dt">C</span> <span class="dv">12</span> <span class="dt">N</span></code></pre></div>
+<p>You can fold it or get its legth. &lt; ghci&gt; foldl (+) 0 testList &lt; 55<br />
+&lt; ghci&gt; foldl (*) 1 testList<br />
+&lt; 504</p>
+<p>And also, <code>foldMap</code> isn’t only useful for making new instances of <code>Foldable</code>; it comes in handy for reducing our structure to a single monoid value. For instance, if we want to know if any number in our tree is equal to <code>42</code>, we can do this:</p>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell">ghci<span class="fu">&gt;</span> getAny <span class="fu">$</span> foldMap (\x <span class="ot">-&gt;</span> <span class="dt">Any</span> <span class="fu">$</span> x <span class="fu">==</span> <span class="dv">42</span>) testList  
+<span class="dt">True</span>  </code></pre></div>
+<p>Here, <code>\x -&gt; Any $ x == 3</code> is a function that takes a number and returns a monoid value, namely a <code>Bool</code> wrapped in <code>Any</code>. <code>foldMap</code> applies this function to every element in our tree and then reduces the resulting monoids into a single monoid with mappend.</p>
+<p><strong>Q:</strong> What is the value of</p>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell">ghci<span class="fu">&gt;</span> getAny <span class="fu">$</span> foldMap (\x <span class="ot">-&gt;</span> <span class="dt">Any</span> <span class="fu">$</span> x <span class="fu">&gt;</span> <span class="dv">15</span>) testList </code></pre></div>
+<p><strong>Q:</strong> What is the value of</p>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell">ghci<span class="fu">&gt;</span> foldMap (\x <span class="ot">-&gt;</span> [x]) testList </code></pre></div>
+<p>What’s cool is that all of these trick aren’t limited to the <code>List</code>, they work on any instance of <code>Foldable</code>.</p>
+<h2 id="foldmap-mapreduce"><code>foldMap</code> = <code>mapReduce</code></h2>
+<p><code>foldMap</code> might be a function difficult to digest, but as we shall now see it is the heart of the more famous function <a href="https://en.wikipedia.org/wiki/MapReduce">mapReduce</a>.</p>
+<div class="figure">
+<img src="https://nikivazou.github.io/CMSC498V/static/mapReduce.jpeg" title="MapReduce Sandwitch" alt="alt text" />
+<p class="caption">alt text</p>
+</div>
+<p>MapReduce applies a function <code>f</code> to its input in parallel.</p>
+<ul>
+<li>First, we split the input into chunks (here the sandwitch ingredients).</li>
+<li>Then, we apply <code>f</code> in parallel to each chunk (here cutting the ingredients).</li>
+<li>Finally, we combine all the mapped chunks (here we eat/serve the sandwitchs).</li>
+</ul>
+<p>Note that combining or reducing the mapped chunks is called folding in the functional world. Thus, <code>mapReduce</code> is basically <code>foldMap</code>, if only we had a chunking function.</p>
+<p>Let’s then use the type class magic to define our missing component, a <code>chunk</code> function.</p>
+<p>We define a class <code>Chunkable</code> with a methos that chunks its arguments into a list.</p>
+<div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt;</span> <span class="kw">class</span> <span class="dt">Chunkable</span> a <span class="kw">where</span> 
+<span class="ot">&gt;   chunk ::</span> a <span class="ot">-&gt;</span> [a]</code></pre></div>
+<p>For example, a list is a <code>Chunkable</code> chunking its input list to lists of lists of length at most <code>2</code>.</p>
+<div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt;</span> <span class="kw">instance</span> <span class="dt">Chunkable</span> [a] <span class="kw">where</span>
+<span class="ot">&gt;</span>   chunk x <span class="fu">|</span> length x <span class="fu">&lt;=</span> <span class="dv">2</span> <span class="fu">=</span> [x]
+<span class="ot">&gt;</span>   chunk x <span class="fu">=</span> take <span class="dv">2</span> x<span class="fu">:</span> chunk (drop <span class="dv">2</span> x)</code></pre></div>
+<p>Now that we have <code>chunk</code> we can define <code>mapReduce</code> in terms of <code>foldMap</code></p>
+<div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt; mapReduce ::</span> (<span class="dt">Chunkable</span> a, <span class="dt">Monoid</span> b) <span class="ot">=&gt;</span> (a <span class="ot">-&gt;</span> b) <span class="ot">-&gt;</span> (a <span class="ot">-&gt;</span> b)
+<span class="ot">&gt;</span> mapReduce f x <span class="fu">=</span> foldMap f (chunk x)</code></pre></div>
+<p>First <code>chunk</code> the input and then <code>foldMap</code> the input function <code>f</code> into each chunk!</p>
+<p>Lets see a use case of <code>mapReduce</code> We define the <code>sum</code> of an integer list to return the <code>Sum</code> of its elements. Since <code>Sum Int</code> is a <code>Monoid</code> we can already use the <code>mconat</code> monoid operation</p>
+<div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt; sum ::</span> [<span class="dt">Int</span>] <span class="ot">-&gt;</span> <span class="dt">Sum</span> <span class="dt">Int</span> 
+<span class="ot">&gt;</span> sum <span class="fu">=</span> mconcat <span class="fu">.</span> map <span class="dt">Sum</span>  </code></pre></div>
+<p>This just works!</p>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell">ghc<span class="fu">&gt;</span> sum [<span class="dv">1</span><span class="fu">..</span><span class="dv">100</span>]
+<span class="dt">Sum</span> {getSum <span class="fu">=</span> <span class="dv">5050</span>}</code></pre></div>
+<p>Since the input of <code>sum</code> is a list (a.k.a. <code>Chunkable</code>) and its result is a <code>Monoid</code> we can apply it to <code>mapReduce</code>:</p>
+<div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt; psum ::</span> [<span class="dt">Int</span>] <span class="ot">-&gt;</span> <span class="dt">Sum</span> <span class="dt">Int</span> 
+<span class="ot">&gt;</span> psum <span class="fu">=</span> mapReduce sum           </code></pre></div>
+<p>Unexpectedly, <code>sum</code> and <code>psum</code> behave the same:</p>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell">ghc<span class="fu">&gt;</span> sum [<span class="dv">1</span><span class="fu">..</span><span class="dv">100</span>]
+<span class="dt">Sum</span> {getSum <span class="fu">=</span> <span class="dv">5050</span>}</code></pre></div>
+<p>So, what did we get? Looking closely at the type of <code>mapRecude</code>, it merely tranforms a function <code>f :: a -&gt; b</code> to a function from <code>a -&gt; b</code>. Due to polymorphism the result function is equivalnt to the input one. So, we got nothing!</p>
+<p><strong>Q:</strong> Is this even true? Can you construct a <code>mapReduceBad</code> implementation with the same type as <code>mapReduce</code> that returns a non-equivalent function?</p>
+<div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt; mapReduceBad ::</span> (<span class="dt">Chunkable</span> a, <span class="dt">Monoid</span> b) <span class="ot">=&gt;</span> (a <span class="ot">-&gt;</span> b) <span class="ot">-&gt;</span> (a <span class="ot">-&gt;</span> b)
+<span class="ot">&gt;</span> mapReduceBad f x <span class="fu">=</span> error <span class="st">&quot;Define me!&quot;</span></code></pre></div>
+<p>Ok, assuming that the returning function behaves as the input one, what did you get? Nothing for now, but in a pure function like Hakell the <code>map</code> portion of <code>foldMap</code> can get parallelised, and then we got efficiency!</p>
         </div>
         <div id="footer">
             Site proudly generated by
