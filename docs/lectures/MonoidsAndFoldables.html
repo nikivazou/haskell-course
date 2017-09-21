@@ -291,8 +291,7 @@ ghci<span class="fu">&gt;</span> length (<span class="dt">Product</span> <span c
 ghci<span class="fu">&gt;</span> foldl (<span class="fu">*</span>) <span class="dv">1</span> testList  
 <span class="dv">504</span>  </code></pre></div>
 <p>And also, <code>foldMap</code> isn’t only useful for making new instances of <code>Foldable</code>; it comes in handy for reducing our structure to a single monoid value. For instance, if we want to know if any number in our tree is equal to <code>42</code>, we can do this:</p>
-<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell">ghci<span class="fu">&gt;</span> getAny <span class="fu">$</span> foldMap (\x <span class="ot">-&gt;</span> <span class="dt">Any</span> <span class="fu">$</span> x <span class="fu">==</span> <span class="dv">42</span>) testList  
-<span class="dt">True</span>  </code></pre></div>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell">ghci<span class="fu">&gt;</span> getAny <span class="fu">$</span> foldMap (\x <span class="ot">-&gt;</span> <span class="dt">Any</span> <span class="fu">$</span> x <span class="fu">==</span> <span class="dv">42</span>) testList  </code></pre></div>
 <p>Here, <code>\x -&gt; Any $ x == 3</code> is a function that takes a number and returns a monoid value, namely a <code>Bool</code> wrapped in <code>Any</code>. <code>foldMap</code> applies this function to every element in our tree and then reduces the resulting monoids into a single monoid with mappend.</p>
 <p><strong>Q:</strong> What is the value of</p>
 <div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell">ghci<span class="fu">&gt;</span> getAny <span class="fu">$</span> foldMap (\x <span class="ot">-&gt;</span> <span class="dt">Any</span> <span class="fu">$</span> x <span class="fu">&gt;</span> <span class="dv">15</span>) testList </code></pre></div>

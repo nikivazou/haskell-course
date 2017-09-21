@@ -614,7 +614,6 @@ it comes in handy for reducing our structure to a single monoid value.
 For instance, if we want to know if any number in our tree is equal to `42`, we can do this:
 
 < ghci> getAny $ foldMap (\x -> Any $ x == 42) testList  
-< True  
 
 Here, `\x -> Any $ x == 3` is a function that takes a number and returns a monoid value, 
 namely a `Bool` wrapped in `Any`. 
