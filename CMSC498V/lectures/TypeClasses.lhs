@@ -184,6 +184,13 @@ But not all of them
 < (1,2,3,4,5,6,7,8,9,10,1,1,1,1,1,1) == (1,2,3,4,5,6,7,8,9,10,1,1,1,1,1,1)
 
 
+\begin{code}
+instance (Eq a, Eq b, Eq c, Eq d, Eq e, Eq f, Eq g, Eq h, Eq i,
+          Eq j, Eq k, Eq l, Eq m, Eq n, Eq o, Eq w) =>
+         Eq (a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, w) where
+  _ == _ = False 
+\end{code}
+
 Using Typeclasses
 ------------------
 
@@ -213,7 +220,11 @@ Every function that calls `insert` should propagate the `Ord` constraint.
 
 \begin{code}
 insertSort :: Ord a => [a] ->[a]
+-- insertSort ::[Int] ->[Int]
 insertSort = foldl (flip insert) []  
+
+f :: Int -> Int 
+f x = x 
 \end{code}
 
 Note, that now Haskell is not smart enough to figure out the constraint, 
@@ -231,6 +242,9 @@ For example, `Read` is a built-in typeclass, where any instance a of `Read` has 
 < read :: (Read a) => String -> a
 
 which can parse a string and turn it into an a. Thus, `Read` is, in a sense, the dual of the `Show`.
+
+**Q:** Is it possible that `read` creates any value of type `a`?
+Does this remind you any function we saw earlier?
 
 **Q:** What does the expression `read "2"` evaluate to?
 
@@ -267,7 +281,7 @@ For example suppose you want to compare two tic-tac-toe tiles.
 
 \begin{code}
 data Tile = X | O | EmptyTile 
-    deriving (Eq)
+--     deriving (Eq)
 \end{code}
 
 **Q:** What does 
@@ -283,10 +297,12 @@ is always `False`?
 
 We can write our own tile-equality operator to capture exactly this crazy requirement.
 
-< instance Eq Tile where
-<   X == X = True 
-<   O == O = True 
-<   _ == _ = False 
+\begin{code}
+instance Eq Tile where
+  X == X = True 
+  O == O = True 
+  _ == _ = False 
+\end{code}
 
 **Q:** Now what does 
 
@@ -359,6 +375,11 @@ insert' dict x (y:ys)
 
 insertSort' :: OrdDict a -> [a] ->[a]
 insertSort' dict = foldl (flip (insert' dict)) []  
+
+
+insertSort' :: Ord a => [a] ->[a]
+insertSort' = foldl (flip (insert)) []  
+
 \end{code}
 
 Note how `insertSort'` propagates the dictionary to `insert'`.
@@ -404,8 +425,11 @@ JSON
 < }
 
 In brief, each JSON object is either 
+
 - a base value like a string, a number or a boolean, 
+
 - an (ordered) array of objects, or 
+
 - a set of string-object pairs.
 
 Thus, we can encode (a subset of) JSON values with the datatype

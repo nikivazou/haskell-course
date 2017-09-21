@@ -141,6 +141,10 @@ ghci<span class="fu">&gt;</span> x' <span class="fu">==</span> x'
 <p>Most of these type classes come with default instances for the basic types. But not all of them</p>
 <p><strong>Q:</strong> Why does Haskell reject the following expression?</p>
 <div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell">(<span class="dv">1</span>,<span class="dv">2</span>,<span class="dv">3</span>,<span class="dv">4</span>,<span class="dv">5</span>,<span class="dv">6</span>,<span class="dv">7</span>,<span class="dv">8</span>,<span class="dv">9</span>,<span class="dv">10</span>,<span class="dv">1</span>,<span class="dv">1</span>,<span class="dv">1</span>,<span class="dv">1</span>,<span class="dv">1</span>,<span class="dv">1</span>) <span class="fu">==</span> (<span class="dv">1</span>,<span class="dv">2</span>,<span class="dv">3</span>,<span class="dv">4</span>,<span class="dv">5</span>,<span class="dv">6</span>,<span class="dv">7</span>,<span class="dv">8</span>,<span class="dv">9</span>,<span class="dv">10</span>,<span class="dv">1</span>,<span class="dv">1</span>,<span class="dv">1</span>,<span class="dv">1</span>,<span class="dv">1</span>,<span class="dv">1</span>)</code></pre></div>
+<div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt;</span> <span class="kw">instance</span> (<span class="dt">Eq</span> a, <span class="dt">Eq</span> b, <span class="dt">Eq</span> c, <span class="dt">Eq</span> d, <span class="dt">Eq</span> e, <span class="dt">Eq</span> f, <span class="dt">Eq</span> g, <span class="dt">Eq</span> h, <span class="dt">Eq</span> i,
+<span class="ot">&gt;</span>           <span class="dt">Eq</span> j, <span class="dt">Eq</span> k, <span class="dt">Eq</span> l, <span class="dt">Eq</span> m, <span class="dt">Eq</span> n, <span class="dt">Eq</span> o, <span class="dt">Eq</span> w) <span class="ot">=&gt;</span>
+<span class="ot">&gt;</span>          <span class="dt">Eq</span> (a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, w) <span class="kw">where</span>
+<span class="ot">&gt;</span>   _ <span class="fu">==</span> _ <span class="fu">=</span> <span class="dt">False</span> </code></pre></div>
 <h2 id="using-typeclasses">Using Typeclasses</h2>
 <p>We have already see how type classes integrate with the rest of the Haskell’s type.</p>
 <p>Recall the <code>insert</code> function</p>
@@ -155,13 +159,18 @@ ghci<span class="fu">&gt;</span> x' <span class="fu">==</span> x'
 <h2 id="constraint-propagation">Constraint Propagation</h2>
 <p>Every function that calls <code>insert</code> should propagate the <code>Ord</code> constraint.</p>
 <div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt; insertSort ::</span> <span class="dt">Ord</span> a <span class="ot">=&gt;</span> [a] <span class="ot">-&gt;</span>[a]
-<span class="ot">&gt;</span> insertSort <span class="fu">=</span> foldl (flip insert) []  </code></pre></div>
+<span class="ot">&gt;</span> <span class="co">-- insertSort ::[Int] -&gt;[Int]</span>
+<span class="ot">&gt;</span> insertSort <span class="fu">=</span> foldl (flip insert) []  
+<span class="ot">&gt;</span> 
+<span class="ot">&gt; f ::</span> <span class="dt">Int</span> <span class="ot">-&gt;</span> <span class="dt">Int</span> 
+<span class="ot">&gt;</span> f x <span class="fu">=</span> x </code></pre></div>
 <p>Note, that now Haskell is not smart enough to figure out the constraint, so we need an explicit type signature.</p>
 <h2 id="explicit-signatures">Explicit Signatures</h2>
 <p>In the case of <code>insertSort</code> Haskell could have guessed a proper type. But, there are cases when the use of type classes requires explicit annotations (which change the behavior of the code.)</p>
 <p>For example, <code>Read</code> is a built-in typeclass, where any instance a of <code>Read</code> has a function</p>
 <div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell">read<span class="ot"> ::</span> (<span class="dt">Read</span> a) <span class="ot">=&gt;</span> <span class="dt">String</span> <span class="ot">-&gt;</span> a</code></pre></div>
 <p>which can parse a string and turn it into an a. Thus, <code>Read</code> is, in a sense, the dual of the <code>Show</code>.</p>
+<p><strong>Q:</strong> Is it possible that <code>read</code> creates any value of type <code>a</code>? Does this remind you any function we saw earlier?</p>
 <p><strong>Q:</strong> What does the expression <code>read &quot;2&quot;</code> evaluate to?</p>
 <p>Haskell is foxed, because it doesn’t know what to convert the string to! Did we want an <code>Int</code> or a <code>Double</code>? Or maybe something else altogether. Thus, we get back the complaint</p>
 <div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell">interactive<span class="fu">&gt;:</span><span class="dv">1</span><span class="fu">:</span><span class="dv">0</span><span class="fu">:</span>
@@ -183,17 +192,17 @@ ghci<span class="fu">&gt;</span> x' <span class="fu">==</span> x'
 <p>However, in many situations the automatic instantiation doesn’t quite cut it, and instead we need to (and get to!) create our own instances.</p>
 <p>For example suppose you want to compare two tic-tac-toe tiles.</p>
 <div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt;</span> <span class="kw">data</span> <span class="dt">Tile</span> <span class="fu">=</span> <span class="dt">X</span> <span class="fu">|</span> <span class="dt">O</span> <span class="fu">|</span> <span class="dt">EmptyTile</span> 
-<span class="ot">&gt;</span>     <span class="kw">deriving</span> (<span class="dt">Eq</span>)</code></pre></div>
+<span class="ot">&gt;</span> <span class="co">--     deriving (Eq)</span></code></pre></div>
 <p><strong>Q:</strong> What does</p>
 <div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell">ghci<span class="fu">&gt;</span> <span class="dt">EmptyTile</span> <span class="fu">==</span> <span class="dt">EmptyTile</span> </code></pre></div>
 <p>evaluate to?</p>
 <p>The equality test is <em>structural</em>, as in, a data type is always equal to itself.</p>
 <p>What is we want to define tile-equality so that comparison with <code>EmptyTile</code> is always <code>False</code>?</p>
 <p>We can write our own tile-equality operator to capture exactly this crazy requirement.</p>
-<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="kw">instance</span> <span class="dt">Eq</span> <span class="dt">Tile</span> <span class="kw">where</span>
-  <span class="dt">X</span> <span class="fu">==</span> <span class="dt">X</span> <span class="fu">=</span> <span class="dt">True</span> 
-  <span class="dt">O</span> <span class="fu">==</span> <span class="dt">O</span> <span class="fu">=</span> <span class="dt">True</span> 
-  _ <span class="fu">==</span> _ <span class="fu">=</span> <span class="dt">False</span> </code></pre></div>
+<div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt;</span> <span class="kw">instance</span> <span class="dt">Eq</span> <span class="dt">Tile</span> <span class="kw">where</span>
+<span class="ot">&gt;</span>   <span class="dt">X</span> <span class="fu">==</span> <span class="dt">X</span> <span class="fu">=</span> <span class="dt">True</span> 
+<span class="ot">&gt;</span>   <span class="dt">O</span> <span class="fu">==</span> <span class="dt">O</span> <span class="fu">=</span> <span class="dt">True</span> 
+<span class="ot">&gt;</span>   _ <span class="fu">==</span> _ <span class="fu">=</span> <span class="dt">False</span> </code></pre></div>
 <p><strong>Q:</strong> Now what does</p>
 <div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell">ghci<span class="fu">&gt;</span> <span class="dt">EmptyTile</span> <span class="fu">==</span> <span class="dt">EmptyTile</span> </code></pre></div>
 <p>evaluate to?</p>
@@ -225,7 +234,11 @@ forall t1,    t1 <span class="fu">==</span> t1 </code></pre></div>
 <span class="ot">&gt;</span>   <span class="fu">|</span> otherwise       <span class="fu">=</span> y<span class="fu">:</span>insert' dict x ys
 <span class="ot">&gt;</span> 
 <span class="ot">&gt; insertSort' ::</span> <span class="dt">OrdDict</span> a <span class="ot">-&gt;</span> [a] <span class="ot">-&gt;</span>[a]
-<span class="ot">&gt;</span> insertSort' dict <span class="fu">=</span> foldl (flip (insert' dict)) []  </code></pre></div>
+<span class="ot">&gt;</span> insertSort' dict <span class="fu">=</span> foldl (flip (insert' dict)) []  
+<span class="ot">&gt;</span> 
+<span class="ot">&gt;</span> 
+<span class="ot">&gt; insertSort' ::</span> <span class="dt">Ord</span> a <span class="ot">=&gt;</span> [a] <span class="ot">-&gt;</span>[a]
+<span class="ot">&gt;</span> insertSort' <span class="fu">=</span> foldl (flip (insert)) []  </code></pre></div>
 <p>Note how <code>insertSort'</code> propagates the dictionary to <code>insert'</code>.</p>
 <p>When we define instances of the <code>Ord</code> class we basically define dictionary values.</p>
 <div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt; intDict ::</span> <span class="dt">OrdDict</span> <span class="dt">Int</span> 
@@ -247,7 +260,12 @@ forall t1,    t1 <span class="fu">==</span> t1 </code></pre></div>
               , {<span class="st">&quot;day&quot;</span> <span class="fu">:</span> <span class="st">&quot;thursday&quot;</span>,  <span class="st">&quot;loc&quot;</span> <span class="fu">:</span> <span class="st">&quot;lab&quot;</span>}
               , {<span class="st">&quot;day&quot;</span> <span class="fu">:</span> <span class="st">&quot;friday&quot;</span>,    <span class="st">&quot;loc&quot;</span> <span class="fu">:</span> <span class="st">&quot;home&quot;</span>} ]
 }</code></pre></div>
-<p>In brief, each JSON object is either - a base value like a string, a number or a boolean, - an (ordered) array of objects, or - a set of string-object pairs.</p>
+<p>In brief, each JSON object is either</p>
+<ul>
+<li><p>a base value like a string, a number or a boolean,</p></li>
+<li><p>an (ordered) array of objects, or</p></li>
+<li><p>a set of string-object pairs.</p></li>
+</ul>
 <p>Thus, we can encode (a subset of) JSON values with the datatype</p>
 <div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt;</span> <span class="kw">data</span> <span class="dt">JVal</span> <span class="fu">=</span> <span class="dt">JStr</span> <span class="dt">String</span>
 <span class="ot">&gt;</span>           <span class="fu">|</span> <span class="dt">JNum</span> <span class="dt">Double</span>
