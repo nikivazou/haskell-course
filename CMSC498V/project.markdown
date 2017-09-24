@@ -15,11 +15,11 @@ Here are some ideas/suggestions:
 
 - A strategy game against the human, e.g., chess. 
 - A puzzle solver, e.g., sudoku.
+- A real game using Functional Reactive Programming check out [haskanoid](https://github.com/ivanperez-keera/haskanoid).
 - An efficient implementation of a data structure, e.g., string matching, red-black trees. 
 - A parser, type-checker, and/or interpreter for lambda-calculus. 
 - A prover of propositional logic. 
 - A web application. 
-- A Functional Reactive Programming application.
 - A Machine Learning implementation.
 - Any library you think is missing from the Haskell ecosystem. 
 
