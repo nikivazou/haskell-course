@@ -20,8 +20,8 @@
 - *Tue, 11/07:* <span style="color:red">**Project Updates.**</span> 
 - *Thu, 11/09:* <span style="color:white"> Functional Reactive Programming </span>
 - *Tue, 11/14:* <span style="color:white"> Lambda Calculus </span>
-- *Thu, 11/16:* <span style="color:white"> Type Inference </span>
-- *Tue, 11/21:* GHC magic by *Joachim Breitner* 
+- *Thu, 11/16:* GHC magic by *Joachim Breitner* 
+- *Tue, 11/21:* Monad Tranformers by *David Darais* 
 - *Thu, 11/23:* <span style="color:green">**No class: Thanks Giving.**</span> 
 - *Tue, 11/28:* <span style="color:white"> Liquid Haskell </span>
 - *Thu, 11/30:* <span style="color:white"> Natural Deduction </span>
