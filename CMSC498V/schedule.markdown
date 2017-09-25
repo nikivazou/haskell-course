@@ -1,0 +1,32 @@
+- *Tue, 08/29:* [intro](lectures/intro.pdf) [Haskell 101](lectures/Haskell101.html)
+- *Tue, 09/05:* <span style="color:green">**No class:**</span> [<span style="color:green">**ICFP.**</span>](http://conf.researchr.org/home/icfp-2017) 
+- *Thu, 09/07:* <span style="color:green">**No class:**</span> [<span style="color:green">**ICFP.**</span>](http://conf.researchr.org/home/icfp-2017) 
+- *Tue, 09/12:* [Lazy + HO examples](lectures/HigherOrder.html)
+- *Thu, 09/14:* [Functional Sorting](lectures/FunctionalThinking.html), [The real world](lectures/TheRealWorld.html)
+- *Tue, 09/19:* [Type Classes](lectures/TypeClasses.html)
+- *Thu, 09/21:* [Monoids and Foldables](lectures/MonoidsAndFoldables.html)
+- *Tue, 09/26:* [How to Architect Haskell Applications](invited/Jasper.html) *by Jasper Van der Jeugt*
+- *Thu, 09/28:* <span style="color:white"> Higher Order Functions</span>
+- *Tue, 10/03:* <span style="color:white"> Laziness</span>
+- *Thu, 10/05:* <span style="color:white"> Libraries + Development</span>
+- *Tue, 10/10:* <span style="color:red"> **Tournament.**</span>
+- *Thu, 10/12:* <span style="color:white"> Type Classes </span>
+- *Tue, 10/17:* <span style="color:red">**Project Proposal.**</span>
+- *Thu, 10/19:* <span style="color:white"> Type Classes </span>
+- *Tue, 10/24:* <span style="color:white"> Monads </span>
+- *Thu, 10/26:* 
+- *Tue, 10/31:* <span style="color:white"> Parsing, Testing </span>
+- *Thu, 11/02:* <span style="color:white"> Monad Transformers </span>
+- *Tue, 11/07:* <span style="color:red">**Project Updates.**</span> 
+- *Thu, 11/09:* <span style="color:white"> Functional Reactive Programming </span>
+- *Tue, 11/14:* <span style="color:white"> Lambda Calculus </span>
+- *Thu, 11/16:* <span style="color:white"> Type Inference </span>
+- *Tue, 11/21:* GHC magic by *Joachim Breitner* 
+- *Thu, 11/23:* <span style="color:green">**No class: Thanks Giving.**</span> 
+- *Tue, 11/28:* <span style="color:white"> Liquid Haskell </span>
+- *Thu, 11/30:* <span style="color:white"> Natural Deduction </span>
+- *Tue, 12/05:* <span style="color:red">**Project Presentation.**</span> 
+- *Thu, 12/07:* <span style="color:red">**Project Presentation.**</span> 
+
+
+
