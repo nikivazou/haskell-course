@@ -34,6 +34,13 @@ main = hakyllWith config $ do
             >>= loadAndApplyTemplate "templates/default.html" defaultContext
             >>= relativizeUrls    
 
+    match "homeworks/*.md" $ do
+        route   $ setExtension "html"
+        compile $ myPandocCompiler
+            >>= loadAndApplyTemplate "templates/default.html" defaultContext
+            >>= relativizeUrls    
+
+
     match (fromList 
               [ "index.markdown"
               , "schedule.markdown"

@@ -44,6 +44,12 @@ ghci<span class="fu">&gt;</span> [] <span class="fu">++</span> [<span class="fl"
 [<span class="fl">0.5</span>,<span class="fl">2.5</span>]  </code></pre></div>
 <p>It seems that both <code>(*)</code> together with <code>1</code> and <code>(++)</code> along with <code>[]</code> share some common properties.</p>
 <p><strong>Q:</strong> Can you write down the common properties in Haskell terms?</p>
+<p>(Multiplication , 1 )</p>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell">x <span class="fu">++</span> [] <span class="fu">=</span> x 
+[] <span class="fu">++</span> x <span class="fu">=</span> x
+x <span class="fu">++</span> (y <span class="fu">++</span> z) <span class="fu">=</span> (x <span class="fu">++</span> y) <span class="fu">++</span> z 
+
+x <span class="fu">*</span> y <span class="fu">==</span> y <span class="fu">*</span> x </code></pre></div>
 <ul>
 <li><p>The function takes two parameters.</p></li>
 <li><p>The parameters and the returned value have the same type.</p></li>
@@ -115,6 +121,18 @@ ghci<span class="fu">&gt;</span> mconcat [[<span class="dv">1</span>,<span class
 <p>To use <code>mempty</code> as the monoid list identity we have to write an explicit type annotation, because if we just did <code>mempty</code>, GHCi wouldn’t know which instance to use, so we had to say we want the list instance. We were able to use the general type of <code>[a]</code> (as opposed to specifying <code>[Int]</code> or <code>[String]</code>) because the empty list can act as if it contains any type.</p>
 <p>Because <code>mconcat</code> has a default implementation, we get it for free when we make something an instance of <code>Monoid</code>! In the case of the list, <code>mconcat</code> turns out to be just concat. It takes a list of lists and flattens it, because that’s the equivalent of doing <code>(++)</code> between all the adjecent lists in a list.</p>
 <p><strong>Q:</strong> Do the monoid laws hold for the list instance?</p>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="dt">Assumption</span> 
+[] <span class="fu">++</span> xs <span class="fu">=</span> xs 
+(y<span class="fu">:</span>ys) <span class="fu">++</span> xs <span class="fu">=</span> y<span class="fu">:</span>(ys <span class="fu">++</span> xs)</code></pre></div>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="dt">GOAL</span><span class="fu">:</span> [] <span class="fu">++</span> xs <span class="fu">=</span> xs 
+<span class="co">-- trivial </span>
+<span class="dt">GOAL</span><span class="fu">:</span> xs <span class="fu">++</span> [] <span class="fu">=</span> xs 
+<span class="co">-- by structural induction </span>
+
+[]     <span class="fu">++</span> [] <span class="fu">=</span> [] 
+(x<span class="fu">:</span>xs) <span class="fu">++</span> [] <span class="fu">=</span> x<span class="fu">:</span>(xs<span class="fu">++</span>[])
+                 <span class="co">--  Inductive Hypothesis</span>
+                 <span class="fu">=</span> x<span class="fu">:</span>xs</code></pre></div>
 <p>Notice that monoids don’t require that <code>a &lt;&gt; b</code> be equal to <code>b &lt;&gt; a</code>. In the case of the list, they clearly aren’t:</p>
 <div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell">ghci<span class="fu">&gt;</span> <span class="st">&quot;one&quot;</span> <span class="fu">&lt;&gt;</span> <span class="st">&quot;two&quot;</span>  
 <span class="st">&quot;onetwo&quot;</span>  

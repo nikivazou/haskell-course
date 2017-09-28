@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+        <title>CMSC498V - Tournament</title>
+        <link rel="stylesheet" type="text/css" href="../css/default.css" />
+        <link rel="stylesheet" type="text/css" href="../css/syntax.css" />
+    </head>
+    <body>
+        <div id="header">
+            <div id="logo">
+                <a href="../">CMSC498V</a>
+            </div>
+            <div id="navigation">
+                <a href="../schedule.html">Schedule</a>
+                <a href="../homeworks.html">Homeworks</a>
+                <a href="../project.html">Projects</a>
+                <a href="../resources.html">Resources</a>
+            </div>
+        </div>
+
+        <div id="content">
+            <h1 id="tournament">Tournament</h1>
+<p>For the tournament you are requested to implement a strategy that solves <a href="https://en.wikipedia.org/wiki/Gomoku">gomoku</a>, a generalization of tic-tac-toe.</p>
+<p>You can (and are encouraged) to work in pairs. You should submit your implementation any time on <strong>10/8</strong>.</p>
+<h2 id="game-rules">Game Rules</h2>
+<ul>
+<li>The game is played on a <strong>15x15</strong> board.</li>
+<li>The tile of the first player is X and the tile of the second is O.</li>
+<li>Each player has <strong>30 sec</strong> to decide their move.</li>
+<li>Players alternate turns placing their tile on an empty intersection.</li>
+<li>The winner is the first player to form an unbroken chain of <strong>five</strong> tiles horizontally, vertically, or diagonally.</li>
+</ul>
+<h2 id="how-to-play">How to play</h2>
+<ul>
+<li><p>Pick up a name for your team. In the following steps replace the world <code>Lambda</code> with your team name.</p></li>
+<li><p>Clone the tic-tac-toe directory and navigate in the <code>gomoku</code> folder.</p></li>
+</ul>
+<pre><code>git clone https://github.com/nikivazou/tic-tac-toe.git
+cd tic-tac-toe/gomoku/</code></pre>
+<ul>
+<li>Create the file that implements your strategy.</li>
+</ul>
+<pre><code>touch src/Player/Lambda.hs</code></pre>
+<ul>
+<li>Initiate the file you just created as below:</li>
+</ul>
+<pre><code>module Player.Lambda (playerLambda) where
+
+import Types
+
+teamMembers :: String 
+teamMembers = &quot;Write your name to get the tournament points&quot;
+
+playerLambda :: Player 
+playerLambda = error &quot;Define me!&quot;</code></pre>
+<p><strong>Note:</strong> In the above initiation you should only change <code>Lambda</code> with your team name. It is important that your team-name starts with a capital letter, so that it can be a module name.</p>
+<ul>
+<li><p>Replace the call to <code>error</code> with your implementation.</p></li>
+<li><p>Register your team by running</p></li>
+</ul>
+<pre><code>sh makeplayers.sh</code></pre>
+<p>The above will output</p>
+<pre><code># Players registerd:
+# BestNext
+# Computer
+# Human
+# Lambda</code></pre>
+<p>Check that your team is indeed added as a registered players.</p>
+<ul>
+<li>Install <code>gomoku</code></li>
+</ul>
+<pre><code>stack install</code></pre>
+<ul>
+<li>Play by calling <code>gomoku</code> with exactly two team-names</li>
+</ul>
+<pre><code>gomoku Lambda Computer</code></pre>
+<h2 id="how-to-submit">How to submit</h2>
+<p>To submit your strategy, generate a <a href="https://help.github.com/articles/creating-a-pull-request/">Pull Request</a> to the tic-tac-toc repository that adds your <code>Strategy.Lambdas.hs</code> file and does not touch anything else.</p>
+<p>Alternatively, you can send your file to the instructor and TA by email, with subject “CMSC498V: Tournamet”.</p>
+<p>You can submit multiple pull requests as long as you make sure that by the end of the deadline you have only one team submitted. You can only send one email.</p>
+<p>On <strong>10/9</strong> all the teams will be announced on piazza. (Check that your submission is registered.)</p>
+<h2 id="grading">Grading</h2>
+<ul>
+<li>If you do not submit a file or your file does not compile (please do not…) you get 0 points.</li>
+<li>If your strategy makes more than 30 sec or crashes you get half points.</li>
+<li>Otherwise, you get full points.</li>
+<li>If you win, you also get a gift!</li>
+</ul>
+<h2 id="teams-and-ties">Teams and Ties</h2>
+<p>The opponents will be decided by a random programs exactly before class. Each game will be 5 rounds of gomoku. In case of a tie, a coin will be tossed.</p>
+<h2 id="integrity-privacy-and-copyrights.">Integrity, Privacy and Copyrights.</h2>
+<p>Sending your solution via a pull request has two benefits</p>
+<ul>
+<li>It makes setting up the tournament easy.</li>
+<li>You will learn how to create a pull request.</li>
+</ul>
+<p>But also it will make your code public. If you do not want your code to get public, send your solutions via email to the instructor and TA.</p>
+<p>Making your solutions public means that some students can copy and submit your solution. We rely on your integrity and respect for your classmates on not copying or looking at other solutions, before you submit yours. Yet, feel free to test your code against other submitted solutions. Or even submit “testing” solutions: solutions without the <code>teamMembers</code> that can be used only for testing.</p>
+        </div>
+        <div id="footer">
+            Site proudly generated by
+            <a href="http://jaspervdj.be/hakyll">Hakyll</a>
+        </div>
+    </body>
+</html>
