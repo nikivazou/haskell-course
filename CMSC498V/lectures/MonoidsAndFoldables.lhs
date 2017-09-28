@@ -1,7 +1,7 @@
-Monoids & Foldables 
-===========
+Monoids & Foldables (& Kinds) 
+=============================
 
-This lecture is stolen from [Learn you a Haskell for Great Good!](http://learnyouahaskell.com/functors-applicative-functors-and-monoids).
+This lecture is adjusted from [Learn you a Haskell for Great Good!](http://learnyouahaskell.com/functors-applicative-functors-and-monoids).
 
 Haskell's combination of purity, higher order functions, parameterized algebraic data types, and typeclasses allows us to implement *polymorphism* on a much higher level than possible in other languages.
 It allows us to abstract over *properties of functions* (what we call class lows)! 
@@ -18,9 +18,12 @@ The path to Monads goes throught the classes of functors and applicatives.
 But let's start today with a simpler class: monoids, which are sort of like socks.
 
 \begin{code}
+
+{-# LANGUAGE FlexibleInstances #-}
+
 module MonoidsAndFoldables where
 
-import Data.Monoid   hiding (Any(..), All(..))
+import Data.Monoid   hiding (Any(..), All(..), Sum(..))
 import Data.Foldable hiding (sum)
 import Prelude       hiding (sum)
 \end{code}
@@ -524,7 +527,7 @@ To use `Product a` as a monoid, we have to do some newtype wrapping and unwrappi
 This is nice as a showcase of the `Monoid` type class, but no one in their right mind would use this way of multiplying numbers instead of just writing `3 * 9` and `3 * 1`. 
 But a bit later, we'll see how these `Monoid` instances that may seem trivial at this time can come in handy.
 
-`Sum` is defined like `Product` and the instance is similar as well. We use it in the same way:
+**Q:** Define `Sum` and its monoid instance like `Product` so that
 
 < ghci> getSum $ Sum 2 <> Sum 9  
 < 11  
@@ -603,6 +606,71 @@ Let's compare the types of Foldable's foldr and the foldr from the Prelude to se
 < length :: Foldable t => t a -> Int
 < ghci> :t foldl
 < foldl :: Foldable t => (b -> a -> b) -> b -> t a -> b  
+
+
+Parenthesis: Kind System 
+------------------------
+
+Wait! What does `t a` mean?
+
+**Q:** What does `a` mean?
+
+We are used to abstract over types, but in Haskell we can further abstarct over *type constuctors*. 
+A type constructor constructs types, given a type, it returns another type.
+Much like functions (eg `id`) that given an expression it returns another expression. 
+For example, `t` above can be instantiated to `Maybe`, `All`, `Any`, `[]`, etc. 
+But cannot get instantiated to `Bool`, `Int`, `Maybe Int`, etc
+
+**Q:** Can `t` be instantiated to `Assoc`?
+
+\begin{code}
+data Assoc k v = Tip | Bin k v (Assoc k v) (Assoc k v)
+  deriving (Show, Eq)
+\end{code}
+
+
+The compiler decides the good instances of `t` using a **kind system**. 
+As values have types, types have kinds. 
+The kind `*` represents the all types of values (the universe). 
+
+< ghci> :k Int
+< Int :: *
+< ghci> :k Bool
+< Bool :: *
+< ghci> :k Maybe Int
+< Maybe Int :: * 
+
+Lets figure out more interesting kinds. 
+What is the kind of `Maybe`, `All`, `Assoc`, `Monoid`, `Foldable`?
+
+The kind system tell us what instances we can create. 
+
+**Q:** Which of the following "kind"-check?
+
+< instance Monoid   Int   where
+< instance Monoid   Maybe where
+< instance Monoid   Assoc where
+< instance Foldable Int   where
+< instance Foldable Maybe where
+< instance Foldable Assoc where
+
+The kind system allows for quite fancy (i.e., higher order) 
+operations like currying and higher order kinds. 
+
+**Q:** What is the kind of `Assoc Int`, `forall a. Assoc a`, `IHaveFunctionKind`?
+
+\begin{code}
+data IHaveFunctionKind t a = IHFK (a -> t a -> Bool)
+\end{code}
+
+In short, the expressive kind system allows for 
+"type level programming" or dependent types. 
+[Who needs terms, anyway?](https://typesandkinds.wordpress.com/)
+
+
+
+Closing Parenthesis: Back to Foldables 
+------------------------
 
 Ah! So `length` and `foldl` is not defined only over lists, but instead over *any type* that can be folded up!
 Okay then, what are some other data structures that support folds? Well, there's the Maybe we all know and love!
@@ -708,7 +776,8 @@ Now that we have `chunk`
 we can define `mapReduce` in terms of `foldMap`
 
 \begin{code}
-mapReduce :: (Chunkable a, Monoid b) => (a -> b) -> (a -> b)
+mapReduce :: (Chunkable a, Monoid b) 
+          => (a -> b) -> (a -> b)
 mapReduce f x = foldMap f (chunk x)
 \end{code}
 
@@ -721,10 +790,8 @@ to return the `Sum` of its elements.
 Since `Sum Int` is a `Monoid` 
 we can already use the `mconat` monoid operation
 
-\begin{code}
-sum :: [Int] -> Sum Int 
-sum = mconcat . map Sum  
-\end{code}
+< sum :: [Int] -> Sum Int 
+< sum = mconcat . map Sum  
 
 This just works! 
 
@@ -734,10 +801,8 @@ This just works!
 Since the input of `sum` is a list (a.k.a. `Chunkable`)
 and its result is a `Monoid` we can apply it to `mapReduce`:
 
-\begin{code}
-psum :: [Int] -> Sum Int 
-psum = mapReduce sum           
-\end{code}
+< psum :: [Int] -> Sum Int 
+< psum = mapReduce sum           
 
 Unexpectedly, `sum` and `psum` behave the same: 
 
@@ -767,3 +832,6 @@ in a pure function like Hakell the `map` portion of `foldMap`
 can get parallelised, and then we got efficiency!
 
 
+**Project Idea:** 
+Define the mapReducable type class and use it to (actually) parallelize 
+divide and conquer algorithms. 

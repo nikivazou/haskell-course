@@ -2,8 +2,8 @@ The project will happen at the *second* half of the semester.
 The goal of the project is to give you some realistic experience of Haskell development and [pair programming](https://en.wikipedia.org/wiki/Pair_programming).
 You are expected to work in pairs and spend at least *30 hours* in the project. 
 
-- *Tue, 10/03:* Project Registration
-- *Tue, 10/10:* Project Proposal 
+- *Tue, 10/10:* Project Registration
+- *Tue, 10/17:* Project Proposal 
 - *Tue, 11/07:* Project Updates
 - *Tue, 12/05:* Project Presentation 
 
@@ -19,7 +19,7 @@ Here are some ideas/suggestions:
 - An efficient implementation of a data structure, e.g., string matching, red-black trees. 
 - A parser, type-checker, and/or interpreter for lambda-calculus. 
 - A prover of propositional logic. 
-- A web application. 
+- A web or database application using [Yesod](https://www.yesodweb.com/). 
 - A Machine Learning implementation.
 - Any library you think is missing from the Haskell ecosystem. 
 
@@ -36,12 +36,12 @@ The tests should be automatically checked via [Travis CI](https://travis-ci.com/
 - *[optional] verification:* optionally you can use [Liquid Haskell](https://ucsd-progsys.github.io/liquidhaskell-blog/) to check validity of your code.
 
 
-*Tue, 10/03:* Project Registration
+*Tue, 10/10:* Project Registration
 ----------------------------------
 
 You need to create a `github` repository for your project, write a `Readme.md` file that describes your goals and write *your names* and the *github link* to the [this](https://docs.google.com/document/d/1OQCYmsOTK25uycGGNqQ_6hyJPvKBxSNudDiNxUjQ8RA/edit?usp=sharing) document.
 
-*Tue, 10/10:* Project Proposal 
+*Tue, 10/17:* Project Proposal 
 -------------------------------
 
 You will give a *5 min* description of your project. 

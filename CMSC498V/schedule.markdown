@@ -4,9 +4,9 @@
 - *Tue, 09/12:* [Lazy + HO examples](lectures/HigherOrder.html)
 - *Thu, 09/14:* [Functional Sorting](lectures/FunctionalThinking.html), [The real world](lectures/TheRealWorld.html)
 - *Tue, 09/19:* [Type Classes](lectures/TypeClasses.html)
-- *Thu, 09/21:* [Monoids and Foldables](lectures/MonoidsAndFoldables.html)
+- *Thu, 09/21:* [Monoids & Foldables (& Kinds)](lectures/MonoidsAndFoldables.html)
 - *Tue, 09/26:* [How to Architect Haskell Applications](invited/Jasper.html) *by Jasper Van der Jeugt*
-- *Thu, 09/28:* <span style="color:white"> Higher Order Functions</span>
+- *Thu, 09/28:* [Functors & Applicatives](lectures/FunctorsAndApplicatives.html)
 - *Tue, 10/03:* <span style="color:white"> Laziness</span>
 - *Thu, 10/05:* <span style="color:white"> Libraries + Development</span>
 - *Tue, 10/10:* <span style="color:red"> **Tournament.**</span>

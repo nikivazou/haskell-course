@@ -21,13 +21,16 @@
         </div>
 
         <div id="content">
-            <h1 id="monoids-foldables">Monoids &amp; Foldables</h1>
-<p>This lecture is stolen from <a href="http://learnyouahaskell.com/functors-applicative-functors-and-monoids">Learn you a Haskell for Great Good!</a>.</p>
+            <h1 id="monoids-foldables-kinds">Monoids &amp; Foldables (&amp; Kinds)</h1>
+<p>This lecture is adjusted from <a href="http://learnyouahaskell.com/functors-applicative-functors-and-monoids">Learn you a Haskell for Great Good!</a>.</p>
 <p>Haskell’s combination of purity, higher order functions, parameterized algebraic data types, and typeclasses allows us to implement <em>polymorphism</em> on a much higher level than possible in other languages. It allows us to abstract over <em>properties of functions</em> (what we call class lows)! We don’t have to think about types belonging to a big hierarchy of types. Instead, we think about what the types can act like and then connect them with the appropriate typeclasses. An <code>Int</code> can act like a lot of things. It can act like an equatable thing, like an ordered thing, like an enumerable thing, etc.</p>
 <p>Typeclasses are <em>open</em>, which means that we can define our own data type, think about what it can act like and connect it with the typeclasses that define its behaviors. Because of that and because of Haskell’s great type system that allows us to know a lot about a function just by knowing its type declaration, we can define typeclasses that define behavior that’s very general and abstract (using terminology from the scary <a href="https://en.wikipedia.org/wiki/Category_theory">Category Theory</a>). We’ve met typeclasses that define operations for seeing if two things are equal,comparing two things by some ordering or turning things into a <code>JSon</code>. Those are very abstract and elegant behaviors, but we just don’t think of them as anything very special because we’ve been dealing with them for most of our lives. Our goal in the next lectures it to understand the abstract class of Monads. The path to Monads goes throught the classes of functors and applicatives. But let’s start today with a simpler class: monoids, which are sort of like socks.</p>
-<div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt;</span> <span class="kw">module</span> <span class="dt">MonoidsAndFoldables</span> <span class="kw">where</span>
+<div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt;</span> 
+<span class="ot">&gt;</span> <span class="ot">{-# LANGUAGE FlexibleInstances #-}</span>
 <span class="ot">&gt;</span> 
-<span class="ot">&gt;</span> <span class="kw">import </span><span class="dt">Data.Monoid</span>   <span class="kw">hiding</span> (<span class="dt">Any</span>(..), <span class="dt">All</span>(..))
+<span class="ot">&gt;</span> <span class="kw">module</span> <span class="dt">MonoidsAndFoldables</span> <span class="kw">where</span>
+<span class="ot">&gt;</span> 
+<span class="ot">&gt;</span> <span class="kw">import </span><span class="dt">Data.Monoid</span>   <span class="kw">hiding</span> (<span class="dt">Any</span>(..), <span class="dt">All</span>(..), <span class="dt">Sum</span>(..))
 <span class="ot">&gt;</span> <span class="kw">import </span><span class="dt">Data.Foldable</span> <span class="kw">hiding</span> (sum)
 <span class="ot">&gt;</span> <span class="kw">import </span><span class="dt">Prelude</span>       <span class="kw">hiding</span> (sum)</code></pre></div>
 <h2 id="monoids">Monoids</h2>
@@ -250,7 +253,7 @@ ghci<span class="fu">&gt;</span> getProduct <span class="fu">$</span> <span clas
 ghci<span class="fu">&gt;</span> getProduct <span class="fu">.</span> mconcat <span class="fu">.</span> map <span class="dt">Product</span> <span class="fu">$</span> [<span class="dv">3</span>,<span class="dv">4</span>,<span class="dv">2</span>]  
 <span class="dv">24</span>  </code></pre></div>
 <p>This is nice as a showcase of the <code>Monoid</code> type class, but no one in their right mind would use this way of multiplying numbers instead of just writing <code>3 * 9</code> and <code>3 * 1</code>. But a bit later, we’ll see how these <code>Monoid</code> instances that may seem trivial at this time can come in handy.</p>
-<p><code>Sum</code> is defined like <code>Product</code> and the instance is similar as well. We use it in the same way:</p>
+<p><strong>Q:</strong> Define <code>Sum</code> and its monoid instance like <code>Product</code> so that</p>
 <div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell">ghci<span class="fu">&gt;</span> getSum <span class="fu">$</span> <span class="dt">Sum</span> <span class="dv">2</span> <span class="fu">&lt;&gt;</span> <span class="dt">Sum</span> <span class="dv">9</span>  
 <span class="dv">11</span>  
 ghci<span class="fu">&gt;</span> getSum <span class="fu">$</span> mempty <span class="fu">&lt;&gt;</span> <span class="dt">Sum</span> <span class="dv">3</span>  
@@ -291,6 +294,34 @@ ghci<span class="fu">&gt;</span> getAll <span class="fu">.</span> mconcat <span 
 length<span class="ot"> ::</span> <span class="dt">Foldable</span> t <span class="ot">=&gt;</span> t a <span class="ot">-&gt;</span> <span class="dt">Int</span>
 ghci<span class="fu">&gt;</span> <span class="fu">:</span>t foldl
 foldl<span class="ot"> ::</span> <span class="dt">Foldable</span> t <span class="ot">=&gt;</span> (b <span class="ot">-&gt;</span> a <span class="ot">-&gt;</span> b) <span class="ot">-&gt;</span> b <span class="ot">-&gt;</span> t a <span class="ot">-&gt;</span> b  </code></pre></div>
+<h2 id="parenthesis-kind-system">Parenthesis: Kind System</h2>
+<p>Wait! What does <code>t a</code> mean?</p>
+<p><strong>Q:</strong> What does <code>a</code> mean?</p>
+<p>We are used to abstract over types, but in Haskell we can further abstarct over <em>type constuctors</em>. A type constructor constructs types, given a type, it returns another type. Much like functions (eg <code>id</code>) that given an expression it returns another expression. For example, <code>t</code> above can be instantiated to <code>Maybe</code>, <code>All</code>, <code>Any</code>, <code>[]</code>, etc. But cannot get instantiated to <code>Bool</code>, <code>Int</code>, <code>Maybe Int</code>, etc</p>
+<p><strong>Q:</strong> Can <code>t</code> be instantiated to <code>Assoc</code>?</p>
+<div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt;</span> <span class="kw">data</span> <span class="dt">Assoc</span> k v <span class="fu">=</span> <span class="dt">Tip</span> <span class="fu">|</span> <span class="dt">Bin</span> k v (<span class="dt">Assoc</span> k v) (<span class="dt">Assoc</span> k v)
+<span class="ot">&gt;</span>   <span class="kw">deriving</span> (<span class="dt">Show</span>, <span class="dt">Eq</span>)</code></pre></div>
+<p>The compiler decides the good instances of <code>t</code> using a <strong>kind system</strong>. As values have types, types have kinds. The kind <code>*</code> represents the all types of values (the universe).</p>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell">ghci<span class="fu">&gt;</span> <span class="fu">:</span>k <span class="dt">Int</span>
+<span class="dt">Int</span><span class="ot"> ::</span> <span class="fu">*</span>
+ghci<span class="fu">&gt;</span> <span class="fu">:</span>k <span class="dt">Bool</span>
+<span class="dt">Bool</span><span class="ot"> ::</span> <span class="fu">*</span>
+ghci<span class="fu">&gt;</span> <span class="fu">:</span>k <span class="dt">Maybe</span> <span class="dt">Int</span>
+<span class="dt">Maybe</span> <span class="dt">Int</span><span class="ot"> ::</span> <span class="fu">*</span> </code></pre></div>
+<p>Lets figure out more interesting kinds. What is the kind of <code>Maybe</code>, <code>All</code>, <code>Assoc</code>, <code>Monoid</code>, <code>Foldable</code>?</p>
+<p>The kind system tell us what instances we can create.</p>
+<p><strong>Q:</strong> Which of the following “kind”-check?</p>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="kw">instance</span> <span class="dt">Monoid</span>   <span class="dt">Int</span>   <span class="kw">where</span>
+<span class="kw">instance</span> <span class="dt">Monoid</span>   <span class="dt">Maybe</span> <span class="kw">where</span>
+<span class="kw">instance</span> <span class="dt">Monoid</span>   <span class="dt">Assoc</span> <span class="kw">where</span>
+<span class="kw">instance</span> <span class="dt">Foldable</span> <span class="dt">Int</span>   <span class="kw">where</span>
+<span class="kw">instance</span> <span class="dt">Foldable</span> <span class="dt">Maybe</span> <span class="kw">where</span>
+<span class="kw">instance</span> <span class="dt">Foldable</span> <span class="dt">Assoc</span> <span class="kw">where</span></code></pre></div>
+<p>The kind system allows for quite fancy (i.e., higher order) operations like currying and higher order kinds.</p>
+<p><strong>Q:</strong> What is the kind of <code>Assoc Int</code>, <code>forall a. Assoc a</code>, <code>IHaveFunctionKind</code>?</p>
+<div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt;</span> <span class="kw">data</span> <span class="dt">IHaveFunctionKind</span> t a <span class="fu">=</span> <span class="dt">IHFK</span> (a <span class="ot">-&gt;</span> t a <span class="ot">-&gt;</span> <span class="dt">Bool</span>)</code></pre></div>
+<p>In short, the expressive kind system allows for “type level programming” or dependent types. <a href="https://typesandkinds.wordpress.com/">Who needs terms, anyway?</a></p>
+<h2 id="closing-parenthesis-back-to-foldables">Closing Parenthesis: Back to Foldables</h2>
 <p>Ah! So <code>length</code> and <code>foldl</code> is not defined only over lists, but instead over <em>any type</em> that can be folded up! Okay then, what are some other data structures that support folds? Well, there’s the Maybe we all know and love!</p>
 <div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell">ghci<span class="fu">&gt;</span> foldl (<span class="fu">+</span>) <span class="dv">2</span> (<span class="dt">Product</span> <span class="dv">42</span>)  
 <span class="dv">44</span>
@@ -338,18 +369,19 @@ ghci<span class="fu">&gt;</span> foldl (<span class="fu">*</span>) <span class="
 <span class="ot">&gt;</span>   chunk x <span class="fu">|</span> length x <span class="fu">&lt;=</span> <span class="dv">2</span> <span class="fu">=</span> [x]
 <span class="ot">&gt;</span>   chunk x <span class="fu">=</span> take <span class="dv">2</span> x<span class="fu">:</span> chunk (drop <span class="dv">2</span> x)</code></pre></div>
 <p>Now that we have <code>chunk</code> we can define <code>mapReduce</code> in terms of <code>foldMap</code></p>
-<div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt; mapReduce ::</span> (<span class="dt">Chunkable</span> a, <span class="dt">Monoid</span> b) <span class="ot">=&gt;</span> (a <span class="ot">-&gt;</span> b) <span class="ot">-&gt;</span> (a <span class="ot">-&gt;</span> b)
+<div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt; mapReduce ::</span> (<span class="dt">Chunkable</span> a, <span class="dt">Monoid</span> b) 
+<span class="ot">&gt;</span>           <span class="ot">=&gt;</span> (a <span class="ot">-&gt;</span> b) <span class="ot">-&gt;</span> (a <span class="ot">-&gt;</span> b)
 <span class="ot">&gt;</span> mapReduce f x <span class="fu">=</span> foldMap f (chunk x)</code></pre></div>
 <p>First <code>chunk</code> the input and then <code>foldMap</code> the input function <code>f</code> into each chunk!</p>
 <p>Lets see a use case of <code>mapReduce</code> We define the <code>sum</code> of an integer list to return the <code>Sum</code> of its elements. Since <code>Sum Int</code> is a <code>Monoid</code> we can already use the <code>mconat</code> monoid operation</p>
-<div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt; sum ::</span> [<span class="dt">Int</span>] <span class="ot">-&gt;</span> <span class="dt">Sum</span> <span class="dt">Int</span> 
-<span class="ot">&gt;</span> sum <span class="fu">=</span> mconcat <span class="fu">.</span> map <span class="dt">Sum</span>  </code></pre></div>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell">sum<span class="ot"> ::</span> [<span class="dt">Int</span>] <span class="ot">-&gt;</span> <span class="dt">Sum</span> <span class="dt">Int</span> 
+sum <span class="fu">=</span> mconcat <span class="fu">.</span> map <span class="dt">Sum</span>  </code></pre></div>
 <p>This just works!</p>
 <div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell">ghc<span class="fu">&gt;</span> sum [<span class="dv">1</span><span class="fu">..</span><span class="dv">100</span>]
 <span class="dt">Sum</span> {getSum <span class="fu">=</span> <span class="dv">5050</span>}</code></pre></div>
 <p>Since the input of <code>sum</code> is a list (a.k.a. <code>Chunkable</code>) and its result is a <code>Monoid</code> we can apply it to <code>mapReduce</code>:</p>
-<div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt; psum ::</span> [<span class="dt">Int</span>] <span class="ot">-&gt;</span> <span class="dt">Sum</span> <span class="dt">Int</span> 
-<span class="ot">&gt;</span> psum <span class="fu">=</span> mapReduce sum           </code></pre></div>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="ot">psum ::</span> [<span class="dt">Int</span>] <span class="ot">-&gt;</span> <span class="dt">Sum</span> <span class="dt">Int</span> 
+psum <span class="fu">=</span> mapReduce sum           </code></pre></div>
 <p>Unexpectedly, <code>sum</code> and <code>psum</code> behave the same:</p>
 <div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell">ghc<span class="fu">&gt;</span> sum [<span class="dv">1</span><span class="fu">..</span><span class="dv">100</span>]
 <span class="dt">Sum</span> {getSum <span class="fu">=</span> <span class="dv">5050</span>}</code></pre></div>
@@ -358,6 +390,7 @@ ghci<span class="fu">&gt;</span> foldl (<span class="fu">*</span>) <span class="
 <div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt; mapReduceBad ::</span> (<span class="dt">Chunkable</span> a, <span class="dt">Monoid</span> b) <span class="ot">=&gt;</span> (a <span class="ot">-&gt;</span> b) <span class="ot">-&gt;</span> (a <span class="ot">-&gt;</span> b)
 <span class="ot">&gt;</span> mapReduceBad f x <span class="fu">=</span> error <span class="st">&quot;Define me!&quot;</span></code></pre></div>
 <p>Ok, assuming that the returning function behaves as the input one, what did you get? Nothing for now, but in a pure function like Hakell the <code>map</code> portion of <code>foldMap</code> can get parallelised, and then we got efficiency!</p>
+<p><strong>Project Idea:</strong> Define the mapReducable type class and use it to (actually) parallelize divide and conquer algorithms.</p>
         </div>
         <div id="footer">
             Site proudly generated by

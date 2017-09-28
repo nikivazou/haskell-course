@@ -47,6 +47,6 @@ Grading
 
 - Questions (10%). In class participation and responses on questions.
 - [Homeworks](/homeworks.html) (20%). Four comprehension, programming assignments. 
-- [Tournament](/schedule.html) (10%). One tournament on a strategy game (like tic-tac-toe).
+- [Tournament](/homeworks/Tournament.html) (10%). One tournament on a strategy game (like tic-tac-toe).
 - [Project](/project.html) (30%).  Haskell implementation of a (semi-) realistic project. 
 - Final (30%). In class final. 
