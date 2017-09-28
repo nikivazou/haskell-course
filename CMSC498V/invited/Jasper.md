@@ -4,6 +4,12 @@ Jasper Van der Jeugt
 How to Architect Medium to Large-Scale Haskell Applications 
 -------------
 
+[Slides](https://github.com/jaspervdj/talks/blob/master/2017-uofmd-practical-haskell/slides.md)
+[Application] (https://github.com/jaspervdj/fugacious)
+
+
+Abstract: 
+---------
 If you are writing a medium-sized Haskell for the very first time, you will typically end up with three modules: Types.hs, Utils.hs and Main.hs. While this is a very clear split, it typically doesn't scale very well as applications become larger.
 
 In this beginners talk, Jasper will share with you some practical ways to organise code in Haskell applications. Some of the questions Jasper will answer include:
