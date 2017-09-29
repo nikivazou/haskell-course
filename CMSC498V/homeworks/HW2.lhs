@@ -216,6 +216,10 @@ that returns the first descending sequence it finds and calls back to
 < descending 0 [] [3, 2, 1]       == [[0],[1,2,3],[]]
 < descending 0 [] [1, 2, 3, 2, 1] == [[0],[1,2,3],[1,2],[]]
 
+Note that `descending` should only find strictly descending sequences, i.e.
+
+< descending 1 [] [1, 2]          == [[1],[1,2],[]]
+
 \begin{code}
 descending :: Ord a => a -> [a] -> [a] -> [[a]]
 descending a as bs = error "Define me!"
