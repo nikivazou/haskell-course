@@ -33,9 +33,12 @@
 <div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt; eval1              ::</span>  <span class="dt">Expr</span> <span class="ot">-&gt;</span> <span class="dt">Int</span>
 <span class="ot">&gt;</span> eval1 (<span class="dt">Val</span> n)     <span class="fu">=</span>  n
 <span class="ot">&gt;</span> eval1 (<span class="dt">Div</span> x y)   <span class="fu">=</span>  eval1 x <span class="ot">`div`</span> eval1 y</code></pre></div>
-<p>However, this function doesn’t take account of the possibility of division by zero, and will produce an error in this case. In order to deal with this explicitly, we can use the <code>Maybe</code> type</p>
-<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="kw">data</span> <span class="dt">Maybe</span> a <span class="fu">=</span> <span class="dt">Nothing</span> <span class="fu">|</span> <span class="dt">Just</span> a
-to define a safe version <span class="kw">of</span> division</code></pre></div>
+<p>However, this function doesn’t take account of the possibility of division by zero, and will produce an error in this case.</p>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell">ghci<span class="fu">&gt;</span> eval (<span class="dt">Div</span> (<span class="dt">Val</span> <span class="dv">1</span>) (<span class="dt">Val</span> <span class="dv">0</span>))
+<span class="fu">***</span> <span class="dt">Exception</span><span class="fu">:</span> divide by zero </code></pre></div>
+<p>In order to deal with this explicitly, we can use the <code>Maybe</code> type</p>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="kw">data</span> <span class="dt">Maybe</span> a <span class="fu">=</span> <span class="dt">Nothing</span> <span class="fu">|</span> <span class="dt">Just</span> a</code></pre></div>
+<p>to define a safe version of division</p>
 <div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt; safeDiv     ::</span> <span class="dt">Int</span> <span class="ot">-&gt;</span> <span class="dt">Int</span> <span class="ot">-&gt;</span> <span class="dt">Maybe</span> <span class="dt">Int</span>
 <span class="ot">&gt;</span> safeDiv n m <span class="fu">=</span>  <span class="kw">if</span> m <span class="fu">==</span> <span class="dv">0</span> <span class="kw">then</span> <span class="dt">Nothing</span> <span class="kw">else</span> <span class="dt">Just</span> (n <span class="ot">`div`</span> m)</code></pre></div>
 <p>and then modify our evaluator as follows:</p>
@@ -46,6 +49,8 @@ to define a safe version <span class="kw">of</span> division</code></pre></div>
 <span class="ot">&gt;</span>                        <span class="dt">Just</span> n1 <span class="ot">-&gt;</span> <span class="kw">case</span> eval1' y <span class="kw">of</span>
 <span class="ot">&gt;</span>                                     <span class="dt">Nothing</span> <span class="ot">-&gt;</span> <span class="dt">Nothing</span>
 <span class="ot">&gt;</span>                                     <span class="dt">Just</span> n2 <span class="ot">-&gt;</span> n1 <span class="ot">`safeDiv`</span> n2</code></pre></div>
+<p><strong>Q:</strong> What happens now to our previous exception?</p>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell">ghci<span class="fu">&gt;</span> eval1' (<span class="dt">Div</span> (<span class="dt">Val</span> <span class="dv">1</span>) (<span class="dt">Val</span> <span class="dv">0</span>))</code></pre></div>
 <p>As in the previous section, we can observe a common pattern, namely performing a case analysis on a value of a <code>Maybe</code> type, mapping <code>Nothing</code> to itself, and <code>Just x</code> to some result depending upon <code>x</code>. (Aside: we could go further and also take account of the fact that the case analysis is performed on the result of an eval, but this would lead to the more advanced notion of a monadic fold.)</p>
 <p>How should this pattern be abstracted out? One approach would be to observe that a key notion in the evaluation of division is the sequencing of two values of a <code>Maybe</code> type, namely the results of evaluating the two arguments of the division. Based upon this observation, we could define a sequencing function</p>
 <div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt; seqn                    ::</span> <span class="dt">Maybe</span> a <span class="ot">-&gt;</span> <span class="dt">Maybe</span> b <span class="ot">-&gt;</span> <span class="dt">Maybe</span> (a, b)

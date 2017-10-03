@@ -862,8 +862,12 @@ Can you construct a `mapReduceBad` implementation
 with the same type as `mapReduce` that returns a non-equivalent function?
 
 \begin{code}
-mapReduceBad :: (Chunkable a, Monoid b) => (a -> b) -> (a -> b)
-mapReduceBad f x = error "Define me!"
+mapReduceBad :: (Chunkable a, Monoid b) 
+             => (a -> b) -> (a -> b)
+mapReduceBad f x = mempty
+
+id' :: Monoid a => a -> a 
+id' x = mempty 
 \end{code}
 
 Ok, assuming that the returning function behaves as the input one, 
@@ -875,4 +879,20 @@ can get parallelised, and then we got efficiency!
 
 **Project Idea:** 
 Define the mapReducable type class and use it to (actually) parallelize 
-divide and conquer algorithms. 
+divide and conquer algorithms, for example [string matching](https://nikivazou.github.io/static/Haskell17/a-tale.pdf). 
+
+Summary
+-------
+
+[Monoids](https://en.wikipedia.org/wiki/Monoid) are a class of functions defined in
+[abstract algebra](https://en.wikipedia.org/wiki/Abstract_algebra) 
+that satisfy special properties. 
+
+In this lecture we learnt two important lessons.
+
+- Monoids are very important for parallelization (general lesson).
+- We learnt how to define and use type classes, abstracting over 
+method definitions and their laws (haskell lesson). 
+
+Let's now go and two equally important type classes, 
+[Functors and Applicatives](FunctorsAndApplicatives.html).

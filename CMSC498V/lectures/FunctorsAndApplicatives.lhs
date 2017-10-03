@@ -82,6 +82,11 @@ square   = tx (^ 2)
 \end{code}
 
 
+
+**Q:** What is the type of `tx`?
+
+
+
 Let's now define the `Transformable` type class
 
 \begin{code}
@@ -99,6 +104,18 @@ instance Transformable Tree where
 instance Transformable [] where
   tx _ []     = []
   tx f (x:xs) = f x : tx f xs
+
+-- data Maybe a = Nothing | Just a 
+instance Transformable Maybe where 
+  -- tx :: (a -> b) -> Maybe a -> Maybe b
+  tx f Nothing  = Nothing 
+  tx f (Just x) = Just (f x) 
+
+instance Transformable IO where
+  --  tx :: (a -> b) -> IO a -> IO b
+  tx f io = do 
+    a <- io
+    return (f a) 
 \end{code}
 
 
@@ -110,8 +127,8 @@ Both functions are defined using the same programming pattern, namely mapping th
 
 using which our two examples can now be defined more compactly:
 
-< inc = map (+1)
-< sqr = map (^2)
+< inc = tx (+1)
+< sqr = tx (^2)
 
 **Q:** What is the type of `foo` defined as:
 
@@ -202,6 +219,16 @@ Given a data structure that *contains* elements of some type `a`,
 \begin{code}
 data Map k v = MTip | MBin k v (Map k v) (Map k v)
   deriving (Eq, Show)
+
+-- fmap :: (a -> b) -> IO a -> IO b
+
+
+bar =  fmap (\str -> ("Hello " ++ str)) getLine
+
+-- instance Functor (\k -> Map k v) where 
+-- fmap :: (a -> b) -> Map k a -> Map k b  
+--   fmap f MTip = MTip
+--   fmap f (MBin k v l r) = MBin k (f v) (fmap f l) (fmap f r) 
 \end{code}
 
 **Q:** Can you fmap on an `IO a` action?
@@ -225,7 +252,7 @@ Functor laws
 Most classes come with laws. 
 Lets try to guess the `Functor` laws
 
-< fmap id x      ==?
+< fmap id x      ==? x 
 
 For example, 
 
@@ -234,7 +261,7 @@ For example,
 < ghci> fmap id "good morning"
 < "good morning"
 
-< fmap (f . g) x ==? 
+< fmap (f . g) x ==? fmap f (fmap g x)
 
 For example, 
 
@@ -316,6 +343,14 @@ For this reason, there is a typeclass called `Applicative` that corresponds to t
 < class Functor f => Applicative f where
 <   pure  :: a -> f a
 <   (<*>) :: f (a -> b) -> f a -> f b
+
+
+**Q:** Assume you have a function `f :: a -> b`
+and a container of `a`s `x :: f a`. How would you apply `f` 
+to all elements of `a`?
+
+What if `f` had two arguments?  
+
 
 We can now define all the lifting operators in using the applicative methods. 
 
@@ -417,8 +452,7 @@ Status Check
 
 Our goal is to get all the benefits of effectful programming 
 and still be pure! 
-The answer to that goal is monads, or  
-["The essence of functional programming"](https://page.mi.fu-berlin.de/scravy/realworldhaskell/materialien/the-essence-of-functional-programming.pdf).
+The answer to that goal is monads, or ["The essence of functional programming"](https://page.mi.fu-berlin.de/scravy/realworldhaskell/materialien/the-essence-of-functional-programming.pdf).
 It should be clear by now that the road to 
 monads and effectful programming
 goes through applicatives, since 
@@ -428,7 +462,7 @@ non-determinism by Lists,
 interactions by IO, 
 and each effect you wish to encode has a representative 
 data type (other than divergence!).
-So, we are much much closer to understand in essence monads!
+So, we are much much closer to understand in essence [monads](Monads.html)!
 
 
 

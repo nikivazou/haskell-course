@@ -30,11 +30,16 @@ eval1 (Div x y)   =  eval1 x `div` eval1 y
 
 
 However, this function doesn’t take account of the possibility of division by zero, 
-and will produce an error in this case. 
+and will produce an error in this case.
+
+< ghci> eval (Div (Val 1) (Val 0))
+< *** Exception: divide by zero 
+
 In order to deal with this explicitly, we can use the `Maybe` type
 
 < data Maybe a = Nothing | Just a
-< to define a safe version of division
+
+to define a safe version of division
 
 \begin{code}
 safeDiv     :: Int -> Int -> Maybe Int
@@ -52,6 +57,11 @@ eval1' (Div x y) =  case eval1' x of
                                     Nothing -> Nothing
                                     Just n2 -> n1 `safeDiv` n2
 \end{code}
+
+
+**Q:** What happens now to our previous exception?
+
+< ghci> eval1' (Div (Val 1) (Val 0))
 
 As in the previous section, we can observe a common pattern, 
 namely 

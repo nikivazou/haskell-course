@@ -10,19 +10,23 @@ You are expected to work in pairs and spend at least *30 hours* in the project.
 Project Ideas
 --------------
 
-You can implement any project you wish. If you think your idea is unrealistic, discuss it with the instructor or the TA. 
-Here are some ideas/suggestions: 
+You can implement any Haskell project you wish. If you think your idea is unrealistic, discuss it with the instructor or the TA. 
+Here are some ideas: 
 
-- A strategy game against the human, e.g., chess. 
-- A puzzle solver, e.g., sudoku.
-- A real game using Functional Reactive Programming check out [haskanoid](https://github.com/ivanperez-keera/haskanoid).
-- An efficient implementation of a data structure, e.g., string matching, red-black trees. 
-- A parser, type-checker, and/or interpreter for lambda-calculus. 
-- A prover of propositional logic. 
-- A web or database application using [Yesod](https://www.yesodweb.com/). 
-- A Machine Learning implementation.
-- Any library you think is missing from the Haskell ecosystem. 
-- ?!?!?! [Liquid Haskell](https://ucsd-progsys.github.io/liquidhaskell-blog/) ?!?!?!?!
+- Games 
+	- A strategy game against the human, e.g., chess. 
+	- A puzzle solver, e.g., sudoku.
+	- A real game using Functional Reactive Programming ([haskanoid](https://github.com/ivanperez-keera/haskanoid)).
+- Applications	
+	- A web or database application ([Yesod](https://www.yesodweb.com/)). 
+	- A Machine Learning implementation.
+- Libraries 
+	- An efficient implementation of a data structure, e.g., string matching, red-black trees. 
+	- Any library you think is missing from the Haskell ecosystem. 
+- Theory and Logic 
+	- A parser, type-checker, and/or interpreter for lambda-calculus. 
+	- A prover of propositional logic. 
+	- ?!?!?! [Liquid Haskell](https://ucsd-progsys.github.io/liquidhaskell-blog/) ?!?!?!?!
 
 Project Evaluation
 ------------------
