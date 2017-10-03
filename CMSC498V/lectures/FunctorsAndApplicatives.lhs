@@ -6,6 +6,8 @@ who adjusted it from [Graham Hutton](http://www.cs.nott.ac.uk/~gmh/monads).
 
 \begin{code}
 module FunctorsAndApplicatives where
+
+import qualified Data.Char as C 
 \end{code}
 
 
@@ -21,6 +23,8 @@ Our ultimate goal is to reach the abstruction of monads.
 But the path for this goal goes through two simpler categories (or classes in Haskell terms)
 that we will see today, Functors and Applicatives. 
 
+Functors: Generalizing mapping
+---------------------------
 
 Before considering functors, let us review this idea, by means of two simple functions:
 
@@ -66,7 +70,7 @@ Can you spot the pattern?
 < map  :: (a -> b) -> List  a -> List  b
 
 We can either define *different* maps for both the above type constructors, 
-or define a type class that abstacts away the mapping idea and re-use 
+or define a type class that abstracts away the mapping idea and re-use 
 the exact *same* mapping transformation.
 
 \begin{code}
@@ -145,6 +149,7 @@ that corresponds to the type constructors that you can `map` over:
 <   fmap :: (a -> b) -> m a -> m b
 
 Note: The `m` is the type constructor, e.g. `[]` or `IO` or `Maybe`.
+
 **Q:** What is the kind of `m`?
 
 We can make `[]` or `IO` or `Maybe` be instances of `Functor` by:
@@ -163,6 +168,55 @@ and
 
 < instance Functor IO where
 <   fmap f x = do {y <- x; return (f x)}
+
+
+Now we can use `fmap` to generically map functor instances, 
+for maybes
+
+< ghci> fmap (+1) Nothing
+< Nothing
+< ghci> fmap (*2) (Just 3)
+< Just 6
+
+for trees 
+
+< ghci > fmap length Tip
+< Tip
+< ghci > fmap length (Bin "yeah!" Tip Tip)
+< Bin 5 Tip Tip
+
+
+Of course this is too verbose for Haskell!
+As in Monoid we can replace `mappend` with `(<>)`, 
+in `Functor` you can replace `fmap` with `(<$>)`!
+So, `map`, `fmap`, and `(<$>)` all mean exactly the same thing!
+
+The intuition is simple! 
+Given a data structure that *contains* elements of some type `a`, 
+`fmap f` will map all the `a`'s using `f`. 
+
+**Q:** Let's define the functor instance for trees!
+
+**Q:** Can you define an instance now for an association tree?
+
+\begin{code}
+data Map k v = MTip | MBin k v (Map k v) (Map k v)
+  deriving (Eq, Show)
+\end{code}
+
+**Q:** Can you fmap on an `IO a` action?
+
+Note how `IO` is also some sort of a container of values `a`, 
+that are generated using input and output. 
+
+An interesting example of mapping over `IO` actions
+is getting the line from the input `getLine`, 
+which returns a `String` or a `[Char]` and then 
+mapping each character to lower case. 
+Thus, we use the same *overloaded* function, to map twice, 
+once over lists and once over `IO`.
+
+< fmap (fmap C.toLower) getLine
 
 
 Functor laws
@@ -198,22 +252,20 @@ class definition in [hackage](https://hackage.haskell.org/package/base-4.10.0.0/
 **Q:** Are the lows satisfied by the instances above?
 
 
-Generalizing `map` to many arguments
+Applicatives: Generalizing function application
 -----------------------------------
 
 We can generalize map to many arguments.
 
 With one argument, we call it `lift1`
 
-\begin{code}
-lift1           :: (a1 -> b) -> [a1] -> [b]
-lift1 f []      = []
-lift1 f (x:xs)  = f x : lift1 f xs
-
-lift2            :: (a1 -> b) -> Maybe a1  -> Maybe b
-lift2 f Nothing  = Nothing
-lift2 f (Just x) = Just (f x)
-\end{code}
+< lift1           :: (a1 -> b) -> [a1] -> [b]
+< lift1 f []      = []
+< lift1 f (x:xs)  = f x : lift1 f xs
+<
+< lift1            :: (a1 -> b) -> Maybe a1  -> Maybe b
+< lift1 f Nothing  = Nothing
+< lift1 f (Just x) = Just (f x)
 
 
 You can imagine defining a version for two arguments
@@ -250,6 +302,11 @@ or
 <       -> IO a3
 <       -> IO b
 
+Since we have the `Functor` class defined for `lift1`, 
+we should defined `Functor2` for `lift2`, 
+`Functor3` for `lift3`, etc!
+But, when do we stop?
+
 Applicative
 ------------
 
@@ -263,9 +320,16 @@ For this reason, there is a typeclass called `Applicative` that corresponds to t
 We can now define all the lifting operators in using the applicative methods. 
 
 < lift2 :: (a1 -> a2 -> b) -> BLOB a1 -> BLOB a2 -> BLOB b
-< lift2 f x1s x2s = pure f <*> x1s <*> x2s
+< lift2 f x1 x2 = pure f <*> x1 <*> x2
 
-But we do not have to, 
+
+This definition is in *applicative style* because it looks a lot 
+like function application `f x1 x2`. 
+But unlike function application that the arguments have types 
+`a1`, `a2`, ..., in the applicative style arguments are wrapped 
+inside the container `f`: `f a1`, `f a2`, ....
+
+Happily, we do not have to do the lifting ourselves, 
 since the `Control.Applicative`
 library defines them for us. 
 
@@ -283,8 +347,89 @@ library defines them for us.
 
 **Note:** The `t` is the type constructor, e.g. `[]` or `IO` or `Maybe` or `Tree`.
 
-Applicative also have [laws](https://hackage.haskell.org/package/base-4.10.0.0/docs/Control-Applicative.html), 
+
+Applicative Instances
+----------------------
+
+The standard `Prelude` defines many applicative instances, 
+including the Maybe instance: 
+
+< instance Applicative Maybe where
+<  -- pure :: a -> Maybe a
+<  pure = Just
+<  -- (<*>) :: Maybe (a -> b) -> Maybe a -> Maybe b
+<  Nothing  <*> _  = Nothing
+< (Just g) <*> mx = fmap g mx
+
+The definition is easy! Just follow the types, 
+but the intuition is interesting! 
+For the application `f <*> x` to be successful, 
+that is return a `Just` both the arguments should succeed!
+Applicative for maybes represent *exceptional* programming, 
+since they propagate the `Nothing` expeption!
+
+
+**Q:** What is the values of the following computations?
+
+< pure (+1) <*> Just 1
+< pure (+) <*> Just 1 <*> Just 2
+< pure (+) <*> Nothing <*> Just 2
+
+As maybes represent expeptions, 
+lists represent non-determinism: 
+a computation can have many different results! 
+And the returning list will represent them *all*!
+
+Lets check the boolean operators. 
+
+< ghci> True  || True 
+< True 
+< ghci> True  || False 
+< True 
+< ghci> False || True 
+< True 
+< ghci> False || False 
+< False
+
+I can use applicatives to get all the possible outcomes combined!
+
+*Q::* What is the value of 
+
+< (pure (&&)) <*> [True,False] <*> [True, False]
+
+As a last applicative example we have `IO`!
+Below, using the applicative `IO` methods, we define the recursive function 
+`getChars` that lifts list `(:)` to combine character reading. 
+\begin{code}
+getChars :: Int -> IO String
+getChars 0 = return []
+getChars n = pure (:) <*> getChar <*> getChars (n-1)
+\end{code}
+
+Let's run `getChars 9` to see what happens!  
+
+*Note:* Applicative also have [laws](https://hackage.haskell.org/package/base-4.10.0.0/docs/Control-Applicative.html), 
 but, kind of more complicated. 
 Let's delegate them to the advanced, advanced functional programming. 
+
+Status Check
+------------
+
+Our goal is to get all the benefits of effectful programming 
+and still be pure! 
+The answer to that goal is monads, or  
+["The essence of functional programming"](https://page.mi.fu-berlin.de/scravy/realworldhaskell/materialien/the-essence-of-functional-programming.pdf).
+It should be clear by now that the road to 
+monads and effectful programming
+goes through applicatives, since 
+applicatives encode *effectful* programming!
+Exceptions are represented by `Maybe`, 
+non-determinism by Lists, 
+interactions by IO, 
+and each effect you wish to encode has a representative 
+data type (other than divergence!).
+So, we are much much closer to understand in essence monads!
+
+
 
 

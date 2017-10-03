@@ -22,6 +22,7 @@ Here are some ideas/suggestions:
 - A web or database application using [Yesod](https://www.yesodweb.com/). 
 - A Machine Learning implementation.
 - Any library you think is missing from the Haskell ecosystem. 
+- ?!?!?! [Liquid Haskell](https://ucsd-progsys.github.io/liquidhaskell-blog/) ?!?!?!?!
 
 Project Evaluation
 ------------------
@@ -34,6 +35,7 @@ The project will be evaluated based on the following criteria:
 - *unit testing:* the project should pass unit tests that are implemented either manually or using [quickcheck](https://hackage.haskell.org/package/QuickCheck). 
 The tests should be automatically checked via [Travis CI](https://travis-ci.com/) or [Circle CI](https://github.com/marketplace/circleci).
 - *[optional] verification:* optionally you can use [Liquid Haskell](https://ucsd-progsys.github.io/liquidhaskell-blog/) to check validity of your code.
+- *presentation:* make sure to clearly present your goals and your implementation.
 
 
 *Tue, 10/10:* Project Registration

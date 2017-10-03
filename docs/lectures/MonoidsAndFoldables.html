@@ -235,6 +235,19 @@ ghci<span class="fu">&gt;</span> <span class="dt">Prods</span> <span class="dv">
 <h2 id="using-newtype-to-make-type-class-instances">Using <code>newtype</code> to make type class instances</h2>
 <p>Now that we know all about <code>newtype</code>, lets go back to monoids on numbers! We use <code>newtype</code> to define multiple instances of the same type class for the same type: we can wrap that type in a <code>newtype</code> and then make the new type an instance of the type class in a different way. We can have our cake and eat it too.</p>
 <p>The <code>Data.Monoid</code> module exports two types for this, namely <code>Product</code> and <code>Sum</code>. <code>Product</code> is defined like this:</p>
+<div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt;</span> <span class="kw">newtype</span> <span class="dt">Sum</span> a <span class="fu">=</span>  <span class="dt">Sum</span> {<span class="ot"> getSum' ::</span> a }  
+<span class="ot">&gt;</span>     <span class="kw">deriving</span> (<span class="dt">Eq</span>, <span class="dt">Ord</span>, <span class="dt">Read</span>, <span class="dt">Show</span>)  
+<span class="ot">&gt;</span> 
+<span class="ot">&gt;</span> <span class="kw">instance</span> <span class="dt">Num</span> a <span class="ot">=&gt;</span> <span class="dt">Monoid</span> (<span class="dt">Sum</span> a) <span class="kw">where</span>  
+<span class="ot">&gt;</span>     mempty <span class="fu">=</span> <span class="dt">Sum</span> <span class="dv">0</span>
+<span class="ot">&gt;</span>     <span class="dt">Sum</span> x <span class="ot">`mappend`</span> <span class="dt">Sum</span> y <span class="fu">=</span> <span class="dt">Sum</span> (x <span class="fu">+</span> y)  </code></pre></div>
+<p>False || x == x x || False == x x || (y || z) == (x || y) || z</p>
+<div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt;</span> <span class="kw">newtype</span> <span class="dt">Any</span> a <span class="fu">=</span>  <span class="dt">Any</span> {<span class="ot">  getAny ::</span> a }  
+<span class="ot">&gt;</span>     <span class="kw">deriving</span> (<span class="dt">Eq</span>, <span class="dt">Ord</span>, <span class="dt">Read</span>, <span class="dt">Show</span>)  
+<span class="ot">&gt;</span> 
+<span class="ot">&gt;</span> <span class="kw">instance</span> <span class="dt">Monoid</span> (<span class="dt">Any</span> <span class="dt">Bool</span>) <span class="kw">where</span>  
+<span class="ot">&gt;</span>     mempty <span class="fu">=</span> <span class="dt">Any</span> <span class="dt">False</span>
+<span class="ot">&gt;</span>     <span class="dt">Any</span> x <span class="ot">`mappend`</span> <span class="dt">Any</span> y <span class="fu">=</span> <span class="dt">Any</span> (x <span class="fu">||</span> y)      </code></pre></div>
 <div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="kw">newtype</span> <span class="dt">Product</span> a <span class="fu">=</span>  <span class="dt">Product</span> {<span class="ot"> getProduct ::</span> a }  
     <span class="kw">deriving</span> (<span class="dt">Eq</span>, <span class="dt">Ord</span>, <span class="dt">Read</span>, <span class="dt">Show</span>)  </code></pre></div>
 <p>Simple, just a newtype wrapper with one type parameter along with some derived instances. Its instance for <code>Monoid</code> goes a little something like this:</p>
@@ -260,6 +273,12 @@ ghci<span class="fu">&gt;</span> getSum <span class="fu">$</span> mempty <span c
 <span class="dv">3</span>  
 ghci<span class="fu">&gt;</span> getSum <span class="fu">.</span> mconcat <span class="fu">.</span> map <span class="dt">Sum</span> <span class="fu">$</span> [<span class="dv">1</span>,<span class="dv">2</span>,<span class="dv">3</span>]  
 <span class="dv">6</span>  </code></pre></div>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="kw">newtype</span> <span class="dt">Product</span> a <span class="fu">=</span>  <span class="dt">Product</span> {<span class="ot"> getProduct ::</span> a }  
+    <span class="kw">deriving</span> (<span class="dt">Eq</span>, <span class="dt">Ord</span>, <span class="dt">Read</span>, <span class="dt">Show</span>)  </code></pre></div>
+<p>Simple, just a newtype wrapper with one type parameter along with some derived instances. Its instance for <code>Monoid</code> goes a little something like this:</p>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="kw">instance</span> <span class="dt">Num</span> a <span class="ot">=&gt;</span> <span class="dt">Monoid</span> (<span class="dt">Product</span> a) <span class="kw">where</span>  
+    mempty <span class="fu">=</span> <span class="dt">Product</span> <span class="dv">1</span>  
+    <span class="dt">Product</span> x <span class="ot">`mappend`</span> <span class="dt">Product</span> y <span class="fu">=</span> <span class="dt">Product</span> (x <span class="fu">*</span> y)  </code></pre></div>
 <h2 id="any-and-all">Any and All</h2>
 <p>Another type which can act like a monoid in two distinct but equally valid ways is <code>Bool</code>. The first way is to have the or function <code>(||)</code> act as the binary function along with <code>False</code> as the identity value. The way or works in logic is that if any of its two parameters is <code>True</code>, it returns <code>True</code>, otherwise it returns <code>False</code>. So if we use <code>False</code> as the identity value, it will return <code>False</code> when or-ed with <code>False</code> and <code>True</code> when or-ed with <code>True</code>.</p>
 <p><strong>Q:</strong> Let’s define an <code>Any</code> new type and its <code>Monoid</code> instance, so that</p>
@@ -297,7 +316,7 @@ foldl<span class="ot"> ::</span> <span class="dt">Foldable</span> t <span class=
 <h2 id="parenthesis-kind-system">Parenthesis: Kind System</h2>
 <p>Wait! What does <code>t a</code> mean?</p>
 <p><strong>Q:</strong> What does <code>a</code> mean?</p>
-<p>We are used to abstract over types, but in Haskell we can further abstarct over <em>type constuctors</em>. A type constructor constructs types, given a type, it returns another type. Much like functions (eg <code>id</code>) that given an expression it returns another expression. For example, <code>t</code> above can be instantiated to <code>Maybe</code>, <code>All</code>, <code>Any</code>, <code>[]</code>, etc. But cannot get instantiated to <code>Bool</code>, <code>Int</code>, <code>Maybe Int</code>, etc</p>
+<p>We are used to abstract over types, but in Haskell we can further abstarct over <em>type constuctors</em>. A type constructor constructs types, given a type, it returns another type. Much like functions (eg <code>id</code>) that given an expression it returns another expression. For example, <code>t</code> above can be instantiated to <code>Maybe</code>, <code>Prod</code>, <code>Sum</code>, <code>[]</code>, etc. But cannot get instantiated to <code>Bool</code>, <code>Int</code>, <code>Maybe Int</code>, etc</p>
 <p><strong>Q:</strong> Can <code>t</code> be instantiated to <code>Assoc</code>?</p>
 <div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt;</span> <span class="kw">data</span> <span class="dt">Assoc</span> k v <span class="fu">=</span> <span class="dt">Tip</span> <span class="fu">|</span> <span class="dt">Bin</span> k v (<span class="dt">Assoc</span> k v) (<span class="dt">Assoc</span> k v)
 <span class="ot">&gt;</span>   <span class="kw">deriving</span> (<span class="dt">Show</span>, <span class="dt">Eq</span>)</code></pre></div>

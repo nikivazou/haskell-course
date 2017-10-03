@@ -23,9 +23,12 @@
         <div id="content">
             <h1 id="functors-and-applicatives">Functors and Applicatives</h1>
 <p>This lecture is adjusted from <a href="http://ucsd-pl.github.io/cse230/lectures/lec-monads.html">Ranjit Jhala</a> who adjusted it from <a href="http://www.cs.nott.ac.uk/~gmh/monads">Graham Hutton</a>.</p>
-<div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt;</span> <span class="kw">module</span> <span class="dt">FunctorsAndApplicatives</span> <span class="kw">where</span></code></pre></div>
+<div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt;</span> <span class="kw">module</span> <span class="dt">FunctorsAndApplicatives</span> <span class="kw">where</span>
+<span class="ot">&gt;</span> 
+<span class="ot">&gt;</span> <span class="kw">import qualified</span> <span class="dt">Data.Char</span> <span class="kw">as</span> <span class="dt">C</span> </code></pre></div>
 <h2 id="abstracting-programming-patterns">Abstracting programming patterns</h2>
 <p>Monoids (and Foldables) are an example of the idea of abstracting out a common programming pattern and their properties as a definition. Category theory is full of such examples. Thus, the goal of this class is not to learn category theory, but instead how to use these (well studies) abstructions to create good quality of code. Our ultimate goal is to reach the abstruction of monads. But the path for this goal goes through two simpler categories (or classes in Haskell terms) that we will see today, Functors and Applicatives.</p>
+<h2 id="functors-generalizing-mapping">Functors: Generalizing mapping</h2>
 <p>Before considering functors, let us review this idea, by means of two simple functions:</p>
 <p>We have seen before the mapping pattern:</p>
 <div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt; inc        ::</span> [<span class="dt">Int</span>] <span class="ot">-&gt;</span> [<span class="dt">Int</span>]
@@ -54,7 +57,7 @@ tsqr  <span class="fu">=</span> tmap (<span class="fu">^</span> <span class="dv"
 <p>Can you spot the pattern?</p>
 <div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="ot">tmap ::</span> (a <span class="ot">-&gt;</span> b) <span class="ot">-&gt;</span> <span class="dt">Tree</span>  a <span class="ot">-&gt;</span> <span class="dt">Tree</span>  b 
 map<span class="ot">  ::</span> (a <span class="ot">-&gt;</span> b) <span class="ot">-&gt;</span> <span class="dt">List</span>  a <span class="ot">-&gt;</span> <span class="dt">List</span>  b</code></pre></div>
-<p>We can either define <em>different</em> maps for both the above type constructors, or define a type class that abstacts away the mapping idea and re-use the exact <em>same</em> mapping transformation.</p>
+<p>We can either define <em>different</em> maps for both the above type constructors, or define a type class that abstracts away the mapping idea and re-use the exact <em>same</em> mapping transformation.</p>
 <div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt; increase ::</span> (<span class="dt">Transformable</span> blob) <span class="ot">=&gt;</span> blob <span class="dt">Int</span> <span class="ot">-&gt;</span> blob <span class="dt">Int</span>
 <span class="ot">&gt;</span> increase <span class="fu">=</span> tx (<span class="fu">+</span> <span class="dv">1</span>)
 <span class="ot">&gt;</span> 
@@ -94,7 +97,8 @@ sqr <span class="fu">=</span> map (<span class="fu">^</span><span class="dv">2</
 <p>For this reason, there is a typeclass called <code>Functor</code> that corresponds to the type constructors that you can <code>map</code> over:</p>
 <div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="kw">class</span> <span class="dt">Functor</span> m <span class="kw">where</span>
 <span class="ot">  fmap ::</span> (a <span class="ot">-&gt;</span> b) <span class="ot">-&gt;</span> m a <span class="ot">-&gt;</span> m b</code></pre></div>
-<p>Note: The <code>m</code> is the type constructor, e.g. <code>[]</code> or <code>IO</code> or <code>Maybe</code>. <strong>Q:</strong> What is the kind of <code>m</code>?</p>
+<p>Note: The <code>m</code> is the type constructor, e.g. <code>[]</code> or <code>IO</code> or <code>Maybe</code>.</p>
+<p><strong>Q:</strong> What is the kind of <code>m</code>?</p>
 <p>We can make <code>[]</code> or <code>IO</code> or <code>Maybe</code> be instances of <code>Functor</code> by:</p>
 <div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="kw">instance</span> <span class="dt">Functor</span> [] <span class="kw">where</span>
   fmap f []     <span class="fu">=</span> []
@@ -106,6 +110,26 @@ sqr <span class="fu">=</span> map (<span class="fu">^</span><span class="dv">2</
 <p>and</p>
 <div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="kw">instance</span> <span class="dt">Functor</span> <span class="dt">IO</span> <span class="kw">where</span>
   fmap f x <span class="fu">=</span> <span class="kw">do</span> {y <span class="ot">&lt;-</span> x; return (f x)}</code></pre></div>
+<p>Now we can use <code>fmap</code> to generically map functor instances, for maybes</p>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell">ghci<span class="fu">&gt;</span> fmap (<span class="fu">+</span><span class="dv">1</span>) <span class="dt">Nothing</span>
+<span class="dt">Nothing</span>
+ghci<span class="fu">&gt;</span> fmap (<span class="fu">*</span><span class="dv">2</span>) (<span class="dt">Just</span> <span class="dv">3</span>)
+<span class="dt">Just</span> <span class="dv">6</span></code></pre></div>
+<p>for trees</p>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell">ghci <span class="fu">&gt;</span> fmap length <span class="dt">Tip</span>
+<span class="dt">Tip</span>
+ghci <span class="fu">&gt;</span> fmap length (<span class="dt">Bin</span> <span class="st">&quot;yeah!&quot;</span> <span class="dt">Tip</span> <span class="dt">Tip</span>)
+<span class="dt">Bin</span> <span class="dv">5</span> <span class="dt">Tip</span> <span class="dt">Tip</span></code></pre></div>
+<p>Of course this is too verbose for Haskell! As in Monoid we can replace <code>mappend</code> with <code>(&lt;&gt;)</code>, in <code>Functor</code> you can replace <code>fmap</code> with <code>(&lt;$&gt;)</code>! So, <code>map</code>, <code>fmap</code>, and <code>(&lt;$&gt;)</code> all mean exactly the same thing!</p>
+<p>The intuition is simple! Given a data structure that <em>contains</em> elements of some type <code>a</code>, <code>fmap f</code> will map all the <code>a</code>’s using <code>f</code>.</p>
+<p><strong>Q:</strong> Let’s define the functor instance for trees!</p>
+<p><strong>Q:</strong> Can you define an instance now for an association tree?</p>
+<div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt;</span> <span class="kw">data</span> <span class="dt">Map</span> k v <span class="fu">=</span> <span class="dt">MTip</span> <span class="fu">|</span> <span class="dt">MBin</span> k v (<span class="dt">Map</span> k v) (<span class="dt">Map</span> k v)
+<span class="ot">&gt;</span>   <span class="kw">deriving</span> (<span class="dt">Eq</span>, <span class="dt">Show</span>)</code></pre></div>
+<p><strong>Q:</strong> Can you fmap on an <code>IO a</code> action?</p>
+<p>Note how <code>IO</code> is also some sort of a container of values <code>a</code>, that are generated using input and output.</p>
+<p>An interesting example of mapping over <code>IO</code> actions is getting the line from the input <code>getLine</code>, which returns a <code>String</code> or a <code>[Char]</code> and then mapping each character to lower case. Thus, we use the same <em>overloaded</em> function, to map twice, once over lists and once over <code>IO</code>.</p>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell">fmap (fmap C.toLower) getLine</code></pre></div>
 <h2 id="functor-laws">Functor laws</h2>
 <p>Most classes come with laws. Lets try to guess the <code>Functor</code> laws</p>
 <div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell">fmap id x      <span class="fu">==?</span></code></pre></div>
@@ -123,16 +147,16 @@ ghci<span class="fu">&gt;</span> fmap (toLower <span class="fu">.</span> intToDi
 <p><strong>Q:</strong> The second law is call “map-fusion” and is really really important. Can you guess why?</p>
 <p>Ok, you can just find them under the <code>Functor</code> class definition in <a href="https://hackage.haskell.org/package/base-4.10.0.0/docs/Data-Functor.html">hackage</a>.</p>
 <p><strong>Q:</strong> Are the lows satisfied by the instances above?</p>
-<h2 id="generalizing-map-to-many-arguments">Generalizing <code>map</code> to many arguments</h2>
+<h2 id="applicatives-generalizing-function-application">Applicatives: Generalizing function application</h2>
 <p>We can generalize map to many arguments.</p>
 <p>With one argument, we call it <code>lift1</code></p>
-<div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt; lift1           ::</span> (a1 <span class="ot">-&gt;</span> b) <span class="ot">-&gt;</span> [a1] <span class="ot">-&gt;</span> [b]
-<span class="ot">&gt;</span> lift1 f []      <span class="fu">=</span> []
-<span class="ot">&gt;</span> lift1 f (x<span class="fu">:</span>xs)  <span class="fu">=</span> f x <span class="fu">:</span> lift1 f xs
-<span class="ot">&gt;</span> 
-<span class="ot">&gt; lift2            ::</span> (a1 <span class="ot">-&gt;</span> b) <span class="ot">-&gt;</span> <span class="dt">Maybe</span> a1  <span class="ot">-&gt;</span> <span class="dt">Maybe</span> b
-<span class="ot">&gt;</span> lift2 f <span class="dt">Nothing</span>  <span class="fu">=</span> <span class="dt">Nothing</span>
-<span class="ot">&gt;</span> lift2 f (<span class="dt">Just</span> x) <span class="fu">=</span> <span class="dt">Just</span> (f x)</code></pre></div>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="ot">lift1           ::</span> (a1 <span class="ot">-&gt;</span> b) <span class="ot">-&gt;</span> [a1] <span class="ot">-&gt;</span> [b]
+lift1 f []      <span class="fu">=</span> []
+lift1 f (x<span class="fu">:</span>xs)  <span class="fu">=</span> f x <span class="fu">:</span> lift1 f xs
+
+<span class="ot">lift1            ::</span> (a1 <span class="ot">-&gt;</span> b) <span class="ot">-&gt;</span> <span class="dt">Maybe</span> a1  <span class="ot">-&gt;</span> <span class="dt">Maybe</span> b
+lift1 f <span class="dt">Nothing</span>  <span class="fu">=</span> <span class="dt">Nothing</span>
+lift1 f (<span class="dt">Just</span> x) <span class="fu">=</span> <span class="dt">Just</span> (f x)</code></pre></div>
 <p>You can imagine defining a version for two arguments</p>
 <div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="ot">lift2 ::</span> (a1 <span class="ot">-&gt;</span> a2 <span class="ot">-&gt;</span> b) <span class="ot">-&gt;</span> [a1] <span class="ot">-&gt;</span> [a2] <span class="ot">-&gt;</span> [b]
 lift2 f (x<span class="fu">:</span>xs) (y<span class="fu">:</span>ys) <span class="fu">=</span> f x y <span class="fu">:</span> lift2 f xs ys
@@ -159,6 +183,7 @@ lift2 f _        _          <span class="fu">=</span> <span class="dt">Nothing</
       <span class="ot">-&gt;</span> <span class="dt">IO</span> a2
       <span class="ot">-&gt;</span> <span class="dt">IO</span> a3
       <span class="ot">-&gt;</span> <span class="dt">IO</span> b</code></pre></div>
+<p>Since we have the <code>Functor</code> class defined for <code>lift1</code>, we should defined <code>Functor2</code> for <code>lift2</code>, <code>Functor3</code> for <code>lift3</code>, etc! But, when do we stop?</p>
 <h2 id="applicative">Applicative</h2>
 <p>This is annoying! For this reason, there is a typeclass called <code>Applicative</code> that corresponds to the type constructors that you can <code>lift2</code> or <code>lift3</code> over.</p>
 <div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="kw">class</span> <span class="dt">Functor</span> f <span class="ot">=&gt;</span> <span class="dt">Applicative</span> f <span class="kw">where</span>
@@ -166,8 +191,9 @@ lift2 f _        _          <span class="fu">=</span> <span class="dt">Nothing</
 <span class="ot">  (&lt;*&gt;) ::</span> f (a <span class="ot">-&gt;</span> b) <span class="ot">-&gt;</span> f a <span class="ot">-&gt;</span> f b</code></pre></div>
 <p>We can now define all the lifting operators in using the applicative methods.</p>
 <div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="ot">lift2 ::</span> (a1 <span class="ot">-&gt;</span> a2 <span class="ot">-&gt;</span> b) <span class="ot">-&gt;</span> <span class="dt">BLOB</span> a1 <span class="ot">-&gt;</span> <span class="dt">BLOB</span> a2 <span class="ot">-&gt;</span> <span class="dt">BLOB</span> b
-lift2 f x1s x2s <span class="fu">=</span> pure f <span class="fu">&lt;*&gt;</span> x1s <span class="fu">&lt;*&gt;</span> x2s</code></pre></div>
-<p>But we do not have to, since the <code>Control.Applicative</code> library defines them for us.</p>
+lift2 f x1 x2 <span class="fu">=</span> pure f <span class="fu">&lt;*&gt;</span> x1 <span class="fu">&lt;*&gt;</span> x2</code></pre></div>
+<p>This definition is in <em>applicative style</em> because it looks a lot like function application <code>f x1 x2</code>. But unlike function application that the arguments have types <code>a1</code>, <code>a2</code>, …, in the applicative style arguments are wrapped inside the container <code>f</code>: <code>f a1</code>, <code>f a2</code>, ….</p>
+<p>Happily, we do not have to do the lifting ourselves, since the <code>Control.Applicative</code> library defines them for us.</p>
 <div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="ot">liftA  ::</span> <span class="dt">Applicative</span> t <span class="ot">=&gt;</span> (a <span class="ot">-&gt;</span> b) <span class="ot">-&gt;</span> t a <span class="ot">-&gt;</span> t b
 
 <span class="ot">liftA2 ::</span> <span class="dt">Applicative</span> t <span class="ot">=&gt;</span> (a1 <span class="ot">-&gt;</span> a2 <span class="ot">-&gt;</span> b) <span class="ot">-&gt;</span> t a1 <span class="ot">-&gt;</span> t a2 <span class="ot">-&gt;</span> t b
@@ -179,7 +205,41 @@ lift2 f x1s x2s <span class="fu">=</span> pure f <span class="fu">&lt;*&gt;</spa
        <span class="ot">-&gt;</span> t a3
        <span class="ot">-&gt;</span> t b</code></pre></div>
 <p><strong>Note:</strong> The <code>t</code> is the type constructor, e.g. <code>[]</code> or <code>IO</code> or <code>Maybe</code> or <code>Tree</code>.</p>
-<p>Applicative also have <a href="https://hackage.haskell.org/package/base-4.10.0.0/docs/Control-Applicative.html">laws</a>, but, kind of more complicated. Let’s delegate them to the advanced, advanced functional programming.</p>
+<h2 id="applicative-instances">Applicative Instances</h2>
+<p>The standard <code>Prelude</code> defines many applicative instances, including the Maybe instance:</p>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="kw">instance</span> <span class="dt">Applicative</span> <span class="dt">Maybe</span> <span class="kw">where</span>
+ <span class="co">-- pure :: a -&gt; Maybe a</span>
+ pure <span class="fu">=</span> <span class="dt">Just</span>
+ <span class="co">-- (&lt;*&gt;) :: Maybe (a -&gt; b) -&gt; Maybe a -&gt; Maybe b</span>
+ <span class="dt">Nothing</span>  <span class="fu">&lt;*&gt;</span> _  <span class="fu">=</span> <span class="dt">Nothing</span>
+(<span class="dt">Just</span> g) <span class="fu">&lt;*&gt;</span> mx <span class="fu">=</span> fmap g mx</code></pre></div>
+<p>The definition is easy! Just follow the types, but the intuition is interesting! For the application <code>f &lt;*&gt; x</code> to be successful, that is return a <code>Just</code> both the arguments should succeed! Applicative for maybes represent <em>exceptional</em> programming, since they propagate the <code>Nothing</code> expeption!</p>
+<p><strong>Q:</strong> What is the values of the following computations?</p>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell">pure (<span class="fu">+</span><span class="dv">1</span>) <span class="fu">&lt;*&gt;</span> <span class="dt">Just</span> <span class="dv">1</span>
+pure (<span class="fu">+</span>) <span class="fu">&lt;*&gt;</span> <span class="dt">Just</span> <span class="dv">1</span> <span class="fu">&lt;*&gt;</span> <span class="dt">Just</span> <span class="dv">2</span>
+pure (<span class="fu">+</span>) <span class="fu">&lt;*&gt;</span> <span class="dt">Nothing</span> <span class="fu">&lt;*&gt;</span> <span class="dt">Just</span> <span class="dv">2</span></code></pre></div>
+<p>As maybes represent expeptions, lists represent non-determinism: a computation can have many different results! And the returning list will represent them <em>all</em>!</p>
+<p>Lets check the boolean operators.</p>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell">ghci<span class="fu">&gt;</span> <span class="dt">True</span>  <span class="fu">||</span> <span class="dt">True</span> 
+<span class="dt">True</span> 
+ghci<span class="fu">&gt;</span> <span class="dt">True</span>  <span class="fu">||</span> <span class="dt">False</span> 
+<span class="dt">True</span> 
+ghci<span class="fu">&gt;</span> <span class="dt">False</span> <span class="fu">||</span> <span class="dt">True</span> 
+<span class="dt">True</span> 
+ghci<span class="fu">&gt;</span> <span class="dt">False</span> <span class="fu">||</span> <span class="dt">False</span> 
+<span class="dt">False</span></code></pre></div>
+<p>I can use applicatives to get all the possible outcomes combined!</p>
+<p><em>Q::</em> What is the value of</p>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell">(pure (<span class="fu">&amp;&amp;</span>)) <span class="fu">&lt;*&gt;</span> [<span class="dt">True</span>,<span class="dt">False</span>] <span class="fu">&lt;*&gt;</span> [<span class="dt">True</span>, <span class="dt">False</span>]</code></pre></div>
+As a last applicative example we have <code>IO</code>! Below, using the applicative <code>IO</code> methods, we define the recursive function <code>getChars</code> that lifts list <code>(:)</code> to combine character reading.
+<div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt; getChars ::</span> <span class="dt">Int</span> <span class="ot">-&gt;</span> <span class="dt">IO</span> <span class="dt">String</span>
+<span class="ot">&gt;</span> getChars <span class="dv">0</span> <span class="fu">=</span> return []
+<span class="ot">&gt;</span> getChars n <span class="fu">=</span> pure (<span class="fu">:</span>) <span class="fu">&lt;*&gt;</span> getChar <span class="fu">&lt;*&gt;</span> getChars (n<span class="fu">-</span><span class="dv">1</span>)</code></pre></div>
+<p>Let’s run <code>getChars 9</code> to see what happens!</p>
+<p><em>Note:</em> Applicative also have <a href="https://hackage.haskell.org/package/base-4.10.0.0/docs/Control-Applicative.html">laws</a>, but, kind of more complicated. Let’s delegate them to the advanced, advanced functional programming.</p>
+<h2 id="status-check">Status Check</h2>
+<p>Our goal is to get all the benefits of effectful programming and still be pure! The answer to that goal is monads, or<br />
+<a href="https://page.mi.fu-berlin.de/scravy/realworldhaskell/materialien/the-essence-of-functional-programming.pdf">“The essence of functional programming”</a>. It should be clear by now that the road to monads and effectful programming goes through applicatives, since applicatives encode <em>effectful</em> programming! Exceptions are represented by <code>Maybe</code>, non-determinism by Lists, interactions by IO, and each effect you wish to encode has a representative data type (other than divergence!). So, we are much much closer to understand in essence monads!</p>
         </div>
         <div id="footer">
             Site proudly generated by

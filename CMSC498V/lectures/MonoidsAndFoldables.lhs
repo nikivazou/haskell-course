@@ -495,6 +495,32 @@ We can have our cake and eat it too.
 The `Data.Monoid` module exports two types for this, namely `Product` and `Sum`. 
 `Product` is defined like this:
 
+\begin{code}
+newtype Sum a =  Sum { getSum' :: a }  
+    deriving (Eq, Ord, Read, Show)  
+
+instance Num a => Monoid (Sum a) where  
+    mempty = Sum 0
+    Sum x `mappend` Sum y = Sum (x + y)  
+\end{code}
+
+
+
+False || x == x 
+x || False == x 
+x || (y || z) == (x || y) || z
+
+\begin{code}
+newtype Any a =  Any {  getAny :: a }  
+    deriving (Eq, Ord, Read, Show)  
+
+instance Monoid (Any Bool) where  
+    mempty = Any False
+    Any x `mappend` Any y = Any (x || y)      
+\end{code}
+
+
+
 < newtype Product a =  Product { getProduct :: a }  
 <     deriving (Eq, Ord, Read, Show)  
 
@@ -536,6 +562,18 @@ But a bit later, we'll see how these `Monoid` instances that may seem trivial at
 < ghci> getSum . mconcat . map Sum $ [1,2,3]  
 < 6  
 
+< newtype Product a =  Product { getProduct :: a }  
+<     deriving (Eq, Ord, Read, Show)  
+
+Simple, just a newtype wrapper with one type parameter along with some derived instances. 
+Its instance for `Monoid` goes a little something like this:
+
+< instance Num a => Monoid (Product a) where  
+<     mempty = Product 1  
+<     Product x `mappend` Product y = Product (x * y)  
+
+
+
 Any and All
 ------------
 
@@ -556,6 +594,9 @@ The first way is to have the or function `(||)` act as the binary function along
 < True  
 < ghci> getAny $ mempty <> mempty  
 < False  
+
+
+
 
 The other way for `Bool` to be an instance of `Monoid` is to kind of do the opposite:
 have `(&&)` be the binary function and then make `True` the identity value. 
@@ -618,7 +659,7 @@ Wait! What does `t a` mean?
 We are used to abstract over types, but in Haskell we can further abstarct over *type constuctors*. 
 A type constructor constructs types, given a type, it returns another type.
 Much like functions (eg `id`) that given an expression it returns another expression. 
-For example, `t` above can be instantiated to `Maybe`, `All`, `Any`, `[]`, etc. 
+For example, `t` above can be instantiated to `Maybe`, `Prod`, `Sum`, `[]`, etc. 
 But cannot get instantiated to `Bool`, `Int`, `Maybe Int`, etc
 
 **Q:** Can `t` be instantiated to `Assoc`?
