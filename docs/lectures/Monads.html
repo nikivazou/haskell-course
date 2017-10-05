@@ -43,14 +43,19 @@
 <div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt; safeDiv     ::</span> <span class="dt">Int</span> <span class="ot">-&gt;</span> <span class="dt">Int</span> <span class="ot">-&gt;</span> <span class="dt">Maybe</span> <span class="dt">Int</span>
 <span class="ot">&gt;</span> safeDiv n m <span class="fu">=</span>  <span class="kw">if</span> m <span class="fu">==</span> <span class="dv">0</span> <span class="kw">then</span> <span class="dt">Nothing</span> <span class="kw">else</span> <span class="dt">Just</span> (n <span class="ot">`div`</span> m)</code></pre></div>
 <p>and then modify our evaluator as follows:</p>
-<div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt; eval1' ::</span>  <span class="dt">Expr</span> <span class="ot">-&gt;</span> <span class="dt">Maybe</span> <span class="dt">Int</span>
+<p>class Monad m where return :: a -&gt; m a (&gt;&gt;=) :: m a -&gt; (a -&gt; m b) -&gt; m b</p>
+<p>instance Monad [] where return :: a -&gt; [a] return x = [x]</p>
+<p>– (&gt;&gt;=) :: [a] -&gt; (a -&gt; [b]) -&gt; [b][] &gt;&gt;= f = []<br />
+(x:xs) &gt;&gt;= f = f x ++ (xs &gt;&gt;= f) – f :: a -&gt; [b] – x :: a – xs :: [a]</p>
+*Monads&gt; pairs [1,2,3] “cat” – [(1, ‘c’), (2,‘a’), (3,‘t’)] – [(1, ‘c’), (1,‘a’), (1, ‘t’), … (2,‘a’), (3,‘t’)]
+<div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt;</span> <span class="kw">type</span> <span class="dt">Exception</span> a <span class="fu">=</span> <span class="dt">Maybe</span> a 
+<span class="ot">&gt;</span> 
+<span class="ot">&gt; eval1' ::</span>  <span class="dt">Expr</span> <span class="ot">-&gt;</span> <span class="dt">Exception</span> <span class="dt">Int</span>
 <span class="ot">&gt;</span> eval1' (<span class="dt">Val</span> n)   <span class="fu">=</span>  <span class="dt">Just</span> n
-<span class="ot">&gt;</span> eval1' (<span class="dt">Div</span> x y) 
-<span class="ot">&gt;</span>   <span class="fu">=</span>  <span class="kw">case</span> eval1' x <span class="kw">of</span>
-<span class="ot">&gt;</span>       <span class="dt">Nothing</span> <span class="ot">-&gt;</span> <span class="dt">Nothing</span>
-<span class="ot">&gt;</span>       <span class="dt">Just</span> n1 <span class="ot">-&gt;</span> <span class="kw">case</span> eval1' y <span class="kw">of</span>
-<span class="ot">&gt;</span>                   <span class="dt">Nothing</span> <span class="ot">-&gt;</span> <span class="dt">Nothing</span>
-<span class="ot">&gt;</span>                   <span class="dt">Just</span> n2 <span class="ot">-&gt;</span> n1 <span class="ot">`safeDiv`</span> n2</code></pre></div>
+<span class="ot">&gt;</span> eval1' (<span class="dt">Div</span> x y) <span class="fu">=</span> <span class="kw">do</span>
+<span class="ot">&gt;</span>   n1 <span class="ot">&lt;-</span> eval1' x
+<span class="ot">&gt;</span>   n2 <span class="ot">&lt;-</span> eval1' y 
+<span class="ot">&gt;</span>   n1 <span class="ot">`safeDiv`</span> n2</code></pre></div>
 <p><strong>Q:</strong> What happens now to our previous exception?</p>
 <div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell">ghci<span class="fu">&gt;</span> eval1' (<span class="dt">Div</span> (<span class="dt">Val</span> <span class="dv">1</span>) (<span class="dt">Val</span> <span class="dv">0</span>))</code></pre></div>
 <p><strong>Goal:</strong> Simplify <code>eval1'</code>. Let’s try to use the fact that <code>Maybe</code> is an applicative to simplify the definition of <code>eval1'</code>:</p>
@@ -90,6 +95,12 @@ m2 <span class="fu">&gt;&gt;=</span> \x2 <span class="ot">-&gt;</span>
 <span class="fu">...</span>
 mn <span class="fu">&gt;&gt;=</span> \xn <span class="ot">-&gt;</span>
 f x1 x2 <span class="fu">...</span> xn</code></pre></div>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="kw">do</span> 
+ x1 <span class="ot">&lt;-</span> m1 
+ x2 <span class="ot">&lt;-</span> m2 
+ <span class="fu">...</span>
+ xn <span class="ot">&lt;-</span> mn 
+ f x1 x2 <span class="fu">...</span> xn</code></pre></div>
 <p>That is, evaluate each of the expression <code>m1</code>, <code>m2</code>,…,<code>mn</code> in turn, and combine their result values <code>x1</code>, <code>x2</code>,…, <code>x</code>n by applying the function <code>f</code>. The definition of <code>(&gt;&gt;=)</code> ensures that such an expression only succeeds (returns a value built using <code>Just</code>) if each <code>mi</code> in the sequence succeeds.</p>
 <p>In other words, the programmer does not have to worry about dealing with the possible failure (returning <code>Nothing</code>) of any of the component expressions, as this is handled automatically by the <code>(&gt;&gt;=)</code> operator.</p>
 <p>Haskell provides a special notation for expressions of the above structure, allowing them to be written in a more appealing form:</p>

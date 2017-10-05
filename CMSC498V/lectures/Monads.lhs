@@ -49,16 +49,40 @@ safeDiv n m =  if m == 0 then Nothing else Just (n `div` m)
 
 and then modify our evaluator as follows:
 
+
+class Monad m where
+  return :: a -> m a 
+  (>>=) :: m a -> (a -> m b) -> m b
+
+instance Monad [] where 
+  return :: a -> [a]
+  return x = [x]  
+  
+  -- (>>=) :: [a] -> (a -> [b]) -> [b]
+  []     >>= f = []  
+  (x:xs) >>= f = f x ++ (xs >>= f)
+  -- f  :: a -> [b]
+  -- x  :: a
+  -- xs :: [a]
+
+
+*Monads> pairs [1,2,3] "cat" 
+-- [(1, 'c'), (2,'a'), (3,'t')]
+-- [(1, 'c'), (1,'a'), (1, 't'), ...
+    (2,'a'), 
+    (3,'t')]
 \begin{code}
-eval1' ::  Expr -> Maybe Int
+type Exception a = Maybe a 
+
+eval1' ::  Expr -> Exception Int
 eval1' (Val n)   =  Just n
-eval1' (Div x y) 
-  =  case eval1' x of
-      Nothing -> Nothing
-      Just n1 -> case eval1' y of
-                  Nothing -> Nothing
-                  Just n2 -> n1 `safeDiv` n2
+eval1' (Div x y) = do
+  n1 <- eval1' x
+  n2 <- eval1' y 
+  n1 `safeDiv` n2
 \end{code}
+
+
 
 
 **Q:** What happens now to our previous exception?
@@ -144,6 +168,15 @@ Generalising from this example, a typical expression built using the `(>>=)` ope
 < ...
 < mn >>= \xn ->
 < f x1 x2 ... xn
+
+< do 
+<  x1 <- m1 
+<  x2 <- m2 
+<  ...
+<  xn <- mn 
+<  f x1 x2 ... xn
+
+
 
 That is, evaluate each of the expression `m1`, `m2`,…,`mn` in turn, 
 and combine their result values `x1`, `x2`,…, `x`n by applying the function `f`. 
