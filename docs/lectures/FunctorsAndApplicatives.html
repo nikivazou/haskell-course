@@ -171,8 +171,12 @@ ghci<span class="fu">&gt;</span> fmap (toLower <span class="fu">.</span> intToDi
 <p>Ok, you can just find them under the <code>Functor</code> class definition in <a href="https://hackage.haskell.org/package/base-4.10.0.0/docs/Data-Functor.html">hackage</a>.</p>
 <p><strong>Q:</strong> Are the lows satisfied by the instances above?</p>
 <h2 id="applicatives-generalizing-function-application">Applicatives: Generalizing function application</h2>
-<p>We can generalize map to many arguments.</p>
-<p>With one argument, we call it <code>lift1</code></p>
+<p><em>General idea:</em> Function application</p>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="ot">f ::</span>   a <span class="ot">-&gt;</span> b,<span class="ot">   x ::</span>   a, f<span class="ot"> x ::</span>   b</code></pre></div>
+<p>Generalization into containers</p>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="ot">f ::</span> c (a <span class="ot">-&gt;</span> b),<span class="ot"> x ::</span> c a, f<span class="ot"> x ::</span> c b</code></pre></div>
+<p>Why would you do that?</p>
+<p>Let’s generalize map to many arguments. With one argument, we call it <code>lift1</code></p>
 <div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="ot">lift1           ::</span> (a1 <span class="ot">-&gt;</span> b) <span class="ot">-&gt;</span> [a1] <span class="ot">-&gt;</span> [b]
 lift1 f []      <span class="fu">=</span> []
 lift1 f (x<span class="fu">:</span>xs)  <span class="fu">=</span> f x <span class="fu">:</span> lift1 f xs
@@ -237,25 +241,25 @@ lift2 f x1 x2 <span class="fu">=</span> pure f <span class="fu">&lt;*&gt;</span>
  pure <span class="fu">=</span> <span class="dt">Just</span>
  <span class="co">-- (&lt;*&gt;) :: Maybe (a -&gt; b) -&gt; Maybe a -&gt; Maybe b</span>
  <span class="dt">Nothing</span>  <span class="fu">&lt;*&gt;</span> _  <span class="fu">=</span> <span class="dt">Nothing</span>
-(<span class="dt">Just</span> g) <span class="fu">&lt;*&gt;</span> mx <span class="fu">=</span> fmap g mx</code></pre></div>
+ (<span class="dt">Just</span> g) <span class="fu">&lt;*&gt;</span> mx <span class="fu">=</span> fmap g mx</code></pre></div>
 <p>The definition is easy! Just follow the types, but the intuition is interesting! For the application <code>f &lt;*&gt; x</code> to be successful, that is return a <code>Just</code> both the arguments should succeed! Applicative for maybes represent <em>exceptional</em> programming, since they propagate the <code>Nothing</code> expeption!</p>
 <p><strong>Q:</strong> What is the values of the following computations?</p>
 <div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell">pure (<span class="fu">+</span><span class="dv">1</span>) <span class="fu">&lt;*&gt;</span> <span class="dt">Just</span> <span class="dv">1</span>
-pure (<span class="fu">+</span>) <span class="fu">&lt;*&gt;</span> <span class="dt">Just</span> <span class="dv">1</span> <span class="fu">&lt;*&gt;</span> <span class="dt">Just</span> <span class="dv">2</span>
-pure (<span class="fu">+</span>) <span class="fu">&lt;*&gt;</span> <span class="dt">Nothing</span> <span class="fu">&lt;*&gt;</span> <span class="dt">Just</span> <span class="dv">2</span></code></pre></div>
+pure (<span class="fu">+</span>)  <span class="fu">&lt;*&gt;</span> <span class="dt">Just</span> <span class="dv">1</span>  <span class="fu">&lt;*&gt;</span> <span class="dt">Just</span> <span class="dv">2</span>
+pure (<span class="fu">+</span>)  <span class="fu">&lt;*&gt;</span> <span class="dt">Nothing</span> <span class="fu">&lt;*&gt;</span> <span class="dt">Just</span> <span class="dv">2</span></code></pre></div>
 <p>As maybes represent expeptions, lists represent non-determinism: a computation can have many different results! And the returning list will represent them <em>all</em>!</p>
 <p>Lets check the boolean operators.</p>
-<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell">ghci<span class="fu">&gt;</span> <span class="dt">True</span>  <span class="fu">||</span> <span class="dt">True</span> 
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell">ghci<span class="fu">&gt;</span> <span class="dt">True</span>  <span class="fu">&amp;&amp;</span> <span class="dt">True</span> 
 <span class="dt">True</span> 
-ghci<span class="fu">&gt;</span> <span class="dt">True</span>  <span class="fu">||</span> <span class="dt">False</span> 
-<span class="dt">True</span> 
-ghci<span class="fu">&gt;</span> <span class="dt">False</span> <span class="fu">||</span> <span class="dt">True</span> 
-<span class="dt">True</span> 
-ghci<span class="fu">&gt;</span> <span class="dt">False</span> <span class="fu">||</span> <span class="dt">False</span> 
+ghci<span class="fu">&gt;</span> <span class="dt">True</span>  <span class="fu">&amp;&amp;</span> <span class="dt">False</span> 
+<span class="dt">False</span> 
+ghci<span class="fu">&gt;</span> <span class="dt">False</span> <span class="fu">&amp;&amp;</span> <span class="dt">True</span> 
+<span class="dt">False</span> 
+ghci<span class="fu">&gt;</span> <span class="dt">False</span> <span class="fu">&amp;&amp;</span> <span class="dt">False</span> 
 <span class="dt">False</span></code></pre></div>
 <p>I can use applicatives to get all the possible outcomes combined!</p>
-<p><em>Q::</em> What is the value of</p>
-<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell">(pure (<span class="fu">&amp;&amp;</span>)) <span class="fu">&lt;*&gt;</span> [<span class="dt">True</span>,<span class="dt">False</span>] <span class="fu">&lt;*&gt;</span> [<span class="dt">True</span>, <span class="dt">False</span>]</code></pre></div>
+<p><strong>Q:</strong> What is the value of</p>
+<div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt;</span> andTable <span class="fu">=</span> (pure (<span class="fu">&amp;&amp;</span>)) <span class="fu">&lt;*&gt;</span> [<span class="dt">True</span>,<span class="dt">False</span>] <span class="fu">&lt;*&gt;</span> [<span class="dt">True</span>, <span class="dt">False</span>]</code></pre></div>
 As a last applicative example we have <code>IO</code>! Below, using the applicative <code>IO</code> methods, we define the recursive function <code>getChars</code> that lifts list <code>(:)</code> to combine character reading.
 <div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt; getChars ::</span> <span class="dt">Int</span> <span class="ot">-&gt;</span> <span class="dt">IO</span> <span class="dt">String</span>
 <span class="ot">&gt;</span> getChars <span class="dv">0</span> <span class="fu">=</span> return []

@@ -282,8 +282,21 @@ class definition in [hackage](https://hackage.haskell.org/package/base-4.10.0.0/
 Applicatives: Generalizing function application
 -----------------------------------
 
-We can generalize map to many arguments.
 
+*General idea:*
+Function application 
+
+< f ::   a -> b,   x ::   a, f x ::   b
+
+Generalization into containers
+
+< f :: c (a -> b), x :: c a, f x :: c b
+
+Why would you do that?
+
+
+
+Let's generalize map to many arguments.
 With one argument, we call it `lift1`
 
 < lift1           :: (a1 -> b) -> [a1] -> [b]
@@ -394,7 +407,7 @@ including the Maybe instance:
 <  pure = Just
 <  -- (<*>) :: Maybe (a -> b) -> Maybe a -> Maybe b
 <  Nothing  <*> _  = Nothing
-< (Just g) <*> mx = fmap g mx
+<  (Just g) <*> mx = fmap g mx
 
 The definition is easy! Just follow the types, 
 but the intuition is interesting! 
@@ -407,8 +420,8 @@ since they propagate the `Nothing` expeption!
 **Q:** What is the values of the following computations?
 
 < pure (+1) <*> Just 1
-< pure (+) <*> Just 1 <*> Just 2
-< pure (+) <*> Nothing <*> Just 2
+< pure (+)  <*> Just 1  <*> Just 2
+< pure (+)  <*> Nothing <*> Just 2
 
 As maybes represent expeptions, 
 lists represent non-determinism: 
@@ -417,20 +430,22 @@ And the returning list will represent them *all*!
 
 Lets check the boolean operators. 
 
-< ghci> True  || True 
+< ghci> True  && True 
 < True 
-< ghci> True  || False 
-< True 
-< ghci> False || True 
-< True 
-< ghci> False || False 
+< ghci> True  && False 
+< False 
+< ghci> False && True 
+< False 
+< ghci> False && False 
 < False
 
 I can use applicatives to get all the possible outcomes combined!
 
-*Q::* What is the value of 
+**Q:** What is the value of 
 
-< (pure (&&)) <*> [True,False] <*> [True, False]
+\begin{code}
+andTable = (pure (&&)) <*> [True,False] <*> [True, False]
+\end{code}
 
 As a last applicative example we have `IO`!
 Below, using the applicative `IO` methods, we define the recursive function 
