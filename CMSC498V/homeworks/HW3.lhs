@@ -11,7 +11,7 @@ You should fill in the definitions of the required functions but **do not** chan
 
 \begin{code}
 module HW3 where
-import Prelude hiding (sum)
+import Prelude hiding (sum, Either(..))
 import Data.Monoid
 import Control.Parallel.Strategies
 \end{code}
