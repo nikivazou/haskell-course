@@ -25,8 +25,7 @@
 <h2 id="instructions">Instructions</h2>
 <p>The source code of this homework can be found <a href="https://raw.githubusercontent.com/nikivazou/CMSC498V/master/CMSC498V/homeworks/HW3.lhs">here</a>. You should fill in the definitions of the required functions but <strong>do not</strong> change the types of the functions.</p>
 <p><strong>How to submit:</strong> Submit this file via the submit server.</p>
-<div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt;</span> <span class="ot">{-# LANGUAGE MultiParamTypeClasses #-}</span>
-<span class="ot">&gt;</span> <span class="kw">module</span> <span class="dt">HW3</span> <span class="kw">where</span>
+<div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt;</span> <span class="kw">module</span> <span class="dt">HW3</span> <span class="kw">where</span>
 <span class="ot">&gt;</span> <span class="kw">import </span><span class="dt">Prelude</span> <span class="kw">hiding</span> (sum)
 <span class="ot">&gt;</span> <span class="kw">import </span><span class="dt">Data.Monoid</span>
 <span class="ot">&gt;</span> <span class="kw">import </span><span class="dt">Control.Parallel.Strategies</span></code></pre></div>
@@ -39,14 +38,14 @@
 <div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt;</span> <span class="kw">data</span> <span class="dt">Either</span> a b <span class="fu">=</span> <span class="dt">Left</span> a <span class="fu">|</span> <span class="dt">Right</span> b 
 <span class="ot">&gt;</span>   <span class="kw">deriving</span> (<span class="dt">Show</span>, <span class="dt">Eq</span>)</code></pre></div>
 <ol style="list-style-type: decimal">
-<li><strong>Functors:</strong> Define a functor instance of <code>Either</code>. So that, for example:</li>
+<li><strong>Functors:</strong> Define a functor instance of <code>Either</code>, that satisfies the functor laws. So that, for example:</li>
 </ol>
 <div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell">ghci<span class="fu">&gt;</span> fmap (<span class="fu">+</span><span class="dv">42</span>) (<span class="dt">Left</span> <span class="dv">0</span>)
 <span class="dt">Left</span> <span class="dv">0</span>
 ghci<span class="fu">&gt;</span> fmap (<span class="fu">+</span><span class="dv">42</span>) (<span class="dt">Right</span> <span class="dv">0</span>)
 <span class="dt">Right</span> <span class="dv">42</span> </code></pre></div>
 <ol start="2" style="list-style-type: decimal">
-<li><strong>Applicatives:</strong> Define an applicative instance of <code>Either</code>. So that, for example:</li>
+<li><strong>Applicatives:</strong> Define an applicative instance of <code>Either</code>, that satisfies the applicative laws. So that, for example:</li>
 </ol>
 <div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell">ghci<span class="fu">&gt;</span> pure <span class="dv">0</span><span class="ot"> ::</span> <span class="dt">Either</span> <span class="dt">Int</span> <span class="dt">Int</span>
 <span class="dt">Right</span> <span class="dv">0</span>
@@ -55,7 +54,7 @@ ghci<span class="fu">&gt;</span> pure (<span class="fu">+</span><span class="dv"
 ghci<span class="fu">&gt;</span> pure (<span class="fu">+</span><span class="dv">42</span>) <span class="fu">&lt;*&gt;</span> (<span class="dt">Right</span> <span class="dv">0</span>)
 <span class="dt">Right</span> <span class="dv">42</span> </code></pre></div>
 <ol start="2" style="list-style-type: decimal">
-<li><strong>Monads:</strong> Define a monad instance of <code>Either</code>. So that, for example:</li>
+<li><strong>Monads:</strong> Define a monad instance of <code>Either</code>, that satisfies the monad laws. So that, for example:</li>
 </ol>
 <div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt;</span> pairs xs ys <span class="fu">=</span> <span class="kw">do</span>  
 <span class="ot">&gt;</span>   x <span class="ot">&lt;-</span> xs 
@@ -125,7 +124,9 @@ forall x, y<span class="fu">.</span> fromMyConfig x <span class="fu">&lt;&gt;</s
 <ol start="3" style="list-style-type: decimal">
 <li><strong>Functor Configurations:</strong> Define an instance <code>Functor</code> of the generalized configurations, that applies functions to the thread field.</li>
 </ol>
-<p>For example,</p>
+<div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt;</span> <span class="kw">instance</span> <span class="dt">Functor</span> (<span class="dt">GConfig</span> a b) <span class="kw">where</span>
+<span class="ot">&gt;</span>   fmap f c <span class="fu">=</span> error <span class="st">&quot;Define me&quot;</span></code></pre></div>
+<p>In essence, <code>fmap f c</code> maps <code>f</code> to the <code>gcThd</code> field of the configuration <code>c</code>. For example,</p>
 <div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell">gcThd (fmap (<span class="fu">+</span><span class="dv">1</span>)  (<span class="dt">GConfig</span> <span class="dv">1</span> <span class="dv">2</span> <span class="dv">3</span>)) <span class="fu">==</span> <span class="dv">4</span> 
 gcThd (fmap (<span class="fu">*</span><span class="dv">42</span>) (<span class="dt">GConfig</span> <span class="dv">1</span> <span class="dv">2</span> <span class="dv">3</span>)) <span class="fu">==</span> <span class="dv">126</span> </code></pre></div>
 <p>Generally, for each function <code>f</code> and <code>GConfig</code> <code>c</code>:</p>

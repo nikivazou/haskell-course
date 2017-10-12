@@ -7,20 +7,19 @@
 - *Thu, 09/21:* [Monoids & Foldables (& Kinds)](lectures/MonoidsAndFoldables.html)
 - *Tue, 09/26:* [How to Architect Haskell Applications](invited/Jasper.html) *by Jasper Van der Jeugt*
 - *Thu, 10/03:* [Functors & Applicatives](lectures/FunctorsAndApplicatives.html)
-- *Thu, 10/05:* <span style="color:white"> Libraries + Development</span>
 - *Tue, 10/10:* <span style="color:red"> **Tournament.**</span>
-- *Thu, 10/12:* <span style="color:white"> Type Classes </span>
+- *Thu, 10/12:* [Monads](lectures/Monads.html)
 - *Tue, 10/17:* <span style="color:red">**Project Proposal.**</span>
 - *Thu, 10/19:* <span style="color:white"> Type Classes </span>
 - *Tue, 10/24:* <span style="color:white"> Monads </span>
 - *Thu, 10/26:* 
-- *Tue, 10/31:* <span style="color:white"> Parsing, Testing </span>
+- *Tue, 10/31:* **HW3 due, HW4 out**
 - *Thu, 11/02:* <span style="color:white"> Monad Transformers </span>
 - *Tue, 11/07:* <span style="color:red">**Project Updates.**</span> 
 - *Thu, 11/09:* <span style="color:white"> Functional Reactive Programming </span>
 - *Tue, 11/14:* <span style="color:white"> Lambda Calculus </span>
 - *Thu, 11/16:* GHC magic by *Joachim Breitner* 
-- *Tue, 11/21:* Monad Tranformers by *David Darais* 
+- *Tue, 11/21:* **HW4 due**, Monad Tranformers by *David Darais* 
 - *Thu, 11/23:* <span style="color:green">**No class: Thanks Giving.**</span> 
 - *Tue, 11/28:* <span style="color:white"> Liquid Haskell </span>
 - *Thu, 11/30:* <span style="color:white"> Natural Deduction </span>

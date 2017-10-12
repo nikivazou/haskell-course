@@ -10,7 +10,6 @@ You should fill in the definitions of the required functions but **do not** chan
 **How to submit:** Submit this file via the submit server. 
 
 \begin{code}
-{-# LANGUAGE MultiParamTypeClasses #-}
 module HW3 where
 import Prelude hiding (sum)
 import Data.Monoid
@@ -33,7 +32,7 @@ data Either a b = Left a | Right b
 \end{code}
 
 1. **Functors:** 
-Define a functor instance of `Either`. 
+Define a functor instance of `Either`, that satisfies the functor laws. 
 So that, for example:
 
 
@@ -43,7 +42,7 @@ So that, for example:
 < Right 42 
 
 2. **Applicatives:** 
-Define an applicative instance of `Either`. 
+Define an applicative instance of `Either`, that satisfies the applicative laws. 
 So that, for example:
  
 
@@ -55,7 +54,7 @@ So that, for example:
 < Right 42 
 
 2. **Monads:** 
-Define a monad instance of `Either`. 
+Define a monad instance of `Either`, that satisfies the monad laws. 
 So that, for example:
 
 \begin{code}
@@ -167,6 +166,13 @@ i.e., the following properties are satisfied
 Define an instance `Functor` of the generalized configurations, 
 that applies functions to the thread field. 
 
+\begin{code}
+instance Functor (GConfig a b) where
+  fmap f c = error "Define me"
+\end{code}
+
+In essence, `fmap f c` maps `f` to the `gcThd` field of the 
+configuration `c`. 
 For example, 
 
 < gcThd (fmap (+1)  (GConfig 1 2 3)) == 4 
