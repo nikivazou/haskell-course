@@ -45,8 +45,7 @@
 <p>and then modify our evaluator as follows:</p>
 <p>class Monad m where return :: a -&gt; m a (&gt;&gt;=) :: m a -&gt; (a -&gt; m b) -&gt; m b</p>
 <p>instance Monad [] where return :: a -&gt; [a] return x = [x]</p>
-<p>– (&gt;&gt;=) :: [a] -&gt; (a -&gt; [b]) -&gt; [b][] &gt;&gt;= f = []<br />
-(x:xs) &gt;&gt;= f = f x ++ (xs &gt;&gt;= f) – f :: a -&gt; [b] – x :: a – xs :: [a]</p>
+<p>– (&gt;&gt;=) :: [a] -&gt; (a -&gt; [b]) -&gt; [b] xs &gt;&gt;= f = concatMap f xs</p>
 *Monads&gt; pairs [1,2,3] “cat” – [(1, ‘c’), (2,‘a’), (3,‘t’)] – [(1, ‘c’), (1,‘a’), (1, ‘t’), … (2,‘a’), (3,‘t’)]
 <div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt;</span> <span class="kw">type</span> <span class="dt">Exception</span> a <span class="fu">=</span> <span class="dt">Maybe</span> a 
 <span class="ot">&gt;</span> 

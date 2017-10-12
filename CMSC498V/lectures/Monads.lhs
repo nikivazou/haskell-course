@@ -59,11 +59,8 @@ instance Monad [] where
   return x = [x]  
   
   -- (>>=) :: [a] -> (a -> [b]) -> [b]
-  []     >>= f = []  
-  (x:xs) >>= f = f x ++ (xs >>= f)
-  -- f  :: a -> [b]
-  -- x  :: a
-  -- xs :: [a]
+  xs >>= f = concatMap f xs 
+
 
 
 *Monads> pairs [1,2,3] "cat" 

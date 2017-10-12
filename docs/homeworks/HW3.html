@@ -1,0 +1,202 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+        <title>CMSC498V - HW3</title>
+        <link rel="stylesheet" type="text/css" href="../css/default.css" />
+        <link rel="stylesheet" type="text/css" href="../css/syntax.css" />
+    </head>
+    <body>
+        <div id="header">
+            <div id="logo">
+                <a href="../">CMSC498V</a>
+            </div>
+            <div id="navigation">
+                <a href="../schedule.html">Schedule</a>
+                <a href="../homeworks.html">Homeworks</a>
+                <a href="../project.html">Projects</a>
+                <a href="../resources.html">Resources</a>
+            </div>
+        </div>
+
+        <div id="content">
+            <h1 id="homework-3">Homework 3</h1>
+<h2 id="instructions">Instructions</h2>
+<p>The source code of this homework can be found <a href="https://raw.githubusercontent.com/nikivazou/CMSC498V/master/CMSC498V/homeworks/HW3.lhs">here</a>. You should fill in the definitions of the required functions but <strong>do not</strong> change the types of the functions.</p>
+<p><strong>How to submit:</strong> Submit this file via the submit server.</p>
+<div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt;</span> <span class="ot">{-# LANGUAGE MultiParamTypeClasses #-}</span>
+<span class="ot">&gt;</span> <span class="kw">module</span> <span class="dt">HW3</span> <span class="kw">where</span>
+<span class="ot">&gt;</span> <span class="kw">import </span><span class="dt">Prelude</span> <span class="kw">hiding</span> (sum)
+<span class="ot">&gt;</span> <span class="kw">import </span><span class="dt">Data.Monoid</span>
+<span class="ot">&gt;</span> <span class="kw">import </span><span class="dt">Control.Parallel.Strategies</span></code></pre></div>
+<h2 id="problem-1-eithers-are-functors-applicatives-monads"><strong>Problem 1:</strong> Eithers are Functors, Applicatives &amp; Monads</h2>
+<p>The data type <code>Either a b</code> contains</p>
+<ul>
+<li>either a <code>Left</code> value <code>a</code>,</li>
+<li>or a <code>Right</code> value <code>b</code>.</li>
+</ul>
+<div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt;</span> <span class="kw">data</span> <span class="dt">Either</span> a b <span class="fu">=</span> <span class="dt">Left</span> a <span class="fu">|</span> <span class="dt">Right</span> b 
+<span class="ot">&gt;</span>   <span class="kw">deriving</span> (<span class="dt">Show</span>, <span class="dt">Eq</span>)</code></pre></div>
+<ol style="list-style-type: decimal">
+<li><strong>Functors:</strong> Define a functor instance of <code>Either</code>. So that, for example:</li>
+</ol>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell">ghci<span class="fu">&gt;</span> fmap (<span class="fu">+</span><span class="dv">42</span>) (<span class="dt">Left</span> <span class="dv">0</span>)
+<span class="dt">Left</span> <span class="dv">0</span>
+ghci<span class="fu">&gt;</span> fmap (<span class="fu">+</span><span class="dv">42</span>) (<span class="dt">Right</span> <span class="dv">0</span>)
+<span class="dt">Right</span> <span class="dv">42</span> </code></pre></div>
+<ol start="2" style="list-style-type: decimal">
+<li><strong>Applicatives:</strong> Define an applicative instance of <code>Either</code>. So that, for example:</li>
+</ol>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell">ghci<span class="fu">&gt;</span> pure <span class="dv">0</span><span class="ot"> ::</span> <span class="dt">Either</span> <span class="dt">Int</span> <span class="dt">Int</span>
+<span class="dt">Right</span> <span class="dv">0</span>
+ghci<span class="fu">&gt;</span> pure (<span class="fu">+</span><span class="dv">42</span>) <span class="fu">&lt;*&gt;</span> (<span class="dt">Left</span> <span class="dv">0</span>)
+<span class="dt">Left</span> <span class="dv">0</span> 
+ghci<span class="fu">&gt;</span> pure (<span class="fu">+</span><span class="dv">42</span>) <span class="fu">&lt;*&gt;</span> (<span class="dt">Right</span> <span class="dv">0</span>)
+<span class="dt">Right</span> <span class="dv">42</span> </code></pre></div>
+<ol start="2" style="list-style-type: decimal">
+<li><strong>Monads:</strong> Define a monad instance of <code>Either</code>. So that, for example:</li>
+</ol>
+<div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt;</span> pairs xs ys <span class="fu">=</span> <span class="kw">do</span>  
+<span class="ot">&gt;</span>   x <span class="ot">&lt;-</span> xs 
+<span class="ot">&gt;</span>   y <span class="ot">&lt;-</span> ys
+<span class="ot">&gt;</span>   return (x,y)</code></pre></div>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell">ghci<span class="fu">&gt;</span> pairs (<span class="dt">Right</span>  <span class="dv">0</span>) (<span class="dt">Right</span> <span class="dv">1</span>)
+<span class="dt">Right</span> (<span class="dv">0</span>,<span class="dv">1</span>)
+ghci<span class="fu">&gt;</span> pairs (<span class="dt">Right</span>  <span class="dv">0</span>) (<span class="dt">Left</span>  <span class="dv">1</span>)
+<span class="dt">Left</span> <span class="dv">1</span>
+ghci<span class="fu">&gt;</span> pairs (<span class="dt">Left</span>   <span class="dv">0</span>) (<span class="dt">Right</span> <span class="dv">1</span>)
+<span class="dt">Left</span> <span class="dv">0</span>
+ghci<span class="fu">&gt;</span> pairs (<span class="dt">Left</span>   <span class="dv">0</span>) (<span class="dt">Left</span> <span class="dv">1</span>)
+<span class="dt">Left</span> <span class="dv">0</span></code></pre></div>
+<h2 id="problem-2-configurations-are-monoids"><strong>Problem 2:</strong> Configurations are monoids</h2>
+<p>A program configuration forms a monoid. For instance, we define the following data type configuration that configures how your Haskell program is compiled:</p>
+<ul>
+<li><code>cOpt</code> shoule the configurations be enabled? (the default is no)</li>
+<li><code>cExt</code> what language extentions should be used?</li>
+<li><code>cThd</code> how many threads is the program using?</li>
+</ul>
+<div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt;</span> <span class="kw">data</span> <span class="dt">Config</span> 
+<span class="ot">&gt;</span>   <span class="fu">=</span> <span class="dt">Config</span> {<span class="ot"> cOpt ::</span> <span class="dt">Bool</span>
+<span class="ot">&gt;</span>            ,<span class="ot"> cExt ::</span> [<span class="dt">String</span>]
+<span class="ot">&gt;</span>            ,<span class="ot"> cThd ::</span> <span class="dt">Int</span> 
+<span class="ot">&gt;</span>            }
+<span class="ot">&gt;</span>    <span class="kw">deriving</span> (<span class="dt">Eq</span>, <span class="dt">Show</span>)</code></pre></div>
+<ol style="list-style-type: decimal">
+<li><strong>Monoidal Configurations:</strong> Define a monoid instance of <code>Config</code>.</li>
+</ol>
+<div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt;</span> <span class="kw">instance</span> <span class="dt">Monoid</span> <span class="dt">Config</span> <span class="kw">where</span>
+<span class="ot">&gt;</span>   mempty  <span class="fu">=</span> error <span class="st">&quot;Define me!&quot;</span>
+<span class="ot">&gt;</span>   mappend <span class="fu">=</span> error <span class="st">&quot;Define me!&quot;</span></code></pre></div>
+<ol start="2" style="list-style-type: decimal">
+<li><strong>Generalized Configurations:</strong><br />
+Consinder a generalization of the above configuration, where the fields are type variables:</li>
+</ol>
+<div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt;</span> <span class="kw">data</span> <span class="dt">GConfig</span> a b c 
+<span class="ot">&gt;</span>   <span class="fu">=</span> <span class="dt">GConfig</span> {<span class="ot"> gcOpt ::</span> a
+<span class="ot">&gt;</span>             ,<span class="ot"> gcExt ::</span> b
+<span class="ot">&gt;</span>             ,<span class="ot"> gcThd ::</span> c
+<span class="ot">&gt;</span>             }
+<span class="ot">&gt;</span>    <span class="kw">deriving</span> (<span class="dt">Eq</span>, <span class="dt">Show</span>)</code></pre></div>
+<p>Now, the instance monoid methods are defined using the monoid methods on the generic configuration’s fields.</p>
+<div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt;</span> <span class="kw">instance</span> (<span class="dt">Monoid</span> a, <span class="dt">Monoid</span> b, <span class="dt">Monoid</span> c) <span class="ot">=&gt;</span> <span class="dt">Monoid</span> (<span class="dt">GConfig</span> a b c) <span class="kw">where</span>
+<span class="ot">&gt;</span>   mempty <span class="fu">=</span> <span class="dt">GConfig</span> mempty mempty mempty
+<span class="ot">&gt;</span>   mappend (<span class="dt">GConfig</span> o1 e1 t1) (<span class="dt">GConfig</span> o2 e2 t2) 
+<span class="ot">&gt;</span>          <span class="fu">=</span> <span class="dt">GConfig</span> (o1 <span class="fu">&lt;&gt;</span> o2) (e1 <span class="fu">&lt;&gt;</span> e2) (t1 <span class="fu">&lt;&gt;</span> t2)</code></pre></div>
+<p>In the class we saw that</p>
+<ul>
+<li>lists are monoids, but also</li>
+<li>booleans are monoids (using <code>All</code> or <code>Any</code>) and</li>
+<li>integers are monoids (using <code>Sum</code> or <code>Product</code>).</li>
+</ul>
+<p>Use the above monoids to <strong>properly</strong> define a type alias, i.e., replace the <code>Int</code> below with an instanciation of <code>GConfig</code>, so that each <code>MyConfig</code> has the same information as <code>Config</code>, i.e., a “boolean”, a list integer, and an “integer” fields.</p>
+<div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt;</span> <span class="kw">type</span> <span class="dt">MyConfig</span> <span class="fu">=</span> <span class="dt">Int</span> </code></pre></div>
+<p>Define the following functions that convert between your monoid configutations</p>
+<div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt; toMyConfig ::</span> <span class="dt">Config</span> <span class="ot">-&gt;</span> <span class="dt">MyConfig</span>
+<span class="ot">&gt;</span> toMyConfig <span class="fu">=</span> error <span class="st">&quot;Define me!&quot;</span>
+<span class="ot">&gt;</span> 
+<span class="ot">&gt; fromMyConfig ::</span> <span class="dt">MyConfig</span> <span class="ot">-&gt;</span> <span class="dt">Config</span>
+<span class="ot">&gt;</span> fromMyConfig <span class="fu">=</span> error <span class="st">&quot;Define me!&quot;</span></code></pre></div>
+<p>and use them to check that your monoid methods behave the same, i.e., the following properties are satisfied</p>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell">toMyConfig   mempty <span class="fu">==</span> mempty
+fromMyConfig mempty <span class="fu">==</span> mempty</code></pre></div>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell">forall x, y<span class="fu">.</span> toMyConfig   x <span class="fu">&lt;&gt;</span> toMyConfig   y <span class="fu">==</span> x <span class="fu">&lt;&gt;</span> y
+forall x, y<span class="fu">.</span> fromMyConfig x <span class="fu">&lt;&gt;</span> fromMyConfig y <span class="fu">==</span> x <span class="fu">&lt;&gt;</span> y</code></pre></div>
+<ol start="3" style="list-style-type: decimal">
+<li><strong>Functor Configurations:</strong> Define an instance <code>Functor</code> of the generalized configurations, that applies functions to the thread field.</li>
+</ol>
+<p>For example,</p>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell">gcThd (fmap (<span class="fu">+</span><span class="dv">1</span>)  (<span class="dt">GConfig</span> <span class="dv">1</span> <span class="dv">2</span> <span class="dv">3</span>)) <span class="fu">==</span> <span class="dv">4</span> 
+gcThd (fmap (<span class="fu">*</span><span class="dv">42</span>) (<span class="dt">GConfig</span> <span class="dv">1</span> <span class="dv">2</span> <span class="dv">3</span>)) <span class="fu">==</span> <span class="dv">126</span> </code></pre></div>
+<p>Generally, for each function <code>f</code> and <code>GConfig</code> <code>c</code>:</p>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell">forall f, c<span class="fu">.</span> gcThd (fmap f c) <span class="fu">==</span> f (gcThd c) </code></pre></div>
+<h2 id="problem-3-map-reduce"><strong>Problem 3:</strong> Map Reduce</h2>
+<ol style="list-style-type: decimal">
+<li><strong>Chunkables:</strong> The <code>Chunkable</code> type class has the method <code>chunk i x</code> that cuts its input <code>x</code> into lists of length as most <code>i</code>.</li>
+</ol>
+<div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt;</span> <span class="kw">class</span> <span class="dt">Chunkable</span> a <span class="kw">where</span> 
+<span class="ot">&gt;   chunk ::</span> <span class="dt">Int</span> <span class="ot">-&gt;</span> a <span class="ot">-&gt;</span> [a]</code></pre></div>
+<p>Define lists as chunkable instances so that</p>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell">ghci<span class="fu">&gt;</span> chunk <span class="dv">2</span> [<span class="dv">1</span>]
+[[<span class="dv">1</span>]]
+ghci<span class="fu">&gt;</span> chunk <span class="dv">2</span> [<span class="dv">1</span><span class="fu">..</span><span class="dv">5</span>]
+[[<span class="dv">1</span>,<span class="dv">2</span>],[<span class="dv">3</span>,<span class="dv">4</span>],[<span class="dv">5</span>]]
+ghci<span class="fu">&gt;</span> chunk <span class="dv">6</span> [<span class="dv">1</span><span class="fu">..</span><span class="dv">5</span>]
+[[<span class="dv">1</span>,<span class="dv">2</span>,<span class="dv">3</span>,<span class="dv">4</span>,<span class="dv">5</span>]]</code></pre></div>
+<p>Generally, each element if <code>chunk i x</code> has lenght no more than <code>i</code>, and the the chunks exactly reconstruct the list:</p>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell">forall i, x<span class="fu">.</span> mconcat (chunk i x) <span class="fu">==</span> x</code></pre></div>
+<div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt;</span> <span class="kw">instance</span> <span class="dt">Chunkable</span> [a] <span class="kw">where</span>
+<span class="ot">&gt;</span>   chunk <span class="fu">=</span> error <span class="st">&quot;Define me!&quot;</span></code></pre></div>
+<ol start="2" style="list-style-type: decimal">
+<li><strong>Parallel Mapping:</strong> Using the parallel functions from the library <code>Control.Parallel.Strategies</code>, we define a parallel mapping function <code>pmap f xs</code> that applies <code>f</code> to each element in <code>xs</code> in parallel.</li>
+</ol>
+<div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt; pmap ::</span> (a <span class="ot">-&gt;</span> b) <span class="ot">-&gt;</span> [a] <span class="ot">-&gt;</span> [b]
+<span class="ot">&gt;</span> pmap <span class="fu">=</span> parMap rseq</code></pre></div>
+<p><em>Side-Note 1:</em> If you actually check on the description of <code>rseq</code>, you will discover that <code>pmap</code> is not really really parallel. For the shake of simplicity, let’s assume it is.</p>
+<p><em>Side-Note 2:</em> Parallelization is only possible because the argement function is effect-free, as enforced by the type system. If <code>f</code> had effects, then the order that the effects would be executed, would be undetermined.</p>
+<p>Use <code>pmap</code> to define the <code>mapReduce i f x</code> function below that</p>
+<ul>
+<li>chunks the input <code>x</code> in chunks of size at most <code>i</code>,</li>
+<li>maps <code>f</code> to each chunk, in parallel, and</li>
+<li>concatenates the result list.</li>
+</ul>
+<div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt; mapReduce ::</span> (<span class="dt">Chunkable</span> a, <span class="dt">Monoid</span> b) 
+<span class="ot">&gt;</span>           <span class="ot">=&gt;</span> <span class="dt">Int</span> <span class="ot">-&gt;</span> (a <span class="ot">-&gt;</span> b) <span class="ot">-&gt;</span> (a <span class="ot">-&gt;</span> b) 
+<span class="ot">&gt;</span> mapReduce <span class="fu">=</span> error <span class="st">&quot;Define me!&quot;</span></code></pre></div>
+<p>Then for example, you can parallelize the <code>sum</code> function from the lecture:</p>
+<div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt; sum ::</span> [<span class="dt">Int</span>] <span class="ot">-&gt;</span> <span class="dt">Sum</span> <span class="dt">Int</span> 
+<span class="ot">&gt;</span> sum <span class="fu">=</span> mconcat <span class="fu">.</span> map <span class="dt">Sum</span>  </code></pre></div>
+<p>So that</p>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell">ghci<span class="fu">&gt;</span> sum [<span class="dv">1</span><span class="fu">..</span><span class="dv">100</span>]
+<span class="dt">Sum</span> {getSum <span class="fu">=</span> <span class="dv">5050</span>}
+mapReduce <span class="dv">10</span> sum [<span class="dv">1</span><span class="fu">..</span><span class="dv">100</span>]
+<span class="dt">Sum</span> {getSum <span class="fu">=</span> <span class="dv">5050</span>}</code></pre></div>
+<p>In general:</p>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell">forall xs, i<span class="fu">.</span> sum xs <span class="fu">=</span> mapReduce i sum xs</code></pre></div>
+<p>Which generalizes to every function <code>f</code></p>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell">forall f, i<span class="fu">.</span> f <span class="fu">=</span> mapReduce i f</code></pre></div>
+<ol start="3" style="list-style-type: decimal">
+<li><strong>Parallel Reducing:</strong> As we parallelized mapping, we can also parallelize the “reduce” stage of map reduce.</li>
+</ol>
+<p>Use <code>chunk</code> and <code>pmap</code> from before to define a parallelized version of the monoid <code>mconcat</code> method, so that <code>pmconcat i xs</code></p>
+<ul>
+<li>if <code>xs</code> has length less than i, then calls <code>mconcat</code>, otherwise</li>
+<li>chunks the input list <code>xs</code>,</li>
+<li>applied <code>mconcat</code> in parallel, and</li>
+<li>recurses on the concatenated chunks.</li>
+</ul>
+<div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt; pmconcat ::</span> <span class="dt">Monoid</span> a <span class="ot">=&gt;</span> <span class="dt">Int</span> <span class="ot">-&gt;</span> [a] <span class="ot">-&gt;</span> a 
+<span class="ot">&gt;</span> pmconcat <span class="fu">=</span> error <span class="st">&quot;Define me!&quot;</span></code></pre></div>
+<p>Use <code>pmconcat</code> to define a “two-level” parallel <code>mapReduce</code>, that parallelized both the “map” and “reduce” stages:</p>
+<div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt; mapReduce2 ::</span> (<span class="dt">Chunkable</span> a, <span class="dt">Monoid</span> b) 
+<span class="ot">&gt;</span>           <span class="ot">=&gt;</span> <span class="dt">Int</span> <span class="ot">-&gt;</span> (a <span class="ot">-&gt;</span> b) <span class="ot">-&gt;</span> (a <span class="ot">-&gt;</span> b) 
+<span class="ot">&gt;</span> mapReduce2 <span class="fu">=</span> error <span class="st">&quot;Define me!&quot;</span></code></pre></div>
+<p>So that</p>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell">mapReduce2 <span class="fu">==</span> mapReduce</code></pre></div>
+        </div>
+        <div id="footer">
+            Site proudly generated by
+            <a href="http://jaspervdj.be/hakyll">Hakyll</a>
+        </div>
+    </body>
+</html>
