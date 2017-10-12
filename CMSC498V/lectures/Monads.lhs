@@ -154,10 +154,16 @@ Generalising from this example, a typical expression built using the `(>>=)` ope
 
 < do 
 <  x1 <- m1 
+<  let y1 = a1  px[ ...x2..] ~~> ERROR  
 <  x2 <- m2 
 <  ...
 <  xn <- mn 
 <  f x1 x2 ... xn
+  where 
+    w1 = ... foo w2 ....
+    w2 = ... w3
+    w3 = ...
+
 
 
 
@@ -310,7 +316,10 @@ using do nation?
 < andTable = (pure (&&)) <*> [True,False] <*> [True, False]
 
 \begin{code}
-andTable = error "Define me!"
+andTable = do 
+  x <- [True, False]
+  y <- [True, False]
+  return (x && y)
 \end{code}
 
 
@@ -570,12 +579,23 @@ we define a special state transformer that
 simply returns the current state as its result, 
 and the next integer as the new state:
 
+
+-- data ST0 a = S0 (State -> (a, State))
+--                f x     = (x, x+1) 
+
+ 
 \begin{code}
 fresh :: ST0 Int
-fresh = error "Define me!"
+fresh = S0 f 
+  where
+    f :: Int -> (Int, Int)
+    f x = (x, x+1)
 
 freshName :: ST0 String
-freshName = error "Define me!"
+freshName = S0 f
+  where
+    f :: Int -> (String, Int)
+    f x = ("Name: " ++ show x, x+1)
 \end{code}
 
 Note that fresh is a state transformer (where the state is itself just `Int`),
@@ -638,11 +658,12 @@ Of course, the do business is just nice syntax for the above:
 
 \begin{code}
 surprise2' = do 
+  fresh 
   n1 <- fresh
   n2 <- fresh
   fresh
   fresh
-  return [n1, n2]
+  return (n1, n2)
 \end{code}
 
 is just like `surprise2`.
