@@ -164,6 +164,7 @@ ghci<span class="fu">&gt;</span> chunk <span class="dv">6</span> [<span class="d
 <div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt; mapReduce ::</span> (<span class="dt">Chunkable</span> a, <span class="dt">Monoid</span> b) 
 <span class="ot">&gt;</span>           <span class="ot">=&gt;</span> <span class="dt">Int</span> <span class="ot">-&gt;</span> (a <span class="ot">-&gt;</span> b) <span class="ot">-&gt;</span> (a <span class="ot">-&gt;</span> b) 
 <span class="ot">&gt;</span> mapReduce <span class="fu">=</span> error <span class="st">&quot;Define me!&quot;</span></code></pre></div>
+<p><strong>Hint:</strong> This should be an one line definition!</p>
 <p>Then for example, you can parallelize the <code>sum</code> function from the lecture:</p>
 <div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt; sum ::</span> [<span class="dt">Int</span>] <span class="ot">-&gt;</span> <span class="dt">Sum</span> <span class="dt">Int</span> 
 <span class="ot">&gt;</span> sum <span class="fu">=</span> mconcat <span class="fu">.</span> map <span class="dt">Sum</span>  </code></pre></div>
@@ -188,10 +189,12 @@ mapReduce <span class="dv">10</span> sum [<span class="dv">1</span><span class="
 </ul>
 <div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt; pmconcat ::</span> <span class="dt">Monoid</span> a <span class="ot">=&gt;</span> <span class="dt">Int</span> <span class="ot">-&gt;</span> [a] <span class="ot">-&gt;</span> a 
 <span class="ot">&gt;</span> pmconcat <span class="fu">=</span> error <span class="st">&quot;Define me!&quot;</span></code></pre></div>
+<p><strong>Hint:</strong> <code>pmconcat</code> is recursively defined.</p>
 <p>Use <code>pmconcat</code> to define a “two-level” parallel <code>mapReduce</code>, that parallelized both the “map” and “reduce” stages:</p>
 <div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt; mapReduce2 ::</span> (<span class="dt">Chunkable</span> a, <span class="dt">Monoid</span> b) 
 <span class="ot">&gt;</span>           <span class="ot">=&gt;</span> <span class="dt">Int</span> <span class="ot">-&gt;</span> (a <span class="ot">-&gt;</span> b) <span class="ot">-&gt;</span> (a <span class="ot">-&gt;</span> b) 
 <span class="ot">&gt;</span> mapReduce2 <span class="fu">=</span> error <span class="st">&quot;Define me!&quot;</span></code></pre></div>
+<p><strong>Hint:</strong> <code>mapReduce2</code> can be defined with an one charactet edit from <code>mapReduce</code>.</p>
 <p>So that</p>
 <div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell">mapReduce2 <span class="fu">==</span> mapReduce</code></pre></div>
         </div>

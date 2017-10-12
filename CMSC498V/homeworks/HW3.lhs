@@ -245,6 +245,8 @@ mapReduce :: (Chunkable a, Monoid b)
 mapReduce = error "Define me!"
 \end{code}
 
+**Hint:** This should be an one line definition!
+
 Then for example, you can parallelize the `sum` function from the lecture: 
 
 \begin{code}
@@ -285,6 +287,9 @@ pmconcat :: Monoid a => Int -> [a] -> a
 pmconcat = error "Define me!"
 \end{code}
 
+**Hint:** `pmconcat` is recursively defined.
+
+
 Use `pmconcat` to define a "two-level" parallel `mapReduce`, 
 that parallelized both the "map" and "reduce" stages: 
 
@@ -293,6 +298,9 @@ mapReduce2 :: (Chunkable a, Monoid b)
           => Int -> (a -> b) -> (a -> b) 
 mapReduce2 = error "Define me!"
 \end{code}
+
+**Hint:** `mapReduce2` can be defined with an one charactet edit from `mapReduce`.
+
 
 So that 
 
