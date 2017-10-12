@@ -8,6 +8,10 @@ let's start by an example that is actually using monads in a hidden way.
 \begin{code}
 {-# LANGUAGE DeriveFunctor #-}
 module Monads where
+import qualified Control.Monad.State.Lazy as ST 
+import Control.Monad.State.Lazy hiding (State)
+
+import Data.Map
 \end{code}
 
 A Simple Evaluator
@@ -50,24 +54,6 @@ safeDiv n m =  if m == 0 then Nothing else Just (n `div` m)
 and then modify our evaluator as follows:
 
 
-class Monad m where
-  return :: a -> m a 
-  (>>=) :: m a -> (a -> m b) -> m b
-
-instance Monad [] where 
-  return :: a -> [a]
-  return x = [x]  
-  
-  -- (>>=) :: [a] -> (a -> [b]) -> [b]
-  xs >>= f = concatMap f xs 
-
-
-
-*Monads> pairs [1,2,3] "cat" 
--- [(1, 'c'), (2,'a'), (3,'t')]
--- [(1, 'c'), (1,'a'), (1, 't'), ...
-    (2,'a'), 
-    (3,'t')]
 \begin{code}
 type Exception a = Maybe a 
 
@@ -259,11 +245,13 @@ on maybe values.
 
 **Q:** Lets define the instance monad for lists. 
 
-< class Applicative m => Monad m where 
-<  (>>=)  :: m a -> (a -> m b) -> m b
+< instance Monad [] where 
+<  -- (>>=)  :: [a] -> (a -> [b]) -> [b]
+<  xs >>= f = concatMap f xs
 < 
-<  return :: a -> m a
-<  return = pure
+<  -- return :: a -> [a]
+<  return x = [x]
+
 
 
 (Aside: in this context, `[]` denotes the list type `[a]` without its parameter.)
@@ -280,7 +268,7 @@ a function that returns all possible ways of pairing elements
 from two lists can be defined using the do notation as follows:
 
 \begin{code}
-pairs :: [a] -> [b] -> [(a,b)]
+-- pairs :: [a] -> [b] -> [(a,b)]
 pairs xs ys =  do x <- xs
                   y <- ys
                   return (x, y)
@@ -419,8 +407,7 @@ similarly, I want:
 
 **Q:** How would you write canonize in Haskell?
 
-
-Now very clean! 
+Not very clean! 
 Next let's see how you can get the stateful 
 benefits on imperative programming in Haskell 
 using a state monad
@@ -565,7 +552,7 @@ lets write a simple sequencing combinator
 
 < (>>) :: Monad m => m a -> m b -> m b
 
-which, in a nutshell, `a1 >>` a2 takes the actions `a1` and `a2` 
+which, in a nutshell, `a1 >> a2` takes the actions `a1` and `a2` 
 and returns the mega action which is 
 `a1-then-a2-returning-the-value-returned-by-a2`.
 
@@ -727,17 +714,421 @@ such that label can be redefined by `label t = run (mlabel t) 0`.
 The Generic State Transformer
 ------------------------------------
 
+Let us use our generic state monad to rewrite the tree 
+labeling function from above. 
+The generic monad is defined in the [`Control.Monad.State.Lazy`](https://hackage.haskell.org/package/mtl-2.2.1/docs/Control-Monad-State-Lazy.html#t:State) and, mush like our definition takes two arguments: one for state and one for the result 
+
+< ST.State s a 
+
+Note that the actual type definition of the generic transformer is hidden 
+from us, so we must use only the publicly exported functions: 
+`get`, `put` and `runState` (in addition to the monadic functions we get for free.)
+
+Recall the action that returns the next fresh integer.
+Using the generic state-transformer, we write it as:
+
+\begin{code}
+freshS :: ST.State Int Int
+freshS = do n <- get
+            put (n+1)
+            return n
+\end{code}
+
+Now, the labeling function is straightforward
+
+\begin{code}
+mlabelS :: Tree a -> ST.State Int (Tree (a,Int))
+mlabelS (Leaf x)   =  do n <- freshS
+                         return (Leaf (x, n))
+mlabelS (Node l r) =  do l' <- mlabelS l
+                         r' <- mlabelS r
+                         return (Node l' r')
+\end{code}
+
+Easy enough!
+
+< ghci> runState (mlabelS tree) 0
+< (Node (Node (Leaf ('a', 0)) (Leaf ('b', 1))) (Leaf ('c', 2)), 3)
+
+We can execute the action from any initial state of our choice
+
+< ghci> runState (mlabelS tree) 1000
+< (Node (Node (Leaf ('a',1000)) (Leaf ('b',1001))) (Leaf ('c',1002)),1003)
+
+Now, whats the point of a generic state transformer 
+if we can’t have richer states. 
+Next, let us extend our fresh and label functions so that
+
+- each node gets a new label (as before),
+- the state also contains a map of the frequency with which each leaf value appears in the tree.
+
+Thus, our state will now have two elements, 
+an integer denoting the next *fresh* integer, 
+and a `Map a Int` denoting the number of times each
+ leaf value appears in the tree.
+
+\begin{code}
+data MyState a = M { index :: Int
+                   , freq  :: Map a Int }
+                 deriving (Eq, Show)
+\end{code}
+
+We write an action that returns the next fresh integer as
+
+\begin{code}
+freshM :: ST.State (MyState k) Int  
+freshM = do
+   s     <- get
+   let n  = index s
+   put $ s { index = n + 1 }
+   return n
+\end{code}
+
+Similarly, we want an action that updates the frequency of a given element `k`
+
+\begin{code}
+updFreqM :: Ord k => k -> ST.State (MyState k) ()  
+updFreqM k = do
+   s    <- get
+   let f = freq s
+   let n = findWithDefault 0 k f
+   put $ s {freq = insert k (n + 1) f}
+\end{code}
+
+And with these two, we are done
+
+\begin{code}
+mlabelM (Leaf x)   =  do updFreqM x
+                         n <- freshM
+                         return $ Leaf (x, n)
+ 
+mlabelM (Node l r) =  do l' <- mlabelM l
+                         r' <- mlabelM r
+                         return $ Node l' r'
+\end{code}
+
+Now, our initial state will be something like
+
+\begin{code}
+initM = M 0 empty
+\end{code}
+
+and so we can label the tree
+
+\begin{code}
+tree2 =  Node (Node (Leaf 'a') (Leaf 'b'))
+              (Node (Leaf 'a') (Leaf 'c'))
+\end{code}
+
+< ghci> let tree2       = Node tree tree
+< ghci> let (tree2', s) = runState (mlabelM tree) $ M 0 empty
+< 
+< ghci> tree2'
+< Node (Node (Leaf ('a', 0)) (Leaf ('b', 1)))
+<      (Node (Leaf ('a', 2)) (Leaf ('c', 3)))
+< 
+< ghci> s
+< M {index = 4, freq = fromList [('a',2),('b',1),('c',1)]}
+
+In short, `State` makes global variables 
+(or "statefull" programming) 
+really easy.
+
+
+
 The IO Monad
 ------------
+
+Recall that interactive programs in Haskell are written using the type 
+`IO a` of “actions” that return a result of type `a`, 
+but may also perform some input/output. 
+
+Sounds familiar?
+
+
+A number of primitives are provided for building values of this type, including:
+
+< return  :: a -> IO a
+< (>>=)   :: IO a -> (a -> IO b) -> IO b
+< getChar :: IO Char
+< putChar :: Char -> IO ()
+
+The use of `return` and `(>>=)` means that `IO` is monadic, 
+and hence that the `do` notation can be used to write interactive programs.
+For example, the action that reads a string of characters from the keyboard can be defined as follows:
+
+< getLine :: IO String
+< getLine =  do x <- getChar
+<               if x == '\n' then
+<                  return []
+<               else
+<                  do xs <- getLine
+<                     return (x:xs)
+
+It is interesting to note that the `IO` monad can be viewed 
+as a special case of the **state monad**, 
+in which the internal state is a suitable representation 
+of the “state of the world”:
+
+<    type World = ...
+< 
+<    type IO a  = World -> (a, World)
+
+or 
+
+<    type IO a  = ST.State World a
+
+That is, an action can be viewed as a function that 
+takes the current state of the world as its argument, 
+and produces a value and a modified world as its result, 
+in which the modified world reflects any input/output performed by the action. 
+In reality, Haskell's compiler GHC implement actions in a more efficient
+manner, but for the purposes of understanding the behaviour of actions, 
+the above interpretation can be useful.
 
 Derived Primitives
 ------------------
 
+An important benefit of abstracting out the notion of a monad into a single
+typeclass, is that it then becomes possible to define a number of useful 
+functions that work in an arbitrary monad.
+
+We’ve already seen this in the pairs function
+
+<  pairs xs ys = do
+<    x <- xs
+<    y <- ys
+<    return (x, y)
+
+What do you think the type of the above is ? (I left out an annotation deliberately!)
+
+< ghci> :t pairs
+< pairs: (Monad m) => m a -> m b -> m (a, b)
+
+It takes two monadic values and returns a single paired monadic value. 
+Be careful though! 
+The function above will behave differently depending 
+on what specific monad instance it is used with! If you use the `Maybe` monad
+
+< ghci> pairs (Nothing) (Just 'a')
+< Nothing
+< 
+< ghci> pairs (Just 42) (Nothing)
+< Just 42
+< 
+< ghci> pairs (Just 2) (Just 'a')
+< Just (2, a)
+
+this generalizes to the list monad
+
+< ghci> pairs [] ['a']
+< []
+< 
+< ghci> pairs [42] []
+< []
+< 
+< ghci> pairs [2] ['a']
+< [(2, a)]
+< 
+< ghci> pairs [1,2] "ab"
+< [(1,'a') , (2, 'a'), (1, 'b'), (2, 'b')]
+
+However, the behavior is quite different with the `IO` monad
+
+< ghci> pairs getChar getChar
+< 40('4','0')
+
+**Q:** What is the type of `foo` defined as:
+
+\begin{code}
+foo f z = do x <- z
+             return (f x)
+\end{code}
+
+
+Whoa! This is actually very useful, 
+because in one-shot we’ve defined a map function for every monad type!
+
+< ghci> foo (+1) [0,1,2]
+< [1, 2, 3]
+< 
+< ghci> foo (+1) (Just 10)
+< Just 11
+< 
+< ghci> foo (+1) Nothing
+< Nothing
+
+Thus, every `Monad` also is a `Functor`!
+Which we already know, because of transitivity!
+
+< instance (Functor m)     => Applicative m where
+< instance (Applicative m) => Monad m where
+
+**Q:** Consider the function `baz` defined as:
+
+\begin{code}
+baz mmx = do mx <- mmx
+             x  <- mx
+             return x
+\end{code}
+
+What does `baz [[1, 2], [3, 4]]` return?
+
+1. `[1, 3], [1, 4], [2, 3], [2, 4]]`
+2. `[1, 2, 3, 4]`
+3. `[[1, 3], [2, 4]]`
+4. `[]`
+5. `Type error`
+
+This above notion of concatenation generalizes to any monad:
+
+
+< join    :: Monad m => m (m a) -> m a
+< join mmx = do mx <- mmx
+<               x  <- mx
+<               return x
+
+
+As a final example, we can define a function that transforms a list of 
+monadic expressions into a single such expression that returns a list of 
+results, by performing each of the argument expressions in sequence and
+collecting their results:
+
+< sequence          :: Monad m => [m a] -> m [a]
+< sequence []       =  return []
+< sequence (mx:mxs) =  do x  <- mx
+<                         xs <- sequence mxs
+<                         return (x:xs)
+
+
 Monads as Programmable Semicolon
 ---------------------------------
 
+It is sometimes useful to sequence two monadic expressions, 
+but discard the result value produced by the first:
+
+< (>>)     :: Monad m => m a -> m b -> m b
+< mx >> my =  do _ <- mx
+<                y <- my
+<                return y
+
+For example, in the state monad the `(>>)` operator is just
+ normal sequential composition, written as `;` in most languages.
+
+Indeed, in Haskell the entire `do` notation, with or without `;` 
+is just [syntactic sugar](http://book.realworldhaskell.org/read/monads.html#monads.do) for `(>>=)` and `(>>)`. 
+For this reason, we can legitimately say that Haskell has a 
+[programmable semicolon](https://donsbot.wordpress.com/2007/03/10/practical-haskell-shell-scripting-with-error-handling-and-privilege-separation/).
+
 The Monad Laws
 ---------------
+
+Earlier we mentioned that the notion of a monad requires that 
+the `return` and `(>>=)` functions satisfy some simple properties. 
+The first two properties concern the link between `return` and `(>>=)`:
+
+< return x >>= f  =  f x  --  (1)
+< 
+< mx >>= return   =  mx   --  (2)
+
+Intuitively, equation 
+`(1)` states that if we return a value `x` and 
+then feed this value into a function `f`, 
+this should give the same result as simply applying `f` to `x`. 
+Dually, equation `(2)` states that if we feed the results of a computation 
+`mx` into the function `return`, 
+this should give the same result as simply performing `mx`. 
+Together, these equations express — modulo the fact that the second argument to `(>>=)` involves a binding operation — 
+that return is the *left and right identity* for `(>>=)`.
+
+The third property concerns the link between `(>>=)` and itself, 
+and expresses (again modulo binding) that `(>>=)` is *associative*:
+
+< (mx >>= f) >>= g  =  mx >>= (\x -> (f x >>= g))   -- (3)
+
+Note that we cannot simply write `mx >>= (f >>= g)` 
+on the right hand side of this equation, as this would not be type correct.
+
+As an example of the utility of the monad laws, 
+let us see how they can be used to prove a useful property of the 
+`liftM`: 
+
+< liftM f mx  = do { x <- mx ; return (f x) }
+
+Namely, that it distributes over the composition operator for functions, 
+in the sense that:
+
+< liftM (f . g)  =  liftM f . liftM g
+
+This equation generalises the familiar distribution property of map from
+lists to an arbitrary monad. 
+In order to verify this equation, we first rewrite the definition of 
+`liftM` using `(>>=)`: That is, we change the definition into
+
+< liftM f mx  =  mx >>= \x -> return (f x)
+
+Now the distribution property can be verified as follows:
+
+< (liftM f . liftM g) mx
+<    = {-   applying . -}
+<      liftM f (liftM g mx)
+<    = {-   applying the second liftM -}
+<      liftM f (mx >>= \x -> return (g x))
+<    = {-   applying liftM -}
+<      (mx >>= \x -> return (g x)) >>= \y -> return (f y)
+<    = {-   equation (3) -}
+<      mx >>= (\z -> (return (g z) >>= \y -> return (f y)))
+<    = {-   equation (1) -}
+<      mx >>= (\z -> return (f (g z)))
+<    = {-   unapplying . -}
+<      mx >>= (\z -> return ((f . g) z)))
+<    = {-   unapplying liftM -}
+<      liftM (f . g) mx
+
+**Q:** Show that the maybe monad satisfies equations (1), (2) and (3).
+
+A fancy monad example
+----------------------
+
+Given the type
+
+\begin{code}
+data Exp a = EVar a | EVal Int | EAdd (Exp a) (Exp a)
+\end{code}
+
+of expressions built from variables of type `a`, 
+show that this type is monadic by completing the following declaration:
+
+\begin{code}
+instance Functor Exp where
+  -- fmap :: (a -> b) -> Exp a -> Exp b
+  fmap f (EVar x)   = error "Define me!"
+  fmap f (EVal n)   = error "Define me!"
+  fmap f (EAdd x y) = error "Define me!"
+
+instance Applicative Exp where
+  -- pure :: a -> Exp a 
+  pure x = error "Define me!"
+
+  -- (<*>) :: Exp (a -> b) -> Exp a -> Exp b
+  ef <*> e = error "Define me!"
+
+
+instance Monad Exp where
+  -- return :: a -> Expr a 
+  return x = error "Define me!"
+
+  -- (>>=) :: Exp a -> (a -> Exp b) -> Exp b 
+  (EVar x)   >>= f = error "Define me!"
+  (EVal n)   >>= f = error "Define me!"
+  (EAdd x y) >>= f = error "Define me!"
+\end{code}
+
+
+Hint: think carefully about the types involved. 
+
+**Q:** What does the `(>>=)` operator for this type do?
+
 
 Further Reading
 ---------------

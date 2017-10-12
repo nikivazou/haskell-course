@@ -24,7 +24,11 @@
             <h1 id="monads">Monads</h1>
 <p>After Monoids, Applicatives and Functors, we are ready to learn what Monads are. But, instead of starting with the monadic class definition, let’s start by an example that is actually using monads in a hidden way.</p>
 <div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt;</span> <span class="ot">{-# LANGUAGE DeriveFunctor #-}</span>
-<span class="ot">&gt;</span> <span class="kw">module</span> <span class="dt">Monads</span> <span class="kw">where</span></code></pre></div>
+<span class="ot">&gt;</span> <span class="kw">module</span> <span class="dt">Monads</span> <span class="kw">where</span>
+<span class="ot">&gt;</span> <span class="kw">import qualified</span> <span class="dt">Control.Monad.State.Lazy</span> <span class="kw">as</span> <span class="dt">ST</span> 
+<span class="ot">&gt;</span> <span class="kw">import </span><span class="dt">Control.Monad.State.Lazy</span> <span class="kw">hiding</span> (<span class="dt">State</span>)
+<span class="ot">&gt;</span> 
+<span class="ot">&gt;</span> <span class="kw">import </span><span class="dt">Data.Map</span></code></pre></div>
 <h2 id="a-simple-evaluator">A Simple Evaluator</h2>
 <p>Consider the following simple language of expressions that are built up from integer values using a division operator:</p>
 <div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt;</span> <span class="kw">data</span> <span class="dt">Expr</span> <span class="fu">=</span> <span class="dt">Val</span> <span class="dt">Int</span>
@@ -43,10 +47,6 @@
 <div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt; safeDiv     ::</span> <span class="dt">Int</span> <span class="ot">-&gt;</span> <span class="dt">Int</span> <span class="ot">-&gt;</span> <span class="dt">Maybe</span> <span class="dt">Int</span>
 <span class="ot">&gt;</span> safeDiv n m <span class="fu">=</span>  <span class="kw">if</span> m <span class="fu">==</span> <span class="dv">0</span> <span class="kw">then</span> <span class="dt">Nothing</span> <span class="kw">else</span> <span class="dt">Just</span> (n <span class="ot">`div`</span> m)</code></pre></div>
 <p>and then modify our evaluator as follows:</p>
-<p>class Monad m where return :: a -&gt; m a (&gt;&gt;=) :: m a -&gt; (a -&gt; m b) -&gt; m b</p>
-<p>instance Monad [] where return :: a -&gt; [a] return x = [x]</p>
-<p>– (&gt;&gt;=) :: [a] -&gt; (a -&gt; [b]) -&gt; [b] xs &gt;&gt;= f = concatMap f xs</p>
-*Monads&gt; pairs [1,2,3] “cat” – [(1, ‘c’), (2,‘a’), (3,‘t’)] – [(1, ‘c’), (1,‘a’), (1, ‘t’), … (2,‘a’), (3,‘t’)]
 <div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt;</span> <span class="kw">type</span> <span class="dt">Exception</span> a <span class="fu">=</span> <span class="dt">Maybe</span> a 
 <span class="ot">&gt;</span> 
 <span class="ot">&gt; eval1' ::</span>  <span class="dt">Expr</span> <span class="ot">-&gt;</span> <span class="dt">Exception</span> <span class="dt">Int</span>
@@ -137,14 +137,15 @@ eval (<span class="dt">Div</span> x y) <span class="fu">=</span> <span class="kw
 <h2 id="the-list-monad">The List Monad</h2>
 <p>As with applicatives, maybe represents exceptions and lists non-determinism. We saw how the (monadic) do notation propagates exceptions on maybe values.</p>
 <p><strong>Q:</strong> Lets define the instance monad for lists.</p>
-<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="kw">class</span> <span class="dt">Applicative</span> m <span class="ot">=&gt;</span> <span class="dt">Monad</span> m <span class="kw">where</span> 
-<span class="ot"> (&gt;&gt;=)  ::</span> m a <span class="ot">-&gt;</span> (a <span class="ot">-&gt;</span> m b) <span class="ot">-&gt;</span> m b
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="kw">instance</span> <span class="dt">Monad</span> [] <span class="kw">where</span> 
+ <span class="co">-- (&gt;&gt;=)  :: [a] -&gt; (a -&gt; [b]) -&gt; [b]</span>
+ xs <span class="fu">&gt;&gt;=</span> f <span class="fu">=</span> concatMap f xs
 
-<span class="ot"> return ::</span> a <span class="ot">-&gt;</span> m a
- return <span class="fu">=</span> pure</code></pre></div>
+ <span class="co">-- return :: a -&gt; [a]</span>
+ return x <span class="fu">=</span> [x]</code></pre></div>
 <p>(Aside: in this context, <code>[]</code> denotes the list type <code>[a]</code> without its parameter.) That is, <code>return</code> simply converts a value into one result containing that value, while <code>(&gt;&gt;=)</code> provides a means of combining computations that may produce multiple results: <code>xs &gt;&gt;= f</code> applies the function <code>f</code> to each of the results in the list xs to give a nested list of results, which is then concatenated to give a single list of results.</p>
 <p>As a simple example of the use of the list monad, a function that returns all possible ways of pairing elements from two lists can be defined using the do notation as follows:</p>
-<div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt; pairs ::</span> [a] <span class="ot">-&gt;</span> [b] <span class="ot">-&gt;</span> [(a,b)]
+<div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt;</span> <span class="co">-- pairs :: [a] -&gt; [b] -&gt; [(a,b)]</span>
 <span class="ot">&gt;</span> pairs xs ys <span class="fu">=</span>  <span class="kw">do</span> x <span class="ot">&lt;-</span> xs
 <span class="ot">&gt;</span>                   y <span class="ot">&lt;-</span> ys
 <span class="ot">&gt;</span>                   return (x, y)</code></pre></div>
@@ -238,7 +239,7 @@ vals0 <span class="fu">=</span> [<span class="ch">'d'</span>, <span class="ch">'
 [<span class="dv">0</span>, <span class="dv">1</span>, <span class="dv">0</span>, <span class="dv">0</span>, <span class="dv">2</span>]</code></pre></div>
 <p><strong>Q:</strong> How would you write <code>canonize</code> in Python?</p>
 <p><strong>Q:</strong> How would you write canonize in Haskell?</p>
-<p>Now very clean! Next let’s see how you can get the stateful benefits on imperative programming in Haskell using a state monad and how <code>IO</code> is just a special case of the state monad.</p>
+<p>Not very clean! Next let’s see how you can get the stateful benefits on imperative programming in Haskell using a state monad and how <code>IO</code> is just a special case of the state monad.</p>
 <h2 id="the-state-monad">The State Monad</h2>
 <p>Now let us consider the problem of writing functions that manipulate some kind of state, represented by a type whose internal details are not important for the moment:</p>
 <div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="kw">type</span> <span class="dt">State</span> <span class="fu">=</span> <span class="fu">...</span></code></pre></div>
@@ -301,7 +302,7 @@ vals0 <span class="fu">=</span> [<span class="ch">'d'</span>, <span class="ch">'
 <p>Intuitively, a value of type <code>ST a</code> (or <code>ST0 a</code>) is simply an action that returns an a value. The sequencing combinators allow us to combine simple actions to get bigger actions, and the <code>apply0</code> allows us to execute an action from some initial state.</p>
 <p><strong>Q:</strong> To get warmed up with the state-transformer monad, lets write a simple sequencing combinator</p>
 <div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="ot">(&gt;&gt;) ::</span> <span class="dt">Monad</span> m <span class="ot">=&gt;</span> m a <span class="ot">-&gt;</span> m b <span class="ot">-&gt;</span> m b</code></pre></div>
-<p>which, in a nutshell, <code>a1 &gt;&gt;</code> a2 takes the actions <code>a1</code> and <code>a2</code> and returns the mega action which is <code>a1-then-a2-returning-the-value-returned-by-a2</code>.</p>
+<p>which, in a nutshell, <code>a1 &gt;&gt; a2</code> takes the actions <code>a1</code> and <code>a2</code> and returns the mega action which is <code>a1-then-a2-returning-the-value-returned-by-a2</code>.</p>
 <p>Next, lets see how to implement a “global counter” in Haskell, by using a state transformer, in which the internal state is simply the next integer</p>
 <div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt;</span> <span class="kw">type</span> <span class="dt">State</span> <span class="fu">=</span> <span class="dt">Int</span></code></pre></div>
 <p>In order to generate the next integer, we define a special state transformer that simply returns the current state as its result, and the next integer as the new state:</p>
@@ -369,10 +370,236 @@ vals0 <span class="fu">=</span> [<span class="ch">'d'</span>, <span class="ch">'
 <p><strong>Q:</strong> Define a function <code>app :: (State -&gt; State) -&gt; ST0 State</code>, such that fresh can be redefined by <code>fresh = app (+1)</code>.</p>
 <p><strong>Q:</strong> Define a function <code>run :: ST0 a -&gt; State -&gt; a</code>, such that label can be redefined by <code>label t = run (mlabel t) 0</code>.</p>
 <h2 id="the-generic-state-transformer">The Generic State Transformer</h2>
+<p>Let us use our generic state monad to rewrite the tree labeling function from above. The generic monad is defined in the <a href="https://hackage.haskell.org/package/mtl-2.2.1/docs/Control-Monad-State-Lazy.html#t:State"><code>Control.Monad.State.Lazy</code></a> and, mush like our definition takes two arguments: one for state and one for the result</p>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="dt">ST.State</span> s a </code></pre></div>
+<p>Note that the actual type definition of the generic transformer is hidden from us, so we must use only the publicly exported functions: <code>get</code>, <code>put</code> and <code>runState</code> (in addition to the monadic functions we get for free.)</p>
+<p>Recall the action that returns the next fresh integer. Using the generic state-transformer, we write it as:</p>
+<div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt; freshS ::</span> <span class="dt">ST.State</span> <span class="dt">Int</span> <span class="dt">Int</span>
+<span class="ot">&gt;</span> freshS <span class="fu">=</span> <span class="kw">do</span> n <span class="ot">&lt;-</span> get
+<span class="ot">&gt;</span>             put (n<span class="fu">+</span><span class="dv">1</span>)
+<span class="ot">&gt;</span>             return n</code></pre></div>
+<p>Now, the labeling function is straightforward</p>
+<div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt; mlabelS ::</span> <span class="dt">Tree</span> a <span class="ot">-&gt;</span> <span class="dt">ST.State</span> <span class="dt">Int</span> (<span class="dt">Tree</span> (a,<span class="dt">Int</span>))
+<span class="ot">&gt;</span> mlabelS (<span class="dt">Leaf</span> x)   <span class="fu">=</span>  <span class="kw">do</span> n <span class="ot">&lt;-</span> freshS
+<span class="ot">&gt;</span>                          return (<span class="dt">Leaf</span> (x, n))
+<span class="ot">&gt;</span> mlabelS (<span class="dt">Node</span> l r) <span class="fu">=</span>  <span class="kw">do</span> l' <span class="ot">&lt;-</span> mlabelS l
+<span class="ot">&gt;</span>                          r' <span class="ot">&lt;-</span> mlabelS r
+<span class="ot">&gt;</span>                          return (<span class="dt">Node</span> l' r')</code></pre></div>
+<p>Easy enough!</p>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell">ghci<span class="fu">&gt;</span> runState (mlabelS tree) <span class="dv">0</span>
+(<span class="dt">Node</span> (<span class="dt">Node</span> (<span class="dt">Leaf</span> (<span class="ch">'a'</span>, <span class="dv">0</span>)) (<span class="dt">Leaf</span> (<span class="ch">'b'</span>, <span class="dv">1</span>))) (<span class="dt">Leaf</span> (<span class="ch">'c'</span>, <span class="dv">2</span>)), <span class="dv">3</span>)</code></pre></div>
+<p>We can execute the action from any initial state of our choice</p>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell">ghci<span class="fu">&gt;</span> runState (mlabelS tree) <span class="dv">1000</span>
+(<span class="dt">Node</span> (<span class="dt">Node</span> (<span class="dt">Leaf</span> (<span class="ch">'a'</span>,<span class="dv">1000</span>)) (<span class="dt">Leaf</span> (<span class="ch">'b'</span>,<span class="dv">1001</span>))) (<span class="dt">Leaf</span> (<span class="ch">'c'</span>,<span class="dv">1002</span>)),<span class="dv">1003</span>)</code></pre></div>
+<p>Now, whats the point of a generic state transformer if we can’t have richer states. Next, let us extend our fresh and label functions so that</p>
+<ul>
+<li>each node gets a new label (as before),</li>
+<li>the state also contains a map of the frequency with which each leaf value appears in the tree.</li>
+</ul>
+<p>Thus, our state will now have two elements, an integer denoting the next <em>fresh</em> integer, and a <code>Map a Int</code> denoting the number of times each leaf value appears in the tree.</p>
+<div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt;</span> <span class="kw">data</span> <span class="dt">MyState</span> a <span class="fu">=</span> <span class="dt">M</span> {<span class="ot"> index ::</span> <span class="dt">Int</span>
+<span class="ot">&gt;</span>                    ,<span class="ot"> freq  ::</span> <span class="dt">Map</span> a <span class="dt">Int</span> }
+<span class="ot">&gt;</span>                  <span class="kw">deriving</span> (<span class="dt">Eq</span>, <span class="dt">Show</span>)</code></pre></div>
+<p>We write an action that returns the next fresh integer as</p>
+<div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt; freshM ::</span> <span class="dt">ST.State</span> (<span class="dt">MyState</span> k) <span class="dt">Int</span>  
+<span class="ot">&gt;</span> freshM <span class="fu">=</span> <span class="kw">do</span>
+<span class="ot">&gt;</span>    s     <span class="ot">&lt;-</span> get
+<span class="ot">&gt;</span>    <span class="kw">let</span> n  <span class="fu">=</span> index s
+<span class="ot">&gt;</span>    put <span class="fu">$</span> s { index <span class="fu">=</span> n <span class="fu">+</span> <span class="dv">1</span> }
+<span class="ot">&gt;</span>    return n</code></pre></div>
+<p>Similarly, we want an action that updates the frequency of a given element <code>k</code></p>
+<div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt; updFreqM ::</span> <span class="dt">Ord</span> k <span class="ot">=&gt;</span> k <span class="ot">-&gt;</span> <span class="dt">ST.State</span> (<span class="dt">MyState</span> k) ()  
+<span class="ot">&gt;</span> updFreqM k <span class="fu">=</span> <span class="kw">do</span>
+<span class="ot">&gt;</span>    s    <span class="ot">&lt;-</span> get
+<span class="ot">&gt;</span>    <span class="kw">let</span> f <span class="fu">=</span> freq s
+<span class="ot">&gt;</span>    <span class="kw">let</span> n <span class="fu">=</span> findWithDefault <span class="dv">0</span> k f
+<span class="ot">&gt;</span>    put <span class="fu">$</span> s {freq <span class="fu">=</span> insert k (n <span class="fu">+</span> <span class="dv">1</span>) f}</code></pre></div>
+<p>And with these two, we are done</p>
+<div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt;</span> mlabelM (<span class="dt">Leaf</span> x)   <span class="fu">=</span>  <span class="kw">do</span> updFreqM x
+<span class="ot">&gt;</span>                          n <span class="ot">&lt;-</span> freshM
+<span class="ot">&gt;</span>                          return <span class="fu">$</span> <span class="dt">Leaf</span> (x, n)
+<span class="ot">&gt;</span>  
+<span class="ot">&gt;</span> mlabelM (<span class="dt">Node</span> l r) <span class="fu">=</span>  <span class="kw">do</span> l' <span class="ot">&lt;-</span> mlabelM l
+<span class="ot">&gt;</span>                          r' <span class="ot">&lt;-</span> mlabelM r
+<span class="ot">&gt;</span>                          return <span class="fu">$</span> <span class="dt">Node</span> l' r'</code></pre></div>
+<p>Now, our initial state will be something like</p>
+<div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt;</span> initM <span class="fu">=</span> <span class="dt">M</span> <span class="dv">0</span> empty</code></pre></div>
+<p>and so we can label the tree</p>
+<div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt;</span> tree2 <span class="fu">=</span>  <span class="dt">Node</span> (<span class="dt">Node</span> (<span class="dt">Leaf</span> <span class="ch">'a'</span>) (<span class="dt">Leaf</span> <span class="ch">'b'</span>))
+<span class="ot">&gt;</span>               (<span class="dt">Node</span> (<span class="dt">Leaf</span> <span class="ch">'a'</span>) (<span class="dt">Leaf</span> <span class="ch">'c'</span>))</code></pre></div>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell">ghci<span class="fu">&gt;</span> <span class="kw">let</span> tree2       <span class="fu">=</span> <span class="dt">Node</span> tree tree
+ghci<span class="fu">&gt;</span> <span class="kw">let</span> (tree2', s) <span class="fu">=</span> runState (mlabelM tree) <span class="fu">$</span> <span class="dt">M</span> <span class="dv">0</span> empty
+
+ghci<span class="fu">&gt;</span> tree2'
+<span class="dt">Node</span> (<span class="dt">Node</span> (<span class="dt">Leaf</span> (<span class="ch">'a'</span>, <span class="dv">0</span>)) (<span class="dt">Leaf</span> (<span class="ch">'b'</span>, <span class="dv">1</span>)))
+     (<span class="dt">Node</span> (<span class="dt">Leaf</span> (<span class="ch">'a'</span>, <span class="dv">2</span>)) (<span class="dt">Leaf</span> (<span class="ch">'c'</span>, <span class="dv">3</span>)))
+
+ghci<span class="fu">&gt;</span> s
+<span class="dt">M</span> {index <span class="fu">=</span> <span class="dv">4</span>, freq <span class="fu">=</span> fromList [(<span class="ch">'a'</span>,<span class="dv">2</span>),(<span class="ch">'b'</span>,<span class="dv">1</span>),(<span class="ch">'c'</span>,<span class="dv">1</span>)]}</code></pre></div>
+<p>In short, <code>State</code> makes global variables (or “statefull” programming) really easy.</p>
 <h2 id="the-io-monad">The IO Monad</h2>
+<p>Recall that interactive programs in Haskell are written using the type <code>IO a</code> of “actions” that return a result of type <code>a</code>, but may also perform some input/output.</p>
+<p>Sounds familiar?</p>
+<p>A number of primitives are provided for building values of this type, including:</p>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell">return<span class="ot">  ::</span> a <span class="ot">-&gt;</span> <span class="dt">IO</span> a
+<span class="ot">(&gt;&gt;=)   ::</span> <span class="dt">IO</span> a <span class="ot">-&gt;</span> (a <span class="ot">-&gt;</span> <span class="dt">IO</span> b) <span class="ot">-&gt;</span> <span class="dt">IO</span> b
+getChar<span class="ot"> ::</span> <span class="dt">IO</span> <span class="dt">Char</span>
+putChar<span class="ot"> ::</span> <span class="dt">Char</span> <span class="ot">-&gt;</span> <span class="dt">IO</span> ()</code></pre></div>
+<p>The use of <code>return</code> and <code>(&gt;&gt;=)</code> means that <code>IO</code> is monadic, and hence that the <code>do</code> notation can be used to write interactive programs. For example, the action that reads a string of characters from the keyboard can be defined as follows:</p>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell">getLine<span class="ot"> ::</span> <span class="dt">IO</span> <span class="dt">String</span>
+getLine <span class="fu">=</span>  <span class="kw">do</span> x <span class="ot">&lt;-</span> getChar
+              <span class="kw">if</span> x <span class="fu">==</span> <span class="ch">'\n'</span> <span class="kw">then</span>
+                 return []
+              <span class="kw">else</span>
+                 <span class="kw">do</span> xs <span class="ot">&lt;-</span> getLine
+                    return (x<span class="fu">:</span>xs)</code></pre></div>
+<p>It is interesting to note that the <code>IO</code> monad can be viewed as a special case of the <strong>state monad</strong>, in which the internal state is a suitable representation of the “state of the world”:</p>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell">   <span class="kw">type</span> <span class="dt">World</span> <span class="fu">=</span> <span class="fu">...</span>
+
+   <span class="kw">type</span> <span class="dt">IO</span> a  <span class="fu">=</span> <span class="dt">World</span> <span class="ot">-&gt;</span> (a, <span class="dt">World</span>)</code></pre></div>
+<p>or</p>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell">   <span class="kw">type</span> <span class="dt">IO</span> a  <span class="fu">=</span> <span class="dt">ST.State</span> <span class="dt">World</span> a</code></pre></div>
+<p>That is, an action can be viewed as a function that takes the current state of the world as its argument, and produces a value and a modified world as its result, in which the modified world reflects any input/output performed by the action. In reality, Haskell’s compiler GHC implement actions in a more efficient manner, but for the purposes of understanding the behaviour of actions, the above interpretation can be useful.</p>
 <h2 id="derived-primitives">Derived Primitives</h2>
+<p>An important benefit of abstracting out the notion of a monad into a single typeclass, is that it then becomes possible to define a number of useful functions that work in an arbitrary monad.</p>
+<p>We’ve already seen this in the pairs function</p>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell"> pairs xs ys <span class="fu">=</span> <span class="kw">do</span>
+   x <span class="ot">&lt;-</span> xs
+   y <span class="ot">&lt;-</span> ys
+   return (x, y)</code></pre></div>
+<p>What do you think the type of the above is ? (I left out an annotation deliberately!)</p>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell">ghci<span class="fu">&gt;</span> <span class="fu">:</span>t pairs
+pairs<span class="fu">:</span> (<span class="dt">Monad</span> m) <span class="ot">=&gt;</span> m a <span class="ot">-&gt;</span> m b <span class="ot">-&gt;</span> m (a, b)</code></pre></div>
+<p>It takes two monadic values and returns a single paired monadic value. Be careful though! The function above will behave differently depending on what specific monad instance it is used with! If you use the <code>Maybe</code> monad</p>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell">ghci<span class="fu">&gt;</span> pairs (<span class="dt">Nothing</span>) (<span class="dt">Just</span> <span class="ch">'a'</span>)
+<span class="dt">Nothing</span>
+
+ghci<span class="fu">&gt;</span> pairs (<span class="dt">Just</span> <span class="dv">42</span>) (<span class="dt">Nothing</span>)
+<span class="dt">Just</span> <span class="dv">42</span>
+
+ghci<span class="fu">&gt;</span> pairs (<span class="dt">Just</span> <span class="dv">2</span>) (<span class="dt">Just</span> <span class="ch">'a'</span>)
+<span class="dt">Just</span> (<span class="dv">2</span>, a)</code></pre></div>
+<p>this generalizes to the list monad</p>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell">ghci<span class="fu">&gt;</span> pairs [] [<span class="ch">'a'</span>]
+[]
+
+ghci<span class="fu">&gt;</span> pairs [<span class="dv">42</span>] []
+[]
+
+ghci<span class="fu">&gt;</span> pairs [<span class="dv">2</span>] [<span class="ch">'a'</span>]
+[(<span class="dv">2</span>, a)]
+
+ghci<span class="fu">&gt;</span> pairs [<span class="dv">1</span>,<span class="dv">2</span>] <span class="st">&quot;ab&quot;</span>
+[(<span class="dv">1</span>,<span class="ch">'a'</span>) , (<span class="dv">2</span>, <span class="ch">'a'</span>), (<span class="dv">1</span>, <span class="ch">'b'</span>), (<span class="dv">2</span>, <span class="ch">'b'</span>)]</code></pre></div>
+<p>However, the behavior is quite different with the <code>IO</code> monad</p>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell">ghci<span class="fu">&gt;</span> pairs getChar getChar
+<span class="dv">40</span>(<span class="ch">'4'</span>,<span class="ch">'0'</span>)</code></pre></div>
+<p><strong>Q:</strong> What is the type of <code>foo</code> defined as:</p>
+<div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt;</span> foo f z <span class="fu">=</span> <span class="kw">do</span> x <span class="ot">&lt;-</span> z
+<span class="ot">&gt;</span>              return (f x)</code></pre></div>
+<p>Whoa! This is actually very useful, because in one-shot we’ve defined a map function for every monad type!</p>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell">ghci<span class="fu">&gt;</span> foo (<span class="fu">+</span><span class="dv">1</span>) [<span class="dv">0</span>,<span class="dv">1</span>,<span class="dv">2</span>]
+[<span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">3</span>]
+
+ghci<span class="fu">&gt;</span> foo (<span class="fu">+</span><span class="dv">1</span>) (<span class="dt">Just</span> <span class="dv">10</span>)
+<span class="dt">Just</span> <span class="dv">11</span>
+
+ghci<span class="fu">&gt;</span> foo (<span class="fu">+</span><span class="dv">1</span>) <span class="dt">Nothing</span>
+<span class="dt">Nothing</span></code></pre></div>
+<p>Thus, every <code>Monad</code> also is a <code>Functor</code>! Which we already know, because of transitivity!</p>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="kw">instance</span> (<span class="dt">Functor</span> m)     <span class="ot">=&gt;</span> <span class="dt">Applicative</span> m <span class="kw">where</span>
+<span class="kw">instance</span> (<span class="dt">Applicative</span> m) <span class="ot">=&gt;</span> <span class="dt">Monad</span> m <span class="kw">where</span></code></pre></div>
+<p><strong>Q:</strong> Consider the function <code>baz</code> defined as:</p>
+<div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt;</span> baz mmx <span class="fu">=</span> <span class="kw">do</span> mx <span class="ot">&lt;-</span> mmx
+<span class="ot">&gt;</span>              x  <span class="ot">&lt;-</span> mx
+<span class="ot">&gt;</span>              return x</code></pre></div>
+<p>What does <code>baz [[1, 2], [3, 4]]</code> return?</p>
+<ol style="list-style-type: decimal">
+<li><code>[1, 3], [1, 4], [2, 3], [2, 4]]</code></li>
+<li><code>[1, 2, 3, 4]</code></li>
+<li><code>[[1, 3], [2, 4]]</code></li>
+<li><code>[]</code></li>
+<li><code>Type error</code></li>
+</ol>
+<p>This above notion of concatenation generalizes to any monad:</p>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="ot">join    ::</span> <span class="dt">Monad</span> m <span class="ot">=&gt;</span> m (m a) <span class="ot">-&gt;</span> m a
+join mmx <span class="fu">=</span> <span class="kw">do</span> mx <span class="ot">&lt;-</span> mmx
+              x  <span class="ot">&lt;-</span> mx
+              return x</code></pre></div>
+<p>As a final example, we can define a function that transforms a list of monadic expressions into a single such expression that returns a list of results, by performing each of the argument expressions in sequence and collecting their results:</p>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell">sequence<span class="ot">          ::</span> <span class="dt">Monad</span> m <span class="ot">=&gt;</span> [m a] <span class="ot">-&gt;</span> m [a]
+sequence []       <span class="fu">=</span>  return []
+sequence (mx<span class="fu">:</span>mxs) <span class="fu">=</span>  <span class="kw">do</span> x  <span class="ot">&lt;-</span> mx
+                        xs <span class="ot">&lt;-</span> sequence mxs
+                        return (x<span class="fu">:</span>xs)</code></pre></div>
 <h2 id="monads-as-programmable-semicolon">Monads as Programmable Semicolon</h2>
+<p>It is sometimes useful to sequence two monadic expressions, but discard the result value produced by the first:</p>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="ot">(&gt;&gt;)     ::</span> <span class="dt">Monad</span> m <span class="ot">=&gt;</span> m a <span class="ot">-&gt;</span> m b <span class="ot">-&gt;</span> m b
+mx <span class="fu">&gt;&gt;</span> my <span class="fu">=</span>  <span class="kw">do</span> _ <span class="ot">&lt;-</span> mx
+               y <span class="ot">&lt;-</span> my
+               return y</code></pre></div>
+<p>For example, in the state monad the <code>(&gt;&gt;)</code> operator is just normal sequential composition, written as <code>;</code> in most languages.</p>
+<p>Indeed, in Haskell the entire <code>do</code> notation, with or without <code>;</code> is just <a href="http://book.realworldhaskell.org/read/monads.html#monads.do">syntactic sugar</a> for <code>(&gt;&gt;=)</code> and <code>(&gt;&gt;)</code>. For this reason, we can legitimately say that Haskell has a <a href="https://donsbot.wordpress.com/2007/03/10/practical-haskell-shell-scripting-with-error-handling-and-privilege-separation/">programmable semicolon</a>.</p>
 <h2 id="the-monad-laws">The Monad Laws</h2>
+<p>Earlier we mentioned that the notion of a monad requires that the <code>return</code> and <code>(&gt;&gt;=)</code> functions satisfy some simple properties. The first two properties concern the link between <code>return</code> and <code>(&gt;&gt;=)</code>:</p>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell">return x <span class="fu">&gt;&gt;=</span> f  <span class="fu">=</span>  f x  <span class="co">--  (1)</span>
+
+mx <span class="fu">&gt;&gt;=</span> return   <span class="fu">=</span>  mx   <span class="co">--  (2)</span></code></pre></div>
+<p>Intuitively, equation <code>(1)</code> states that if we return a value <code>x</code> and then feed this value into a function <code>f</code>, this should give the same result as simply applying <code>f</code> to <code>x</code>. Dually, equation <code>(2)</code> states that if we feed the results of a computation <code>mx</code> into the function <code>return</code>, this should give the same result as simply performing <code>mx</code>. Together, these equations express — modulo the fact that the second argument to <code>(&gt;&gt;=)</code> involves a binding operation — that return is the <em>left and right identity</em> for <code>(&gt;&gt;=)</code>.</p>
+<p>The third property concerns the link between <code>(&gt;&gt;=)</code> and itself, and expresses (again modulo binding) that <code>(&gt;&gt;=)</code> is <em>associative</em>:</p>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell">(mx <span class="fu">&gt;&gt;=</span> f) <span class="fu">&gt;&gt;=</span> g  <span class="fu">=</span>  mx <span class="fu">&gt;&gt;=</span> (\x <span class="ot">-&gt;</span> (f x <span class="fu">&gt;&gt;=</span> g))   <span class="co">-- (3)</span></code></pre></div>
+<p>Note that we cannot simply write <code>mx &gt;&gt;= (f &gt;&gt;= g)</code> on the right hand side of this equation, as this would not be type correct.</p>
+<p>As an example of the utility of the monad laws, let us see how they can be used to prove a useful property of the <code>liftM</code>:</p>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell">liftM f mx  <span class="fu">=</span> <span class="kw">do</span> { x <span class="ot">&lt;-</span> mx ; return (f x) }</code></pre></div>
+<p>Namely, that it distributes over the composition operator for functions, in the sense that:</p>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell">liftM (f <span class="fu">.</span> g)  <span class="fu">=</span>  liftM f <span class="fu">.</span> liftM g</code></pre></div>
+<p>This equation generalises the familiar distribution property of map from lists to an arbitrary monad. In order to verify this equation, we first rewrite the definition of <code>liftM</code> using <code>(&gt;&gt;=)</code>: That is, we change the definition into</p>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell">liftM f mx  <span class="fu">=</span>  mx <span class="fu">&gt;&gt;=</span> \x <span class="ot">-&gt;</span> return (f x)</code></pre></div>
+<p>Now the distribution property can be verified as follows:</p>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell">(liftM f <span class="fu">.</span> liftM g) mx
+   <span class="fu">=</span> <span class="co">{-   applying . -}</span>
+     liftM f (liftM g mx)
+   <span class="fu">=</span> <span class="co">{-   applying the second liftM -}</span>
+     liftM f (mx <span class="fu">&gt;&gt;=</span> \x <span class="ot">-&gt;</span> return (g x))
+   <span class="fu">=</span> <span class="co">{-   applying liftM -}</span>
+     (mx <span class="fu">&gt;&gt;=</span> \x <span class="ot">-&gt;</span> return (g x)) <span class="fu">&gt;&gt;=</span> \y <span class="ot">-&gt;</span> return (f y)
+   <span class="fu">=</span> <span class="co">{-   equation (3) -}</span>
+     mx <span class="fu">&gt;&gt;=</span> (\z <span class="ot">-&gt;</span> (return (g z) <span class="fu">&gt;&gt;=</span> \y <span class="ot">-&gt;</span> return (f y)))
+   <span class="fu">=</span> <span class="co">{-   equation (1) -}</span>
+     mx <span class="fu">&gt;&gt;=</span> (\z <span class="ot">-&gt;</span> return (f (g z)))
+   <span class="fu">=</span> <span class="co">{-   unapplying . -}</span>
+     mx <span class="fu">&gt;&gt;=</span> (\z <span class="ot">-&gt;</span> return ((f <span class="fu">.</span> g) z)))
+   <span class="fu">=</span> <span class="co">{-   unapplying liftM -}</span>
+     liftM (f <span class="fu">.</span> g) mx</code></pre></div>
+<p><strong>Q:</strong> Show that the maybe monad satisfies equations (1), (2) and (3).</p>
+<h2 id="a-fancy-monad-example">A fancy monad example</h2>
+<p>Given the type</p>
+<div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt;</span> <span class="kw">data</span> <span class="dt">Exp</span> a <span class="fu">=</span> <span class="dt">EVar</span> a <span class="fu">|</span> <span class="dt">EVal</span> <span class="dt">Int</span> <span class="fu">|</span> <span class="dt">EAdd</span> (<span class="dt">Exp</span> a) (<span class="dt">Exp</span> a)</code></pre></div>
+<p>of expressions built from variables of type <code>a</code>, show that this type is monadic by completing the following declaration:</p>
+<div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt;</span> <span class="kw">instance</span> <span class="dt">Functor</span> <span class="dt">Exp</span> <span class="kw">where</span>
+<span class="ot">&gt;</span>   <span class="co">-- fmap :: (a -&gt; b) -&gt; Exp a -&gt; Exp b</span>
+<span class="ot">&gt;</span>   fmap f (<span class="dt">EVar</span> x)   <span class="fu">=</span> error <span class="st">&quot;Define me!&quot;</span>
+<span class="ot">&gt;</span>   fmap f (<span class="dt">EVal</span> n)   <span class="fu">=</span> error <span class="st">&quot;Define me!&quot;</span>
+<span class="ot">&gt;</span>   fmap f (<span class="dt">EAdd</span> x y) <span class="fu">=</span> error <span class="st">&quot;Define me!&quot;</span>
+<span class="ot">&gt;</span> 
+<span class="ot">&gt;</span> <span class="kw">instance</span> <span class="dt">Applicative</span> <span class="dt">Exp</span> <span class="kw">where</span>
+<span class="ot">&gt;</span>   <span class="co">-- pure :: a -&gt; Exp a </span>
+<span class="ot">&gt;</span>   pure x <span class="fu">=</span> error <span class="st">&quot;Define me!&quot;</span>
+<span class="ot">&gt;</span> 
+<span class="ot">&gt;</span>   <span class="co">-- (&lt;*&gt;) :: Exp (a -&gt; b) -&gt; Exp a -&gt; Exp b</span>
+<span class="ot">&gt;</span>   ef <span class="fu">&lt;*&gt;</span> e <span class="fu">=</span> error <span class="st">&quot;Define me!&quot;</span>
+<span class="ot">&gt;</span> 
+<span class="ot">&gt;</span> 
+<span class="ot">&gt;</span> <span class="kw">instance</span> <span class="dt">Monad</span> <span class="dt">Exp</span> <span class="kw">where</span>
+<span class="ot">&gt;</span>   <span class="co">-- return :: a -&gt; Expr a </span>
+<span class="ot">&gt;</span>   return x <span class="fu">=</span> error <span class="st">&quot;Define me!&quot;</span>
+<span class="ot">&gt;</span> 
+<span class="ot">&gt;</span>   <span class="co">-- (&gt;&gt;=) :: Exp a -&gt; (a -&gt; Exp b) -&gt; Exp b </span>
+<span class="ot">&gt;</span>   (<span class="dt">EVar</span> x)   <span class="fu">&gt;&gt;=</span> f <span class="fu">=</span> error <span class="st">&quot;Define me!&quot;</span>
+<span class="ot">&gt;</span>   (<span class="dt">EVal</span> n)   <span class="fu">&gt;&gt;=</span> f <span class="fu">=</span> error <span class="st">&quot;Define me!&quot;</span>
+<span class="ot">&gt;</span>   (<span class="dt">EAdd</span> x y) <span class="fu">&gt;&gt;=</span> f <span class="fu">=</span> error <span class="st">&quot;Define me!&quot;</span></code></pre></div>
+<p>Hint: think carefully about the types involved.</p>
+<p><strong>Q:</strong> What does the <code>(&gt;&gt;=)</code> operator for this type do?</p>
 <h2 id="further-reading">Further Reading</h2>
 <p>The subject of monads is a large one, and we have only scratched the surface here. If you are interested in finding out more, two suggestions for further reading would be to look at “monads with a zero a plus” (which extend the basic notion with two extra primitives that are supported by some monads), and “monad transformers” (which provide a means to combine monads). For example, see sections 3 and 7 of the following article, which concerns the monadic nature of <a href="http://www.cs.nott.ac.uk/~gmh/monparsing.pdf">functional parsers</a>. For a more in-depth exploration of the IO monad, see Simon Peyton Jones’ excellent article on the <a href="http://research.microsoft.com/Users/simonpj/papers/marktoberdorf/">“awkward squad”</a>.</p>
         </div>

@@ -26,7 +26,7 @@ Here are some ideas:
 - Theory and Logic 
 	- A parser, type-checker, and/or interpreter for lambda-calculus. 
 	- A prover of propositional logic. 
-	- ?!?!?! [Liquid Haskell](https://ucsd-progsys.github.io/liquidhaskell-blog/) ?!?!?!?!
+	- [Liquid Haskell:](https://ucsd-progsys.github.io/liquidhaskell-blog/)Correctness of [bird-style transformations](https://github.com/nikivazou/nikivazou.github.io/blob/master/static/projects/bird-style-equivalence.md).
 
 Project Evaluation
 ------------------
