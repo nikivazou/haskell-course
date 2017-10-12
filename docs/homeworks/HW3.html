@@ -72,8 +72,8 @@ ghci<span class="fu">&gt;</span> pairs (<span class="dt">Left</span>   <span cla
 <h2 id="problem-2-configurations-are-monoids"><strong>Problem 2:</strong> Configurations are monoids</h2>
 <p>A program configuration forms a monoid. For instance, we define the following data type configuration that configures how your Haskell program is compiled:</p>
 <ul>
-<li><code>cOpt</code> shoule the configurations be enabled? (the default is no)</li>
-<li><code>cExt</code> what language extentions should be used?</li>
+<li><code>cOpt</code> should the configurations be enabled? (the default is no)</li>
+<li><code>cExt</code> what language extensions should be used?</li>
 <li><code>cThd</code> how many threads is the program using?</li>
 </ul>
 <div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt;</span> <span class="kw">data</span> <span class="dt">Config</span> 
@@ -90,7 +90,7 @@ ghci<span class="fu">&gt;</span> pairs (<span class="dt">Left</span>   <span cla
 <span class="ot">&gt;</span>   mappend <span class="fu">=</span> error <span class="st">&quot;Define me!&quot;</span></code></pre></div>
 <ol start="2" style="list-style-type: decimal">
 <li><strong>Generalized Configurations:</strong><br />
-Consinder a generalization of the above configuration, where the fields are type variables:</li>
+Consider a generalization of the above configuration, where the fields are type variables:</li>
 </ol>
 <div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt;</span> <span class="kw">data</span> <span class="dt">GConfig</span> a b c 
 <span class="ot">&gt;</span>   <span class="fu">=</span> <span class="dt">GConfig</span> {<span class="ot"> gcOpt ::</span> a
@@ -109,9 +109,9 @@ Consinder a generalization of the above configuration, where the fields are type
 <li>booleans are monoids (using <code>All</code> or <code>Any</code>) and</li>
 <li>integers are monoids (using <code>Sum</code> or <code>Product</code>).</li>
 </ul>
-<p>Use the above monoids to <strong>properly</strong> define a type alias, i.e., replace the <code>Int</code> below with an instanciation of <code>GConfig</code>, so that each <code>MyConfig</code> has the same information as <code>Config</code>, i.e., a “boolean”, a list integer, and an “integer” fields.</p>
+<p>Use the above monoids to <strong>properly</strong> define a type alias, i.e., replace the <code>Int</code> below with an instantiation of <code>GConfig</code>, so that each <code>MyConfig</code> has the same information as <code>Config</code>, i.e., a “boolean”, a list integer, and an “integer” fields.</p>
 <div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt;</span> <span class="kw">type</span> <span class="dt">MyConfig</span> <span class="fu">=</span> <span class="dt">Int</span> </code></pre></div>
-<p>Define the following functions that convert between your monoid configutations</p>
+<p>Define the following functions that convert between your monoid configurations</p>
 <div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt; toMyConfig ::</span> <span class="dt">Config</span> <span class="ot">-&gt;</span> <span class="dt">MyConfig</span>
 <span class="ot">&gt;</span> toMyConfig <span class="fu">=</span> error <span class="st">&quot;Define me!&quot;</span>
 <span class="ot">&gt;</span> 
@@ -143,7 +143,7 @@ ghci<span class="fu">&gt;</span> chunk <span class="dv">2</span> [<span class="d
 [[<span class="dv">1</span>,<span class="dv">2</span>],[<span class="dv">3</span>,<span class="dv">4</span>],[<span class="dv">5</span>]]
 ghci<span class="fu">&gt;</span> chunk <span class="dv">6</span> [<span class="dv">1</span><span class="fu">..</span><span class="dv">5</span>]
 [[<span class="dv">1</span>,<span class="dv">2</span>,<span class="dv">3</span>,<span class="dv">4</span>,<span class="dv">5</span>]]</code></pre></div>
-<p>Generally, each element if <code>chunk i x</code> has lenght no more than <code>i</code>, and the the chunks exactly reconstruct the list:</p>
+<p>Generally, each element if <code>chunk i x</code> has length no more than <code>i</code>, and the the chunks exactly reconstruct the list:</p>
 <div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell">forall i, x<span class="fu">.</span> mconcat (chunk i x) <span class="fu">==</span> x</code></pre></div>
 <div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt;</span> <span class="kw">instance</span> <span class="dt">Chunkable</span> [a] <span class="kw">where</span>
 <span class="ot">&gt;</span>   chunk <span class="fu">=</span> error <span class="st">&quot;Define me!&quot;</span></code></pre></div>
@@ -153,7 +153,7 @@ ghci<span class="fu">&gt;</span> chunk <span class="dv">6</span> [<span class="d
 <div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt; pmap ::</span> (a <span class="ot">-&gt;</span> b) <span class="ot">-&gt;</span> [a] <span class="ot">-&gt;</span> [b]
 <span class="ot">&gt;</span> pmap <span class="fu">=</span> parMap rseq</code></pre></div>
 <p><em>Side-Note 1:</em> If you actually check on the description of <code>rseq</code>, you will discover that <code>pmap</code> is not really really parallel. For the shake of simplicity, let’s assume it is.</p>
-<p><em>Side-Note 2:</em> Parallelization is only possible because the argement function is effect-free, as enforced by the type system. If <code>f</code> had effects, then the order that the effects would be executed, would be undetermined.</p>
+<p><em>Side-Note 2:</em> Parallelization is only possible because the argument function is effect-free, as enforced by the type system. If <code>f</code> had effects, then the order that the effects would be executed, would be undetermined.</p>
 <p>Use <code>pmap</code> to define the <code>mapReduce i f x</code> function below that</p>
 <ul>
 <li>chunks the input <code>x</code> in chunks of size at most <code>i</code>,</li>

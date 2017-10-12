@@ -82,8 +82,8 @@ A program configuration forms a monoid.
 For instance, we define the following data type configuration that 
 configures how your Haskell program is compiled:
 
-  - `cOpt` shoule the configurations be enabled? (the default is no)
-  - `cExt` what language extentions should be used?
+  - `cOpt` should the configurations be enabled? (the default is no)
+  - `cExt` what language extensions should be used?
   - `cThd` how many threads is the program using?
   
 \begin{code}
@@ -105,7 +105,7 @@ instance Monoid Config where
 \end{code}
 
 2. **Generalized Configurations:**  
-Consinder a generalization of the above configuration, 
+Consider a generalization of the above configuration, 
 where the fields are type variables: 
 
 \begin{code}
@@ -135,7 +135,7 @@ In the class we saw that
 
 
 Use the above monoids to **properly** define a type alias, 
-i.e., replace the `Int` below with an instanciation of `GConfig`, 
+i.e., replace the `Int` below with an instantiation of `GConfig`, 
 so that each `MyConfig` has the same information as `Config`, 
 i.e., a "boolean", a list integer, and an "integer" fields. 
 
@@ -143,7 +143,7 @@ i.e., a "boolean", a list integer, and an "integer" fields.
 type MyConfig = Int 
 \end{code}
 
-Define the following functions that convert between your monoid configutations 
+Define the following functions that convert between your monoid configurations 
 
 \begin{code}
 toMyConfig :: Config -> MyConfig
@@ -198,7 +198,7 @@ Define lists as chunkable instances so that
 < ghci> chunk 6 [1..5]
 < [[1,2,3,4,5]]
 
-Generally, each element if `chunk i x` has lenght no more than `i`, 
+Generally, each element if `chunk i x` has length no more than `i`, 
 and the the chunks exactly reconstruct the list: 
 
 < forall i, x. mconcat (chunk i x) == x
@@ -223,7 +223,7 @@ pmap = parMap rseq
 you will discover that `pmap` is not really really parallel. 
 For the shake of simplicity, let's assume it is. 
 
-*Side-Note 2:* Parallelization is only possible because the argement function 
+*Side-Note 2:* Parallelization is only possible because the argument function 
 is effect-free, as enforced by the type system. 
 If `f` had effects, then the order that the effects would be executed, would be undetermined. 
 
