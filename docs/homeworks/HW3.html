@@ -155,7 +155,7 @@ ghci<span class="fu">&gt;</span> chunk <span class="dv">6</span> [<span class="d
 <span class="ot">&gt;</span> pmap <span class="fu">=</span> parMap rseq</code></pre></div>
 <p><em>Side-Note 1:</em> If you actually check on the description of <code>rseq</code>, you will discover that <code>pmap</code> is not really really parallel. For the shake of simplicity, let’s assume it is.</p>
 <p><em>Side-Note 2:</em> Parallelization is only possible because the argument function is effect-free, as enforced by the type system. If <code>f</code> had effects, then the order that the effects would be executed, would be undetermined.</p>
-<p>Use <code>pmap</code> to define the <code>mapReduce i f x</code> function below that</p>
+<p>Use <code>chunk</code>, <code>pmap</code> and a monoid function to define the <code>mapReduce i f x</code> function below that</p>
 <ul>
 <li>chunks the input <code>x</code> in chunks of size at most <code>i</code>,</li>
 <li>maps <code>f</code> to each chunk, in parallel, and</li>

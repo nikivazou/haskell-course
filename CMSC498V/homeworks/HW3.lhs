@@ -233,7 +233,7 @@ For the shake of simplicity, let's assume it is.
 is effect-free, as enforced by the type system. 
 If `f` had effects, then the order that the effects would be executed, would be undetermined. 
 
-Use `pmap` to define the `mapReduce i f x` function below that 
+Use `chunk`, `pmap` and a monoid function to define the `mapReduce i f x` function below that 
 
 - chunks the input `x` in chunks of size at most `i`,
 - maps `f` to each chunk, in parallel, and 

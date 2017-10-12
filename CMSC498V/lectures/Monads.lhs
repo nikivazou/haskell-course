@@ -572,15 +572,18 @@ and the next integer as the new state:
 
 \begin{code}
 fresh :: ST0 Int
-fresh =  S0 (\n -> (n, n+1))
+fresh = error "Define me!"
 
 freshName :: ST0 String
-freshName =  S0 (\n -> ("surprise " ++ show n, n + 1))
+freshName = error "Define me!"
 \end{code}
 
 Note that fresh is a state transformer (where the state is itself just `Int`),
 that is an action that happens to return integer values.
 
+**Q:** What does the following evaluate to?
+
+< ghci> apply0 fresh 0
 
 **Q:**
 Consider the function `surprise` defined as:

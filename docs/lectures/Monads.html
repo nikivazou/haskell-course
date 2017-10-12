@@ -307,11 +307,13 @@ vals0 <span class="fu">=</span> [<span class="ch">'d'</span>, <span class="ch">'
 <div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt;</span> <span class="kw">type</span> <span class="dt">State</span> <span class="fu">=</span> <span class="dt">Int</span></code></pre></div>
 <p>In order to generate the next integer, we define a special state transformer that simply returns the current state as its result, and the next integer as the new state:</p>
 <div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt; fresh ::</span> <span class="dt">ST0</span> <span class="dt">Int</span>
-<span class="ot">&gt;</span> fresh <span class="fu">=</span>  <span class="dt">S0</span> (\n <span class="ot">-&gt;</span> (n, n<span class="fu">+</span><span class="dv">1</span>))
+<span class="ot">&gt;</span> fresh <span class="fu">=</span> error <span class="st">&quot;Define me!&quot;</span>
 <span class="ot">&gt;</span> 
 <span class="ot">&gt; freshName ::</span> <span class="dt">ST0</span> <span class="dt">String</span>
-<span class="ot">&gt;</span> freshName <span class="fu">=</span>  <span class="dt">S0</span> (\n <span class="ot">-&gt;</span> (<span class="st">&quot;surprise &quot;</span> <span class="fu">++</span> show n, n <span class="fu">+</span> <span class="dv">1</span>))</code></pre></div>
+<span class="ot">&gt;</span> freshName <span class="fu">=</span> error <span class="st">&quot;Define me!&quot;</span></code></pre></div>
 <p>Note that fresh is a state transformer (where the state is itself just <code>Int</code>), that is an action that happens to return integer values.</p>
+<p><strong>Q:</strong> What does the following evaluate to?</p>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell">ghci<span class="fu">&gt;</span> apply0 fresh <span class="dv">0</span></code></pre></div>
 <p><strong>Q:</strong> Consider the function <code>surprise</code> defined as:</p>
 <div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt;</span> surprise1 <span class="fu">=</span> 
 <span class="ot">&gt;</span>   fresh <span class="fu">&gt;&gt;=</span> \_ <span class="ot">-&gt;</span>
