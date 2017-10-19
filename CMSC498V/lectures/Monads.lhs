@@ -579,10 +579,8 @@ we define a special state transformer that
 simply returns the current state as its result, 
 and the next integer as the new state:
 
-
--- data ST0 a = S0 (State -> (a, State))
---                f x     = (x, x+1) 
-
+< type State = Int 
+< data ST0 a = S0 (State -> (a, State))
  
 \begin{code}
 fresh :: ST0 Int
@@ -779,9 +777,31 @@ We can execute the action from any initial state of our choice
 < ghci> runState (mlabelS tree) 1000
 < (Node (Node (Leaf ('a',1000)) (Leaf ('b',1001))) (Leaf ('c',1002)),1003)
 
+
 Now, whats the point of a generic state transformer 
 if we can’t have richer states. 
-Next, let us extend our fresh and label functions so that
+
+
+Let's now count the frequency of each leaf value appears in the tree.
+
+\begin{code}
+tree2 =  Node (Node (Leaf 'a') (Leaf 'b'))
+              (Node (Leaf 'a') (Leaf 'c'))
+\end{code}
+
+< ghci> let tree2       = Node tree tree
+< ghci> let (tree2', s) = runState (mlabelM tree) $ M 0 empty
+< 
+< ghci> tree2'
+< Node (Node (Leaf ('a', 0)) (Leaf ('b', 1)))
+<      (Node (Leaf ('a', 2)) (Leaf ('c', 3)))
+< 
+< ghci> s
+< M {index = 4, freq = fromList [('a',2),('b',1),('c',1)]}
+
+
+
+Define your state so that it has now two elements: 
 
 - each node gets a new label (as before),
 - the state also contains a map of the frequency with which each leaf value appears in the tree.
@@ -792,8 +812,7 @@ and a `Map a Int` denoting the number of times each
  leaf value appears in the tree.
 
 \begin{code}
-data MyState a = M { index :: Int
-                   , freq  :: Map a Int }
+data MyState a = M { index :: Int }
                  deriving (Eq, Show)
 \end{code}
 
@@ -812,47 +831,21 @@ Similarly, we want an action that updates the frequency of a given element `k`
 
 \begin{code}
 updFreqM :: Ord k => k -> ST.State (MyState k) ()  
-updFreqM k = do
-   s    <- get
-   let f = freq s
-   let n = findWithDefault 0 k f
-   put $ s {freq = insert k (n + 1) f}
+updFreqM k = error "Define me!"
 \end{code}
 
 And with these two, we are done
 
 \begin{code}
-mlabelM (Leaf x)   =  do updFreqM x
-                         n <- freshM
-                         return $ Leaf (x, n)
- 
-mlabelM (Node l r) =  do l' <- mlabelM l
-                         r' <- mlabelM r
-                         return $ Node l' r'
+mlabelM = error "Define me!"
 \end{code}
 
 Now, our initial state will be something like
 
 \begin{code}
-initM = M 0 empty
+initM = error "Define me!"
 \end{code}
 
-and so we can label the tree
-
-\begin{code}
-tree2 =  Node (Node (Leaf 'a') (Leaf 'b'))
-              (Node (Leaf 'a') (Leaf 'c'))
-\end{code}
-
-< ghci> let tree2       = Node tree tree
-< ghci> let (tree2', s) = runState (mlabelM tree) $ M 0 empty
-< 
-< ghci> tree2'
-< Node (Node (Leaf ('a', 0)) (Leaf ('b', 1)))
-<      (Node (Leaf ('a', 2)) (Leaf ('c', 3)))
-< 
-< ghci> s
-< M {index = 4, freq = fromList [('a',2),('b',1),('c',1)]}
 
 In short, `State` makes global variables 
 (or "statefull" programming) 
@@ -1013,16 +1006,15 @@ This above notion of concatenation generalizes to any monad:
 <               return x
 
 
-As a final example, we can define a function that transforms a list of 
-monadic expressions into a single such expression that returns a list of 
-results, by performing each of the argument expressions in sequence and
-collecting their results:
+As a final example, 
+another usefull function is `mapM` which maps a list of arguments to 
+a monadic action, collecting their results:
 
-< sequence          :: Monad m => [m a] -> m [a]
-< sequence []       =  return []
-< sequence (mx:mxs) =  do x  <- mx
-<                         xs <- sequence mxs
-<                         return (x:xs)
+< mapM          :: Monad m => (a -> m b) -> [a] -> m [b]
+< mapM _ []     =  return []
+< mapM f (x:xs) =  do y  <- f x
+<                     ys <- mapM f xs
+<                     return (y:ys)
 
 
 Monads as Programmable Semicolon
@@ -1164,7 +1156,39 @@ two suggestions for further reading would be to look at
 “monads with a zero a plus” 
 (which extend the basic notion with two extra primitives that are supported by some monads), 
 and “monad transformers” (which provide a means to combine monads). 
+For a more in-depth exploration of the IO monad, see Simon Peyton Jones’ excellent article on the [“awkward squad”](http://research.microsoft.com/Users/simonpj/papers/marktoberdorf/).
+
+
+Status Check
+------------
+
+We saw how one can use monads in Haskell to enjoy all the benefits
+of imprerative programming (i.e., state and input/output) while in the back 
+everything is functional (i.e., no side effects).
+
+The benefit: the monadic type signatures explicitely capture the effects of your program
+since most effects are actually monads (["The essence of functional programming"](https://page.mi.fu-berlin.de/scravy/realworldhaskell/materialien/the-essence-of-functional-programming.pdf)).
+Remember from out first lecture notes: 
+The following functions are pure: 
+
+< fib               :: Int -> Int 
+< allRightTriangles :: Int -> [(Int, Int, Int)]
+< id                :: a -> a
+
+while the following have effects: 
+
+< putStrLn :: String -> IO ()
+< updFreqM :: Ord k => k -> ST.State (MyState k) ()  
+< eval     :: Expr -> Exception Int
+
+The common first application of monadic programming is parsing.
 For example, see sections 3 and 7 of the following article, 
 which concerns the monadic nature of 
-[functional parsers](http://www.cs.nott.ac.uk/~gmh/monparsing.pdf). 
-For a more in-depth exploration of the IO monad, see Simon Peyton Jones’ excellent article on the [“awkward squad”](http://research.microsoft.com/Users/simonpj/papers/marktoberdorf/).
+[functional parsers](http://www.cs.nott.ac.uk/~gmh/monparsing.pdf), 
+where a parser is described as string (i.e., state) transformer 
+
+< type Parser a = String -> [(a,String)]
+
+To make time to discuss more about program correctness, 
+we skip parsers and just directly to how monad combinators are used to 
+test properties of your program (or how Ben corrected your homeworks). 
