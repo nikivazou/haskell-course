@@ -11,7 +11,7 @@ module Monads where
 import qualified Control.Monad.State.Lazy as ST 
 import Control.Monad.State.Lazy hiding (State)
 
-import Data.Map
+import Data.Map hiding (lookup)
 \end{code}
 
 A Simple Evaluator
@@ -699,10 +699,19 @@ This can be achieved by taking the next fresh integer as an additional argument
 to the function, and returning the next fresh integer as an additional result,
 for instance, as shown below:
 
+< data Tree a = Leaf a
+<             | Node (Tree a) (Tree a)
+
+
 \begin{code}
 mlabel :: Tree a -> ST0 (Tree (a,Int))
-mlabel (Leaf v)   = error "Define me!"
-mlabel (Node l r) = error "Define me!"
+mlabel (Leaf v)   = do 
+  n <- fresh 
+  return (Leaf (v, n))
+mlabel (Node l r) = do
+  l' <- mlabel l  -- ::ST0 (Tree (a, Int))
+  r' <- mlabel r  
+  return (Node l' r')
 \end{code}
 
 Note that the programmer does not have to worry about the tedious and 
@@ -812,7 +821,8 @@ and a `Map a Int` denoting the number of times each
  leaf value appears in the tree.
 
 \begin{code}
-data MyState a = M { index :: Int }
+data MyState k = M { index :: Int 
+                   , count :: [(k, Int)]}
                  deriving (Eq, Show)
 \end{code}
 
@@ -831,13 +841,27 @@ Similarly, we want an action that updates the frequency of a given element `k`
 
 \begin{code}
 updFreqM :: Ord k => k -> ST.State (MyState k) ()  
-updFreqM k = error "Define me!"
+updFreqM k = do 
+  M i c <- get --  c :: [(k, Int)]
+  case lookup k c of
+    Just ki -> put (M i ((k, ki+1):c))
+    Nothing -> put (M i ((k,1):c)) 
 \end{code}
 
 And with these two, we are done
 
 \begin{code}
-mlabelM = error "Define me!"
+mlabelM :: Ord k => Tree k 
+  -> ST.State (MyState k) (Tree (k, Int))  
+mlabelM (Leaf v) = do 
+  n <- freshM
+  updFreqM v 
+  return (Leaf (v,n))
+
+mlabelM (Node l r) = do 
+  l' <- mlabelM l 
+  r' <- mlabelM r 
+  return (Node l' r')
 \end{code}
 
 Now, our initial state will be something like
@@ -958,6 +982,9 @@ However, the behavior is quite different with the `IO` monad
 **Q:** What is the type of `foo` defined as:
 
 \begin{code}
+foo :: Monad a => (x -> y) -> a x -> a y
+-- foo :: (x -> y) -> [x] -> [y] -- map 
+-- foo :: (x -> y) ->  Maybe x -> Maybe y -- map 
 foo f z = do x <- z
              return (f x)
 \end{code}
@@ -986,8 +1013,19 @@ Which we already know, because of transitivity!
 \begin{code}
 baz mmx = do mx <- mmx
              x  <- mx
-             return x
+             return (x+1)
 \end{code}
+
+mmx >>= (\mx -> 
+return mx)
+
+
+mmx `concatMap` return
+
+concatMap return mmx
+concatMap return []
+
+
 
 What does `baz [[1, 2], [3, 4]]` return?
 
@@ -1024,9 +1062,9 @@ It is sometimes useful to sequence two monadic expressions,
 but discard the result value produced by the first:
 
 < (>>)     :: Monad m => m a -> m b -> m b
-< mx >> my =  do _ <- mx
-<                y <- my
-<                return y
+< mx >> my =  do {_ <- mx; 
+<                 y <- my; 
+<                return y}
 
 For example, in the state monad the `(>>)` operator is just
  normal sequential composition, written as `;` in most languages.
