@@ -1,0 +1,480 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+        <title>CMSC498V - Testing</title>
+        <link rel="stylesheet" type="text/css" href="../css/default.css" />
+        <link rel="stylesheet" type="text/css" href="../css/syntax.css" />
+    </head>
+    <body>
+        <div id="header">
+            <div id="logo">
+                <a href="../">CMSC498V</a>
+            </div>
+            <div id="navigation">
+                <a href="../schedule.html">Schedule</a>
+                <a href="../homeworks.html">Homeworks</a>
+                <a href="../project.html">Projects</a>
+                <a href="../resources.html">Resources</a>
+            </div>
+        </div>
+
+        <div id="content">
+            <h1 id="quickcheck-type-directed-property-testing">QuickCheck: Type-directed Property Testing</h1>
+<div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt;</span> <span class="kw">module</span> <span class="dt">Testing</span> <span class="kw">where</span>
+<span class="ot">&gt;</span> <span class="kw">import </span><span class="dt">Test.QuickCheck</span>
+<span class="ot">&gt;</span> <span class="kw">import </span><span class="dt">Data.Char</span>
+<span class="ot">&gt;</span> <span class="kw">import </span><span class="dt">Data.List</span> (sort)</code></pre></div>
+<p>In this lecture, we will look at <a href="http://www.cse.chalmers.se/~rjmh/QuickCheck/">QuickCheck</a>, a technique that cleverly exploits typeclasses and monads to deliver a powerful automatic testing methodology.</p>
+<p>Quickcheck was developed by <a href="http://www.cse.chalmers.se/~koen/">Koen Claessen</a> and <a href="http://www.cse.chalmers.se/~rjmh/">John Hughes</a> at 2000 and ten years later won the most influential paper award. This was expected, as since then it has been ported to other languages and is currently used, among other things to find subtle concurrency bugs in <a href="http://www.erlang-factory.com/upload/presentations/55/TestingErlangProgrammesforMulticore.pdf">telecommunications code</a>.</p>
+<p>The key idea on which QuickCheck is founded, is <em>property-based testing</em>. That is, instead of writing individual test cases (e.g., unit tests corresponding to input-output pairs for particular functions) one should write properties that are desired of the functions, and then automatically generate random tests which can be run to verify (or rather, falsify) the property.</p>
+<p>By emphasizing the importance of specifications, QuickCheck yields several benefits:</p>
+<ol style="list-style-type: decimal">
+<li><p>The developer is forced to think about what the code should do,</p></li>
+<li><p>The tool finds corner-cases where the specification is violated, which leads to either the code or the specification getting fixed,</p></li>
+<li><p>The specifications live on as rich, machine-checkable documentation about how the code should behave.</p></li>
+</ol>
+<h2 id="properties">Properties</h2>
+<p>A QuickCheck property is essentially a function whose output is a boolean. The standard “hello-world” QC property is</p>
+<div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt; prop_revapp ::</span> [<span class="dt">Int</span>] <span class="ot">-&gt;</span> [<span class="dt">Int</span>] <span class="ot">-&gt;</span> <span class="dt">Bool</span>
+<span class="ot">&gt;</span> prop_revapp xs ys <span class="fu">=</span> 
+<span class="ot">&gt;</span>   reverse (xs <span class="fu">++</span> ys) <span class="fu">==</span> reverse xs <span class="fu">++</span> reverse ys</code></pre></div>
+<p>That is, a property looks a bit like a mathematical theorem that the programmer believes is true. A QC convention is to use the prefix ‘prop_’ for QC properties. Note that the type signature for the property is not the usual polymorphic signature; we have given the concrete type <code>Int</code> for the elements of the list. This is because QC uses the types to generate random inputs, and hence is restricted to monomorphic properties (that don’t contain type variables.)</p>
+<p>To check a property, we simply invoke the function</p>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="ot">quickCheck ::</span> (<span class="dt">Testable</span> prop) <span class="ot">=&gt;</span> prop <span class="ot">-&gt;</span> <span class="dt">IO</span> ()
+    <span class="co">-- Defined in Test.QuickCheck.Test</span></code></pre></div>
+<p>lets try it on our example property above</p>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell">ghci<span class="fu">&gt;</span> quickCheck prop_revapp
+<span class="fu">***</span> <span class="dt">Failed</span><span class="fu">!</span> <span class="dt">Falsifiable</span> (after <span class="dv">2</span> tests and <span class="dv">1</span> shrink)<span class="fu">:</span>
+[<span class="dv">0</span>]
+[<span class="dv">1</span>]</code></pre></div>
+<p>Whats that ?! Well, lets run the property function on the two inputs</p>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell">ghci<span class="fu">&gt;</span> prop_revapp [<span class="dv">0</span>] [<span class="dv">1</span>]
+<span class="dt">False</span></code></pre></div>
+<p>QC has found a sample input for which the property function fails i.e., returns <code>False</code>. Of course, those of you who are paying attention will realize there was a bug in our property, namely it should be</p>
+<div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt; prop_revapp_ok ::</span> [<span class="dt">Int</span>] <span class="ot">-&gt;</span> [<span class="dt">Int</span>] <span class="ot">-&gt;</span> <span class="dt">Bool</span>
+<span class="ot">&gt;</span> prop_revapp_ok xs ys <span class="fu">=</span> reverse (xs <span class="fu">++</span> ys) <span class="fu">==</span> reverse ys <span class="fu">++</span> reverse xs</code></pre></div>
+<p>because <code>reverse</code> will flip the order of the two parts <code>xs</code> and <code>ys</code> of <code>xs ++ ys</code>. Now, when we run</p>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell">ghci<span class="fu">&gt;</span> quickCheck prop_revapp_ok
+<span class="fu">+++</span> <span class="dt">OK</span>, passed <span class="dv">100</span> tests<span class="fu">.</span></code></pre></div>
+<p>That is, Haskell generated 100 test inputs and for all of those, the property held. You can up the stakes a bit by changing the number of tests you want to run</p>
+<div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt; quickCheckN   ::</span> (<span class="dt">Testable</span> p) <span class="ot">=&gt;</span> <span class="dt">Int</span> <span class="ot">-&gt;</span> p <span class="ot">-&gt;</span> <span class="dt">IO</span> ()
+<span class="ot">&gt;</span> quickCheckN n <span class="fu">=</span> quickCheckWith <span class="fu">$</span> stdArgs { maxSuccess <span class="fu">=</span> n }</code></pre></div>
+<p>and then do</p>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell">ghci<span class="fu">&gt;</span> quickCheckN <span class="dv">10000</span> prop_revapp_ok
+<span class="fu">+++</span> <span class="dt">OK</span>, passed <span class="dv">10000</span> tests<span class="fu">.</span></code></pre></div>
+<h2 id="quickcheck-fancy-sort">QuickCheck Fancy Sort</h2>
+<p>Lets look at a slightly more interesting example. Remember our fancy sorting algorithm?</p>
+<div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt; fsort ::</span> (<span class="dt">Ord</span> a) <span class="ot">=&gt;</span> [a] <span class="ot">-&gt;</span> [a]
+<span class="ot">&gt;</span> fsort <span class="fu">=</span> mergeAll <span class="fu">.</span> sequences
+<span class="ot">&gt;</span> 
+<span class="ot">&gt;</span> sequences (a<span class="fu">:</span>b<span class="fu">:</span>xs)
+<span class="ot">&gt;</span>   <span class="fu">|</span> a <span class="fu">&gt;</span> b     <span class="fu">=</span> descending b [a]  xs
+<span class="ot">&gt;</span>   <span class="fu">|</span> otherwise <span class="fu">=</span> ascending  b (a<span class="fu">:</span>) xs
+<span class="ot">&gt;</span> sequences xs  <span class="fu">=</span> [xs]
+<span class="ot">&gt;</span> 
+<span class="ot">&gt;</span> descending a as (b<span class="fu">:</span>bs)
+<span class="ot">&gt;</span>   <span class="fu">|</span> a <span class="fu">&gt;</span> b          <span class="fu">=</span> descending b (a<span class="fu">:</span>as) bs
+<span class="ot">&gt;</span> descending a as bs <span class="fu">=</span> (a<span class="fu">:</span>as)<span class="fu">:</span> sequences bs
+<span class="ot">&gt;</span> 
+<span class="ot">&gt;</span> ascending a as (b<span class="fu">:</span>bs)
+<span class="ot">&gt;</span>   <span class="fu">|</span> a <span class="fu">&lt;=</span> b        <span class="fu">=</span> ascending b (\ys <span class="ot">-&gt;</span> as (a<span class="fu">:</span>ys)) bs
+<span class="ot">&gt;</span> ascending a as bs <span class="fu">=</span> as [a]<span class="fu">:</span> sequences bs
+<span class="ot">&gt;</span> 
+<span class="ot">&gt;</span> mergeAll [x] <span class="fu">=</span> x
+<span class="ot">&gt;</span> mergeAll xs  <span class="fu">=</span> mergeAll (mergePairs xs)
+<span class="ot">&gt;</span> 
+<span class="ot">&gt;</span> mergePairs (a<span class="fu">:</span>b<span class="fu">:</span>xs) <span class="fu">=</span> merge a b<span class="fu">:</span> mergePairs xs
+<span class="ot">&gt;</span> mergePairs xs       <span class="fu">=</span> xs
+<span class="ot">&gt;</span> 
+<span class="ot">&gt;</span> merge as<span class="fu">@</span>(a<span class="fu">:</span>as') bs<span class="fu">@</span>(b<span class="fu">:</span>bs')
+<span class="ot">&gt;</span>   <span class="fu">|</span> a <span class="fu">&gt;</span> b           <span class="fu">=</span> b<span class="fu">:</span>merge as  bs'
+<span class="ot">&gt;</span>   <span class="fu">|</span> a <span class="fu">&lt;</span> b           <span class="fu">=</span> a<span class="fu">:</span>merge as' bs
+<span class="ot">&gt;</span>   <span class="fu">|</span> otherwise       <span class="fu">=</span> a<span class="fu">:</span>merge as' bs'
+<span class="ot">&gt;</span> merge [] bs         <span class="fu">=</span> bs
+<span class="ot">&gt;</span> merge as []         <span class="fu">=</span> as</code></pre></div>
+<p>Lets run it “by hand” on a few inputs</p>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell">ghci<span class="fu">&gt;</span> [<span class="dv">10</span>,<span class="dv">9</span><span class="fu">..</span><span class="dv">1</span>]
+[<span class="dv">10</span>,<span class="dv">9</span>,<span class="dv">8</span>,<span class="dv">7</span>,<span class="dv">6</span>,<span class="dv">5</span>,<span class="dv">4</span>,<span class="dv">3</span>,<span class="dv">2</span>,<span class="dv">1</span>]
+ghci<span class="fu">&gt;</span> fsort [<span class="dv">10</span>,<span class="dv">9</span><span class="fu">..</span><span class="dv">1</span>]
+[<span class="dv">1</span>,<span class="dv">2</span>,<span class="dv">3</span>,<span class="dv">4</span>,<span class="dv">5</span>,<span class="dv">6</span>,<span class="dv">7</span>,<span class="dv">8</span>,<span class="dv">9</span>,<span class="dv">10</span>]</code></pre></div>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell">ghci<span class="fu">&gt;</span> [<span class="dv">2</span>,<span class="dv">4</span><span class="fu">..</span><span class="dv">20</span>] <span class="fu">++</span> [<span class="dv">1</span>,<span class="dv">3</span><span class="fu">..</span><span class="dv">11</span>]
+[<span class="dv">2</span>,<span class="dv">4</span>,<span class="dv">6</span>,<span class="dv">8</span>,<span class="dv">10</span>,<span class="dv">12</span>,<span class="dv">14</span>,<span class="dv">16</span>,<span class="dv">18</span>,<span class="dv">20</span>,<span class="dv">1</span>,<span class="dv">3</span>,<span class="dv">5</span>,<span class="dv">7</span>,<span class="dv">9</span>,<span class="dv">11</span>]
+ghci<span class="fu">&gt;</span> fsort <span class="fu">$</span> [<span class="dv">2</span>,<span class="dv">4</span><span class="fu">..</span><span class="dv">20</span>] <span class="fu">++</span> [<span class="dv">1</span>,<span class="dv">3</span><span class="fu">..</span><span class="dv">11</span>]
+[<span class="dv">1</span>,<span class="dv">2</span>,<span class="dv">3</span>,<span class="dv">4</span>,<span class="dv">5</span>,<span class="dv">6</span>,<span class="dv">7</span>,<span class="dv">8</span>,<span class="dv">9</span>,<span class="dv">10</span>,<span class="dv">11</span>,<span class="dv">12</span>,<span class="dv">14</span>,<span class="dv">16</span>,<span class="dv">18</span>,<span class="dv">20</span>]</code></pre></div>
+<p>Looks good – lets try to test that the output is in fact sorted. We need a function that checks that a list is ordered</p>
+<div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt; isOrdered ::</span>         (<span class="dt">Ord</span> a) <span class="ot">=&gt;</span> [a] <span class="ot">-&gt;</span> <span class="dt">Bool</span>
+<span class="ot">&gt;</span> isOrdered (x1<span class="fu">:</span>x2<span class="fu">:</span>xs) <span class="fu">=</span> x1 <span class="fu">&lt;=</span> x2 <span class="fu">&amp;&amp;</span> isOrdered (x2<span class="fu">:</span>xs)
+<span class="ot">&gt;</span> isOrdered _          <span class="fu">=</span> <span class="dt">True</span></code></pre></div>
+<p>and then we can use the above to write a property</p>
+<div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt; prop_fsort_isOrdered ::</span> [<span class="dt">Int</span>] <span class="ot">-&gt;</span> <span class="dt">Bool</span>
+<span class="ot">&gt;</span> prop_fsort_isOrdered xs <span class="fu">=</span> isOrdered (fsort xs)</code></pre></div>
+<p>and use Quickcheck to test it</p>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell">ghci<span class="fu">&gt;</span> quickCheckN <span class="dv">10000</span> isOrdered
+<span class="fu">+++</span> <span class="dt">OK</span>, passed <span class="dv">10000</span> tests<span class="fu">.</span></code></pre></div>
+<h2 id="conditional-properties">Conditional Properties</h2>
+<p>Here are several other properties that we might want. First, repeated <code>fsorting</code> should not change the list. That is,</p>
+<div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt; prop_fsort_idemp ::</span> [<span class="dt">Int</span>] <span class="ot">-&gt;</span> <span class="dt">Bool</span>
+<span class="ot">&gt;</span> prop_fsort_idemp xs <span class="fu">=</span> fsort (fsort xs) <span class="fu">==</span> fsort xs</code></pre></div>
+<p>Second, the head of the result is the minimum element of the input</p>
+<div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt; prop_fsort_min ::</span> [<span class="dt">Int</span>] <span class="ot">-&gt;</span> <span class="dt">Bool</span>
+<span class="ot">&gt;</span> prop_fsort_min xs <span class="fu">=</span> head (fsort xs) <span class="fu">==</span> minimum xs</code></pre></div>
+<p>However, when we run this, we run into a glitch</p>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell">ghci<span class="fu">&gt;</span> quickCheck prop_qsort_min
+<span class="fu">***</span> <span class="dt">Failed</span><span class="fu">!</span> <span class="dt">Exception</span><span class="fu">:</span> <span class="ch">'Prelude.head: empty list'</span> (after <span class="dv">1</span> test)<span class="fu">:</span>
+[]</code></pre></div>
+<p>But of course! The earlier properties held for all inputs while this property makes no sense if the input list is empty! This is why thinking about specifications and properties has the benefit of clarifying the preconditions under which a given piece of code is supposed to work.</p>
+<p>In this case we want a conditional properties where we only want the output to satisfy to satisfy the spec if the input meets the precondition that it is non-empty.</p>
+<div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt; prop_fsort_nn_min    ::</span> [<span class="dt">Int</span>] <span class="ot">-&gt;</span> <span class="dt">Property</span>
+<span class="ot">&gt;</span> prop_fsort_nn_min xs <span class="fu">=</span>
+<span class="ot">&gt;</span>   not (null xs) <span class="fu">==&gt;</span> head (fsort xs) <span class="fu">==</span> minimum xs</code></pre></div>
+<p>This time around, both the property holds!</p>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell">ghci<span class="fu">&gt;</span> quickCheckN <span class="dv">1000</span> prop_fsort_nn_min
+<span class="fu">+++</span> <span class="dt">OK</span>, passed <span class="dv">1000</span> tests<span class="fu">.</span></code></pre></div>
+<p><strong>Q:</strong> Can you write a similar property for the maximum of the list?</p>
+<p>Note that now, instead of just being a <code>Bool</code> the output of the function is a <code>Property</code> a special type built into the <code>QC</code> library. Similarly the implies combinator <code>==&gt;</code> is on of many <code>QC</code> combinators that allow the construction of rich properties.</p>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="ot">(==&gt;) ::</span> <span class="dt">Testable</span> prop <span class="ot">=&gt;</span> <span class="dt">Bool</span> <span class="ot">-&gt;</span> prop <span class="ot">-&gt;</span> <span class="dt">Property</span></code></pre></div>
+<h2 id="testing-against-a-model-implementation">Testing against a model implementation</h2>
+<p>We could keep writing different properties that capture various aspects of the desired functionality of <code>fsort</code>. Another approach for validation is to test that our <code>fsort</code> is behaviourally identical to a trusted reference implementation which itself may be too inefficient or otherwise unsuitable for deployment. In this case, lets use the standard library’s <code>sort</code> function</p>
+<div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt; prop_fsort_sort    ::</span> [<span class="dt">Int</span>] <span class="ot">-&gt;</span> <span class="dt">Bool</span>
+<span class="ot">&gt;</span> prop_fsort_sort xs <span class="fu">=</span>  fsort xs <span class="fu">==</span> sort xs</code></pre></div>
+<p>which we can put to the test</p>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell">ghci<span class="fu">&gt;</span> quickCheckN <span class="dv">1000</span> prop_fsort_sort
+<span class="fu">***</span> <span class="dt">Failed</span><span class="fu">!</span> <span class="dt">Falsifiable</span> (after <span class="dv">9</span> tests and <span class="dv">6</span> shrink)<span class="fu">:</span>
+[<span class="dv">1</span>,<span class="dv">0</span>,<span class="dv">0</span>]</code></pre></div>
+<p>Say, what?!</p>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell">ghci<span class="fu">&gt;</span> fsort [<span class="dv">1</span>,<span class="dv">0</span>,<span class="dv">0</span>]
+[<span class="dv">0</span>,<span class="dv">1</span>]</code></pre></div>
+<p>Ugh! So close, and yet … Can you spot the bug in our code?</p>
+<p>Aha! Merging is implemented to eliminate the duplicates!</p>
+<p>Is this a bug in the code? What is a bug anyway? Perhaps the fact that the duplicates are eliminated is a feature! At any rate there is an inconsistency between our mental model of how the code should behave as articulated in <code>prop_fsort_sort</code> and the actual behavior of the code itself.</p>
+<p>We can rectify matters by stipulating that the <code>fsort</code> is only called on lists of distinct elements</p>
+<div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt; isDistinct ::</span>(<span class="dt">Eq</span> a) <span class="ot">=&gt;</span> [a] <span class="ot">-&gt;</span> <span class="dt">Bool</span>
+<span class="ot">&gt;</span> isDistinct (x<span class="fu">:</span>xs) <span class="fu">=</span> not (x <span class="ot">`elem`</span> xs) <span class="fu">&amp;&amp;</span> isDistinct xs
+<span class="ot">&gt;</span> isDistinct _      <span class="fu">=</span> <span class="dt">True</span></code></pre></div>
+<p>and then, weakening the equivalence to only hold on inputs that are duplicate-free</p>
+<div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt; prop_fsort_distinct_sort ::</span> [<span class="dt">Int</span>] <span class="ot">-&gt;</span> <span class="dt">Property</span>
+<span class="ot">&gt;</span> prop_fsort_distinct_sort xs <span class="fu">=</span>
+<span class="ot">&gt;</span>   (isDistinct xs) <span class="fu">==&gt;</span> (fsort xs <span class="fu">==</span> sort xs)</code></pre></div>
+<p>QuickCheck happily checks the modified property</p>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell">ghci<span class="fu">&gt;</span> quickCheck prop_fsort_distinct_sort
+<span class="fu">+++</span> <span class="dt">OK</span>, passed <span class="dv">100</span> tests<span class="fu">.</span></code></pre></div>
+<h2 id="the-perils-of-conditional-testing">The perils of Conditional Testing</h2>
+<p>Well, we managed to fix the <code>fsort</code> property, but beware! Adding preconditions leads one down a slippery slope. In fact, if we paid closer attention to the above runs, we would notice something</p>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell">ghci<span class="fu">&gt;</span> quickCheckN <span class="dv">10000</span> prop_fsort_distinct_sort
+<span class="fu">...</span>
+(<span class="dv">5012</span> tests; <span class="dv">248</span> discarded)
+<span class="fu">...</span>
+<span class="fu">+++</span> <span class="dt">OK</span>, passed <span class="dv">10000</span> tests<span class="fu">.</span></code></pre></div>
+<p>The bit about some tests being discarded is ominous. In effect, when the property is constructed with the <code>==&gt;</code> combinator, QC discards the randomly generated tests on which the precondition is false. In the above case QC grinds away on the remainder until it can meet its target of <code>10000</code> valid tests. This is because the probability of a randomly generated list meeting the precondition (having distinct elements) is high enough. This may not always be the case.</p>
+<p>The following code is (a simplified version of) the <code>insert</code> function from the standard library</p>
+<div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt;</span> insert x []                 <span class="fu">=</span> [x]
+<span class="ot">&gt;</span> insert x (y<span class="fu">:</span>ys) <span class="fu">|</span> x <span class="fu">&lt;</span> y     <span class="fu">=</span> x <span class="fu">:</span> y <span class="fu">:</span> ys
+<span class="ot">&gt;</span>                 <span class="fu">|</span> otherwise <span class="fu">=</span> y <span class="fu">:</span> insert x ys</code></pre></div>
+<p>Given an element <code>x</code> and a list <code>xs</code>, the function walks along <code>xs</code> till it finds the first element greater than <code>x</code> and it places <code>x</code> to the left of that element. Thus</p>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell">ghci<span class="fu">&gt;</span> insert <span class="dv">8</span> ([<span class="dv">1</span><span class="fu">..</span><span class="dv">3</span>] <span class="fu">++</span> [<span class="dv">10</span><span class="fu">..</span><span class="dv">13</span>])
+[<span class="dv">1</span>,<span class="dv">2</span>,<span class="dv">3</span>,<span class="dv">8</span>,<span class="dv">10</span>,<span class="dv">11</span>,<span class="dv">12</span>,<span class="dv">13</span>]</code></pre></div>
+<p>Indeed, the following is the well known insertion-sort algorithm</p>
+<div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt; isort ::</span> (<span class="dt">Ord</span> a) <span class="ot">=&gt;</span> [a] <span class="ot">-&gt;</span> [a]
+<span class="ot">&gt;</span> isort xs <span class="fu">=</span> foldr insert [] xs</code></pre></div>
+<p>We could write our own tests, but why do something a machine can do better?!</p>
+<div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt; prop_isort_sort    ::</span> [<span class="dt">Int</span>] <span class="ot">-&gt;</span> <span class="dt">Bool</span>
+<span class="ot">&gt;</span> prop_isort_sort xs <span class="fu">=</span> isort xs <span class="fu">==</span> sort xs</code></pre></div>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell">ghci<span class="fu">&gt;</span> quickCheckN <span class="dv">10000</span> prop_isort_sort
+<span class="fu">+++</span> <span class="dt">OK</span>, passed <span class="dv">10000</span> tests<span class="fu">.</span></code></pre></div>
+<p>Now, the reason that the above works is that the insert routine preserves sorted-ness. That is while of course the property</p>
+<div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt; prop_insert_ordered'      ::</span> <span class="dt">Int</span> <span class="ot">-&gt;</span> [<span class="dt">Int</span>] <span class="ot">-&gt;</span> <span class="dt">Bool</span>
+<span class="ot">&gt;</span> prop_insert_ordered' x xs <span class="fu">=</span> isOrdered (insert x xs)</code></pre></div>
+<p>is bogus</p>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell">ghci<span class="fu">&gt;</span> quickCheckN <span class="dv">10000</span> prop_insert_ordered'
+<span class="fu">***</span> <span class="dt">Failed</span><span class="fu">!</span> <span class="dt">Falsifiable</span> (after <span class="dv">4</span> tests and <span class="dv">1</span> shrink)<span class="fu">:</span>
+<span class="dv">0</span>
+[<span class="dv">0</span>,<span class="fu">-</span><span class="dv">1</span>]</code></pre></div>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell">ghci<span class="fu">&gt;</span> insert <span class="dv">0</span> [<span class="dv">0</span>, <span class="fu">-</span><span class="dv">1</span>]
+[<span class="dv">0</span>, <span class="fu">-</span><span class="dv">1</span>, <span class="dv">0</span>]</code></pre></div>
+<p>the output is ordered if the input was ordered to begin with</p>
+<div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt; prop_insert_ordered      ::</span> <span class="dt">Int</span> <span class="ot">-&gt;</span> [<span class="dt">Int</span>] <span class="ot">-&gt;</span> <span class="dt">Property</span>
+<span class="ot">&gt;</span> prop_insert_ordered x xs <span class="fu">=</span>
+<span class="ot">&gt;</span>   isOrdered xs <span class="fu">==&gt;</span> isOrdered (insert x xs)</code></pre></div>
+<p>Notice that now, the precondition is more complex – the property requires that the input list be ordered. If we QC the property</p>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell">ghci<span class="fu">&gt;</span> quickCheckN <span class="dv">10000</span> prop_insert_ordered
+<span class="fu">***</span> <span class="dt">Gave</span> up<span class="fu">!</span> <span class="dt">Passed</span> only <span class="dv">5409</span> tests<span class="fu">.</span></code></pre></div>
+<p>Ugh! The ordered lists are so sparsely distributed among random lists, that QC timed out well before it found <code>10000</code> valid inputs!</p>
+<p>Aside the above example also illustrates the benefit of writing the property as <code>p ==&gt; q</code> instead of using the boolean operator <code>(||)</code> to write <code>not p || q</code>. In the latter case, there is a flat predicate, and QC doesn’t know what the precondition is, so a property may hold vacuously. For example consider the variant</p>
+<div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt; prop_insert_ordered_vacuous ::</span> <span class="dt">Int</span> <span class="ot">-&gt;</span> [<span class="dt">Int</span>] <span class="ot">-&gt;</span> <span class="dt">Bool</span>
+<span class="ot">&gt;</span> prop_insert_ordered_vacuous x xs <span class="fu">=</span>
+<span class="ot">&gt;</span>   not (isOrdered xs) <span class="fu">||</span> isOrdered (insert x xs)</code></pre></div>
+<p>QC will happily check it for us</p>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell">ghci<span class="fu">&gt;</span> quickCheckN <span class="dv">1000</span> prop_insert_ordered_vacuous
+<span class="fu">+++</span> <span class="dt">OK</span>, passed <span class="dv">10000</span> tests<span class="fu">.</span></code></pre></div>
+<p>Unfortunately, in the above, the tests passed vacuously only because their inputs were not ordered, and one should use <code>(==&gt;)</code> to avoid the false sense of security delivered by vacuity.</p>
+<p>QC provides us with some combinators for guarding against vacuity by allowing us to investigate the distribution of test cases</p>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="ot">collect  ::</span> <span class="dt">Show</span> a <span class="ot">=&gt;</span> a <span class="ot">-&gt;</span> <span class="dt">Property</span> <span class="ot">-&gt;</span> <span class="dt">Property</span>
+<span class="ot">classify ::</span> <span class="dt">Bool</span> <span class="ot">-&gt;</span> <span class="dt">String</span> <span class="ot">-&gt;</span> <span class="dt">Property</span> <span class="ot">-&gt;</span> <span class="dt">Property</span></code></pre></div>
+<p>We may use these to write a property that looks like</p>
+<div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt; prop_insert_ordered_vacuous' ::</span> <span class="dt">Int</span> <span class="ot">-&gt;</span> [<span class="dt">Int</span>] <span class="ot">-&gt;</span> <span class="dt">Property</span>
+<span class="ot">&gt;</span> prop_insert_ordered_vacuous' x xs <span class="fu">=</span>
+<span class="ot">&gt;</span>   collect (length xs) <span class="fu">$</span>
+<span class="ot">&gt;</span>   classify (isOrdered xs) <span class="st">&quot;ord&quot;</span> <span class="fu">$</span>
+<span class="ot">&gt;</span>   classify (not (isOrdered xs)) <span class="st">&quot;not-ord&quot;</span> <span class="fu">$</span>
+<span class="ot">&gt;</span>   not (isOrdered xs) <span class="fu">||</span> isOrdered (insert x xs)</code></pre></div>
+<p>When we run this, as before we get a detailed breakdown of the <code>100</code> passing tests</p>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell">ghci<span class="fu">&gt;</span> quickCheck prop_insert_ordered_vacuous'
+<span class="fu">+++</span> <span class="dt">OK</span>, passed <span class="dv">100</span> tests<span class="fu">:</span>
+ <span class="dv">8</span><span class="fu">%</span> <span class="dv">5</span>, not<span class="fu">-</span>ord
+ <span class="dv">5</span><span class="fu">%</span> <span class="dv">3</span>, not<span class="fu">-</span>ord
+ <span class="dv">3</span><span class="fu">%</span> <span class="dv">0</span>, ord
+ <span class="dv">5</span><span class="fu">%</span> <span class="dv">2</span>, ord
+ <span class="dv">5</span><span class="fu">%</span> <span class="dv">12</span>, not<span class="fu">-</span>ord
+ <span class="dv">5</span><span class="fu">%</span> <span class="dv">10</span>, not<span class="fu">-</span>ord
+ <span class="dv">2</span><span class="fu">%</span> <span class="dv">1</span>, ord
+ <span class="dv">4</span><span class="fu">%</span> <span class="dv">18</span>, not<span class="fu">-</span>ord
+ <span class="dv">3</span><span class="fu">%</span> <span class="dv">6</span>, not<span class="fu">-</span>ord9<span class="fu">%</span> <span class="dv">1</span>, ord
+<span class="fu">...</span></code></pre></div>
+<p>where a line <code>P% N, COND</code> means that <code>p</code> percent of the inputs had length <code>N</code> and satisfied the predicate denoted by the string <code>COND</code>. Thus, as we see from the above, a paltry <code>14%</code> of the tests were ordered and that was because they were either empty (<code>3% 0, ord</code>) or had one (<code>2% 1, ord</code>) or two elements <code>(1% 2, ord)</code>. The odds of randomly stumbling upon a beefy list that is ordered are rather small indeed!</p>
+<h1 id="generating-data">Generating Data</h1>
+<p>Before we start discussing how QC generates data (and how we can help it generate data meeting some pre-conditions), we must ask ourselves a basic question: how does QC behave randomly in the first place?!</p>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell">ghci<span class="fu">&gt;</span> quickCheck prop_insert_ordered'
+<span class="fu">***</span> <span class="dt">Failed</span><span class="fu">!</span> <span class="dt">Falsifiable</span> (after <span class="dv">4</span> tests and <span class="dv">2</span> shrinks)<span class="fu">:</span>
+<span class="dv">0</span>
+[<span class="dv">0</span>,<span class="fu">-</span><span class="dv">1</span>]</code></pre></div>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell">ghci<span class="fu">&gt;</span> quickCheck prop_insert_ordered'
+<span class="fu">***</span> <span class="dt">Failed</span><span class="fu">!</span> <span class="dt">Falsifiable</span> (after <span class="dv">5</span> tests and <span class="dv">5</span> shrinks)<span class="fu">:</span>
+<span class="dv">0</span>
+[<span class="dv">1</span>,<span class="dv">0</span>]</code></pre></div>
+<p>Eh? This seems most impure – same inputs yielding two totally different outputs! Well, this should give you a clue as to one of the key techniques underlying QC – monads!</p>
+<h2 id="the-generator-monad">The Generator Monad</h2>
+<p>A Haskell term that generates a (random value) of type a has the type <code>Gen</code> a which is defined as</p>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="kw">newtype</span> <span class="dt">Gen</span> a <span class="fu">=</span> <span class="dt">MkGen</span> {<span class="ot"> unGen ::</span> <span class="dt">StdGen</span> <span class="ot">-&gt;</span> <span class="dt">Int</span> <span class="ot">-&gt;</span> a }</code></pre></div>
+<p>In effect, the term is a function that takes as input a random number generator <code>StdGen</code> and a seed <code>Int</code> and returns an a value. One can easily (and we shall see, profitably!) turn <code>Gen</code> into a <code>Monad</code> by</p>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="kw">instance</span> <span class="dt">Monad</span> <span class="dt">Gen</span> <span class="kw">where</span>
+  return x <span class="fu">=</span>
+    <span class="dt">MkGen</span> (\_ _ <span class="ot">-&gt;</span> x)
+
+  <span class="dt">MkGen</span> m <span class="fu">&gt;&gt;=</span> k <span class="fu">=</span>
+    <span class="dt">MkGen</span> (\r n <span class="ot">-&gt;</span>
+      <span class="kw">let</span> (r1, r2)  <span class="fu">=</span> split r
+          <span class="dt">MkGen</span> m' <span class="fu">=</span> k (m r1 n)
+       <span class="kw">in</span> m' r2 n
+    )</code></pre></div>
+<p>The function <code>split</code> simply forks the random number generator into two parts; which are used by the left and right parameters of the bind operator <code>(&gt;&gt;=)</code>. (Aside you should be able to readily spot the similarity between random number generators and the <code>ST</code> monad – in both cases the basic action is to grab some value and transition the state to the next-value.)</p>
+<h2 id="the-arbitrary-typeclass">The Arbitrary Typeclass</h2>
+<p>QC uses the above to define a typeclass for types for which random values can be generated!</p>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="kw">class</span> <span class="dt">Show</span> a <span class="kw">where</span>
+<span class="ot">  show ::</span> a <span class="ot">-&gt;</span> <span class="dt">String</span></code></pre></div>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="kw">class</span> <span class="dt">Arbitrary</span> a <span class="kw">where</span>
+<span class="ot">  arbitrary ::</span> <span class="dt">Gen</span> a</code></pre></div>
+<p>Thus, to have QC work with (i.e., generate random tests for) values of type <code>a</code> we need only make <code>a</code> an instance of <code>Arbitrary</code> by defining an appropriate arbitrary function for it. QC defines instances for base types like <code>Int</code> , <code>Float</code>, lists etc. and lifts them to compound types much like we did for JSON a few lectures back.</p>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="kw">instance</span> (<span class="dt">Arbitrary</span> a, <span class="dt">Arbitrary</span> b) <span class="ot">=&gt;</span> <span class="dt">Arbitrary</span> (a,b) <span class="kw">where</span>
+  arbitrary <span class="fu">=</span> <span class="kw">do</span> x <span class="ot">&lt;-</span> arbitrary
+                 y <span class="ot">&lt;-</span> arbitrary
+                 return (x,y)</code></pre></div>
+<p>or more simply</p>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="kw">instance</span> (<span class="dt">Arbitrary</span> a, <span class="dt">Arbitrary</span> b) <span class="ot">=&gt;</span> <span class="dt">Arbitrary</span> (a,b) <span class="kw">where</span>
+  arbitrary <span class="fu">=</span> liftM2 (,) arbitrary arbitrary</code></pre></div>
+<h2 id="generator-combinators">Generator Combinators</h2>
+<p>QC comes loaded with a set of combinators that allow us to create custom instances for our own types.</p>
+<p>The first of these combinators is <code>choose</code></p>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="ot">choose ::</span> (<span class="dt">System.Random.Random</span> a) <span class="ot">=&gt;</span> (a, a) <span class="ot">-&gt;</span> <span class="dt">Gen</span> a</code></pre></div>
+<p>which takes an interval and returns an random element from that interval. (The typeclass <code>System.Random.Random</code> describes types which can be sampled. For example, the following is a randomly chosen set of numbers between 0 and 3.</p>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell">ghci<span class="fu">&gt;</span> sample <span class="fu">$</span> choose (<span class="dv">0</span>, <span class="dv">3</span>)
+<span class="dv">2</span>
+<span class="dv">2</span>
+<span class="dv">2</span>
+<span class="dv">1</span>
+<span class="dv">2</span>
+<span class="dv">1</span>
+<span class="dv">0</span>
+<span class="dv">2</span>
+<span class="dv">2</span>
+<span class="dv">1</span>
+<span class="dv">3</span></code></pre></div>
+<p><strong>Q:</strong> What is a plausible type for sample?</p>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="dt">Show</span> a <span class="ot">=&gt;</span> <span class="dt">Gen</span> a <span class="ot">-&gt;</span>     [a]  <span class="co">-- 1)</span>
+          <span class="dt">Gen</span> a <span class="ot">-&gt;</span> <span class="dt">Gen</span> [a]  <span class="co">-- 2)</span>
+<span class="dt">Show</span> a <span class="ot">=&gt;</span> <span class="dt">Gen</span> a <span class="ot">-&gt;</span> <span class="dt">IO</span>  [a]  <span class="co">-- 3)</span>
+<span class="dt">Show</span> a <span class="ot">=&gt;</span> <span class="dt">Gen</span> a <span class="ot">-&gt;</span> <span class="dt">IO</span>  ()   <span class="co">-- 4)</span>
+          <span class="dt">Gen</span> a <span class="ot">-&gt;</span> <span class="dt">IO</span>  ()   <span class="co">-- 5)</span>
+          <span class="dt">Gen</span> a <span class="ot">-&gt;</span> <span class="dt">IO</span>   a   <span class="co">-- 6)</span></code></pre></div>
+<p>A second useful combinator is elements</p>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="ot">elements ::</span> [a] <span class="ot">-&gt;</span> <span class="dt">Gen</span> a</code></pre></div>
+<p>which returns a generator that produces values drawn from the input list</p>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell">ghci<span class="fu">&gt;</span> sample <span class="fu">$</span> elements [<span class="dv">10</span>, <span class="dv">20</span><span class="fu">..</span><span class="dv">100</span>]
+<span class="dv">60</span>
+<span class="dv">70</span>
+<span class="dv">30</span>
+<span class="dv">50</span>
+<span class="dv">30</span>
+<span class="dv">20</span>
+<span class="dv">20</span>
+<span class="dv">10</span>
+<span class="dv">100</span>
+<span class="dv">80</span>
+<span class="dv">10</span></code></pre></div>
+<p><strong>Q:</strong> Lets try to figure out the implementation of elements</p>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="ot">elements ::</span> [a] <span class="ot">-&gt;</span> <span class="dt">Gen</span> a
+elements <span class="fu">=</span> error <span class="st">&quot;Define me!&quot;</span></code></pre></div>
+<p>A third combinator is <code>oneof</code></p>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="ot">oneof ::</span> [<span class="dt">Gen</span> a] <span class="ot">-&gt;</span> <span class="dt">Gen</span> a</code></pre></div>
+<p>which allows us to randomly choose between multiple generators</p>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell">ghci<span class="fu">&gt;</span> sample <span class="fu">$</span> oneof [elements [<span class="dv">10</span>,<span class="dv">20</span>,<span class="dv">30</span>], choose (<span class="dv">0</span>,<span class="dv">3</span>)]
+<span class="dv">10</span>
+<span class="dv">0</span>
+<span class="dv">10</span>
+<span class="dv">1</span>
+<span class="dv">30</span>
+<span class="dv">1</span>
+<span class="dv">20</span>
+<span class="dv">2</span>
+<span class="dv">20</span>
+<span class="dv">3</span>
+<span class="dv">30</span></code></pre></div>
+<p><strong>Q:</strong> Lets try to figure out the implementation of oneOf</p>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="ot">oneOf ::</span> [<span class="dt">Gen</span> a] <span class="ot">-&gt;</span> <span class="dt">Gen</span> a
+oneOf <span class="fu">=</span> error <span class="st">&quot;Define me!&quot;</span></code></pre></div>
+<p>Finally, <code>oneOf</code> is generalized into the frequency combinator</p>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="ot">frequency ::</span> [(<span class="dt">Int</span>, <span class="dt">Gen</span> a)] <span class="ot">-&gt;</span> <span class="dt">Gen</span> a</code></pre></div>
+<p>which allows us to build weighted combinations of individual generators.</p>
+<h2 id="generating-ordered-lists">Generating Ordered Lists</h2>
+<p>We can use the above combinators to write generators for lists</p>
+<div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt; genList1 ::</span>  (<span class="dt">Arbitrary</span> a) <span class="ot">=&gt;</span> <span class="dt">Gen</span> [a]
+<span class="ot">&gt;</span> genList1 <span class="fu">=</span> (<span class="fu">:</span>) <span class="fu">&lt;$&gt;</span> arbitrary <span class="fu">&lt;*&gt;</span> genList1</code></pre></div>
+<p>Can you spot a problem in the above?</p>
+<p><em>Problem:</em> <code>genList1</code> only generates infinite lists! Hmm. Lets try again,</p>
+<div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt; genList2 ::</span>  (<span class="dt">Arbitrary</span> a) <span class="ot">=&gt;</span> <span class="dt">Gen</span> [a]
+<span class="ot">&gt;</span> genList2 <span class="fu">=</span> oneof [ return []
+<span class="ot">&gt;</span>                  , (<span class="fu">:</span>) <span class="fu">&lt;$&gt;</span> arbitrary <span class="fu">&lt;*&gt;</span> genList2]</code></pre></div>
+<p>This is not bad, but we may want to give the generator a higher chance of not finishing off with the empty list, so lets use</p>
+<div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt; genList3 ::</span>  (<span class="dt">Arbitrary</span> a) <span class="ot">=&gt;</span> <span class="dt">Gen</span> [a]
+<span class="ot">&gt;</span> genList3 <span class="fu">=</span> frequency [ (<span class="dv">1</span>, return [])
+<span class="ot">&gt;</span>                      , (<span class="dv">7</span>, (<span class="fu">:</span>) <span class="fu">&lt;$&gt;</span> arbitrary <span class="fu">&lt;*&gt;</span> genList2) ]</code></pre></div>
+<p>We can use the above to build a custom generator that always returns ordered lists by piping the generate list into the sort function</p>
+<div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt; genOrdList ::</span> (<span class="dt">Ord</span> a, <span class="dt">Arbitrary</span> a) <span class="ot">=&gt;</span> <span class="dt">Gen</span> [a]
+<span class="ot">&gt;</span> genOrdList <span class="fu">=</span> sort <span class="fu">&lt;$&gt;</span> genList3</code></pre></div>
+<p>To check the output of a custom generator we can use the <code>forAll</code> combinator</p>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="ot">forAll ::</span> (<span class="dt">Show</span> a, <span class="dt">Testable</span> prop) 
+       <span class="ot">=&gt;</span> <span class="dt">Gen</span> a <span class="ot">-&gt;</span> (a <span class="ot">-&gt;</span> prop) <span class="ot">-&gt;</span> <span class="dt">Property</span></code></pre></div>
+<p>For example, we can check that in fact, the combinator only produces ordered lists</p>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell">ghci<span class="fu">&gt;</span> quickCheckN <span class="dv">1000</span> <span class="fu">$</span> forAll genOrdList isOrdered
+<span class="fu">+++</span> <span class="dt">OK</span>, passed <span class="dv">1000</span> tests<span class="fu">.</span></code></pre></div>
+<p>and now, we can properly test the <code>insert</code> property</p>
+<div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt; prop_insert ::</span> <span class="dt">Int</span> <span class="ot">-&gt;</span> <span class="dt">Property</span>
+<span class="ot">&gt;</span> prop_insert x <span class="fu">=</span> forAll genOrdList <span class="fu">$</span> 
+<span class="ot">&gt;</span>   \xs <span class="ot">-&gt;</span> <span class="co">-- collect (length xs) $ </span>
+<span class="ot">&gt;</span>          isOrdered xs <span class="fu">&amp;&amp;</span> isOrdered (insert x xs)</code></pre></div>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell">ghci<span class="fu">&gt;</span> quickCheckN <span class="dv">1000</span> prop_insert
+<span class="fu">+++</span> <span class="dt">OK</span>, passed <span class="dv">1000</span> tests<span class="fu">.</span></code></pre></div>
+<p>Note how the frequency of the empty lists fails when we modify the generator frequency.</p>
+<h1 id="using-quickeck-to-grade-your-homeworks">Using Quickeck to Grade your Homeworks</h1>
+<p>Ben has been using QC to grade your homeworks. Here are few interesting examples.</p>
+<h2 id="functional-equivalence-primality-testing">Functional Equivalence: Primality Testing</h2>
+<p>To test your <code>isPrime</code> function (HW1, Problem 2) we defined a model implementation <code>isPrimeOK</code></p>
+<div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt; factors ::</span> <span class="dt">Int</span> <span class="ot">-&gt;</span> [<span class="dt">Int</span>] 
+<span class="ot">&gt;</span> factors n <span class="fu">=</span> [i <span class="fu">|</span> i <span class="ot">&lt;-</span> [<span class="dv">1</span><span class="fu">..</span>n], n <span class="ot">`mod`</span> i <span class="fu">==</span> <span class="dv">0</span>]
+<span class="ot">&gt;</span> 
+<span class="ot">&gt; isPrimeOK ::</span> <span class="dt">Int</span> <span class="ot">-&gt;</span> <span class="dt">Bool</span> 
+<span class="ot">&gt;</span> isPrimeOK n <span class="fu">=</span> factors n <span class="fu">==</span> [<span class="dv">1</span>,n]</code></pre></div>
+<p>and tested the model implementation <code>isPrimeOK</code> against<br />
+your submited function, say <code>isPrimeSol</code></p>
+<div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt; isPrimeSol::</span> <span class="dt">Int</span> <span class="ot">-&gt;</span> <span class="dt">Bool</span> 
+<span class="ot">&gt;</span> isPrimeSol n <span class="fu">=</span> (n <span class="fu">&lt;</span> <span class="dv">0</span>) <span class="fu">||</span> length (factors n) <span class="fu">==</span> <span class="dv">2</span></code></pre></div>
+<p>There are many ways to compares these two functions. For example, a bad comparison will always return <code>True</code></p>
+<div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt; prop_isPrime_bad ::</span> <span class="dt">Int</span> <span class="ot">-&gt;</span> <span class="dt">Bool</span>
+<span class="ot">&gt;</span> prop_isPrime_bad _ <span class="fu">=</span> <span class="dt">True</span></code></pre></div>
+<p>As another bad check, we check primality on all integers, even the negative ones!</p>
+<div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt; prop_isPrime_bad_neg ::</span> <span class="dt">Int</span> <span class="ot">-&gt;</span> <span class="dt">Bool</span>
+<span class="ot">&gt;</span> prop_isPrime_bad_neg n <span class="fu">=</span> 
+<span class="ot">&gt;</span>   isPrimeOK n <span class="fu">==</span> isPrimeSol n</code></pre></div>
+<p>Let’s naively restrict checking to positive numbers:</p>
+<div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt; prop_isPrime_naive ::</span> <span class="dt">Int</span> <span class="ot">-&gt;</span> <span class="dt">Bool</span>
+<span class="ot">&gt;</span> prop_isPrime_naive n <span class="fu">=</span> 
+<span class="ot">&gt;</span>   (n <span class="fu">&lt;=</span> <span class="dv">0</span>) <span class="fu">||</span> isPrimeOK n <span class="fu">==</span> isPrimeSol n</code></pre></div>
+<p>We saw that QC behaves more precisely when we use <code>(==&gt;)</code> to condition testing</p>
+<div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt; prop_isPrime ::</span> <span class="dt">Int</span> <span class="ot">-&gt;</span> <span class="dt">Property</span>
+<span class="ot">&gt;</span> prop_isPrime n <span class="fu">=</span> 
+<span class="ot">&gt;</span>   (n <span class="fu">&gt;</span> <span class="dv">0</span>) <span class="fu">==&gt;</span> isPrimeOK n <span class="fu">==</span> isPrimeSol n</code></pre></div>
+<p>Yet again, we need to be very cautious when using <code>(==&gt;)</code> so that we do not exclude meaningful tests:</p>
+<div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt; prop_isPrime_bad_asm ::</span> <span class="dt">Int</span> <span class="ot">-&gt;</span> <span class="dt">Property</span>
+<span class="ot">&gt;</span> prop_isPrime_bad_asm n <span class="fu">=</span> 
+<span class="ot">&gt;</span>   (isPrimeSol n) <span class="fu">==&gt;</span> isPrimeOK n <span class="fu">==</span> isPrimeSol n</code></pre></div>
+<p>Or get very restrictive with out assumptions</p>
+<div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt; prop_isPrime_bad_timeout ::</span> <span class="dt">Int</span> <span class="ot">-&gt;</span> <span class="dt">Property</span>
+<span class="ot">&gt;</span> prop_isPrime_bad_timeout n <span class="fu">=</span> 
+<span class="ot">&gt;</span>   (n <span class="fu">==</span> <span class="dv">5</span>) <span class="fu">==&gt;</span> isPrimeOK n <span class="fu">==</span> isPrimeSol n</code></pre></div>
+<p>Finally, it is always better to use QC’s building constructs to consruct our tests</p>
+<div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt; prop_isPrime_best ::</span> (<span class="dt">Positive</span> <span class="dt">Int</span>) <span class="ot">-&gt;</span> <span class="dt">Bool</span>
+<span class="ot">&gt;</span> prop_isPrime_best (<span class="dt">Positive</span> n) <span class="fu">=</span> 
+<span class="ot">&gt;</span>   isPrimeOK n <span class="fu">==</span> isPrimeSol n</code></pre></div>
+<h2 id="user-defined-aribitrary-instances-the-balkans">User Defined Aribitrary Instances: The balkans</h2>
+<div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt;</span> <span class="co">-- Example 3: Simple Aribitrary Instance </span>
+<span class="ot">&gt;</span> 
+<span class="ot">&gt;</span> <span class="kw">data</span> <span class="dt">Balkan</span> <span class="fu">=</span> <span class="dt">Albania</span> <span class="fu">|</span> <span class="dt">Bulgaria</span> <span class="fu">|</span> <span class="dt">BosniaAndHerzegovina</span>
+<span class="ot">&gt;</span>             <span class="fu">|</span> <span class="dt">Kosovo</span> <span class="fu">|</span> <span class="dt">Macedonia</span> <span class="fu">|</span> <span class="dt">Montenegro</span>
+<span class="ot">&gt;</span>   <span class="kw">deriving</span> (<span class="dt">Show</span>, <span class="dt">Eq</span>)
+<span class="ot">&gt;</span> 
+<span class="ot">&gt;</span> <span class="kw">data</span> <span class="dt">Color</span> <span class="fu">=</span> <span class="dt">Blue</span> <span class="fu">|</span> <span class="dt">Red</span> <span class="fu">|</span> <span class="dt">Green</span> <span class="fu">|</span> <span class="dt">Yellow</span>
+<span class="ot">&gt;</span>   <span class="kw">deriving</span> (<span class="dt">Show</span>, <span class="dt">Eq</span>)
+<span class="ot">&gt;</span>   
+<span class="ot">&gt;</span> <span class="kw">instance</span> <span class="dt">Arbitrary</span> <span class="dt">Balkan</span> <span class="kw">where</span>
+<span class="ot">&gt;</span>   arbitrary <span class="fu">=</span> elements [<span class="dt">Albania</span>, <span class="dt">Bulgaria</span>, <span class="dt">BosniaAndHerzegovina</span>, <span class="dt">Kosovo</span>, <span class="dt">Macedonia</span>, <span class="dt">Montenegro</span>]
+<span class="ot">&gt;</span> 
+<span class="ot">&gt;</span> <span class="kw">instance</span> <span class="dt">Arbitrary</span> <span class="dt">Color</span> <span class="kw">where</span>
+<span class="ot">&gt;</span>   arbitrary <span class="fu">=</span> elements [<span class="dt">Blue</span>, <span class="dt">Red</span>, <span class="dt">Green</span>, <span class="dt">Yellow</span>]
+<span class="ot">&gt;</span> 
+<span class="ot">&gt; isGoodColoring1 ::</span> [(<span class="dt">Balkan</span>, <span class="dt">Balkan</span>)] <span class="ot">-&gt;</span> [(<span class="dt">Balkan</span>,<span class="dt">Color</span>)] <span class="ot">-&gt;</span> <span class="dt">Bool</span> 
+<span class="ot">&gt;</span> isGoodColoring1 adj coloring 
+<span class="ot">&gt;</span>   <span class="fu">=</span> null [ (c1,c2) <span class="fu">|</span> (c1,c2) <span class="ot">&lt;-</span> adj, lookup c1 coloring <span class="fu">==</span> lookup c2 coloring <span class="fu">&amp;&amp;</span> lookup c1 coloring <span class="fu">/=</span> <span class="dt">Nothing</span>]
+<span class="ot">&gt;</span> 
+<span class="ot">&gt; isGoodColoring2 ::</span> [(<span class="dt">Balkan</span>, <span class="dt">Balkan</span>)] <span class="ot">-&gt;</span> [(<span class="dt">Balkan</span>,<span class="dt">Color</span>)] <span class="ot">-&gt;</span> <span class="dt">Bool</span> 
+<span class="ot">&gt;</span> isGoodColoring2 adj coloring <span class="fu">=</span> null <span class="fu">$</span> <span class="kw">do</span>
+<span class="ot">&gt;</span>   (c1, c2) <span class="ot">&lt;-</span> adj
+<span class="ot">&gt;</span>   <span class="kw">if</span> ((lookup c1 coloring)<span class="fu">==</span>(lookup c2 coloring))<span class="fu">&amp;&amp;</span> (lookup c1 coloring <span class="fu">/=</span> <span class="dt">Nothing</span>)
+<span class="ot">&gt;</span>     <span class="kw">then</span>
+<span class="ot">&gt;</span>     return (c1, c2)
+<span class="ot">&gt;</span>     <span class="kw">else</span>
+<span class="ot">&gt;</span>     []
+<span class="ot">&gt;</span> 
+<span class="ot">&gt; testColoring ::</span> [(<span class="dt">Balkan</span>, <span class="dt">Balkan</span>)] <span class="ot">-&gt;</span> [(<span class="dt">Balkan</span>, <span class="dt">Color</span>)] <span class="ot">-&gt;</span> <span class="dt">Bool</span>
+<span class="ot">&gt;</span> testColoring adj coloring <span class="fu">=</span>
+<span class="ot">&gt;</span>   isGoodColoring1 adj coloring <span class="fu">==</span> isGoodColoring2 adj coloring</code></pre></div>
+<h2 id="user-defined-aribitrary-instances-the-balkans-1">User Defined Aribitrary Instances: The balkans</h2>
+<div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt;</span> <span class="co">-- Example 4: More Interesting Arbitrary Instance</span>
+<span class="ot">&gt;</span> 
+<span class="ot">&gt;</span> <span class="kw">data</span> <span class="dt">Tree</span> a <span class="fu">=</span> <span class="dt">Tip</span> <span class="fu">|</span> <span class="dt">Bin</span> a (<span class="dt">Tree</span> a) (<span class="dt">Tree</span> a)
+<span class="ot">&gt;</span>   <span class="kw">deriving</span> (<span class="dt">Eq</span>, <span class="dt">Show</span>)
+<span class="ot">&gt;</span> 
+<span class="ot">&gt;</span> <span class="kw">instance</span> (<span class="dt">Arbitrary</span> a) <span class="ot">=&gt;</span> <span class="dt">Arbitrary</span> (<span class="dt">Tree</span> a) <span class="kw">where</span>
+<span class="ot">&gt;</span>   arbitrary <span class="fu">=</span> sized arbTreeCan
+<span class="ot">&gt;</span> 
+<span class="ot">&gt; arbTreeCan ::</span> <span class="dt">Arbitrary</span> a <span class="ot">=&gt;</span> <span class="dt">Int</span> <span class="ot">-&gt;</span> <span class="dt">Gen</span> (<span class="dt">Tree</span> a)
+<span class="ot">&gt;</span> arbTreeCan <span class="dv">0</span> <span class="fu">=</span> <span class="kw">do</span>
+<span class="ot">&gt;</span>   return <span class="fu">$</span> <span class="dt">Tip</span>
+<span class="ot">&gt;</span> arbTreeCan n <span class="fu">=</span> <span class="kw">do</span>
+<span class="ot">&gt;</span>   (<span class="dt">Positive</span> m1) <span class="ot">&lt;-</span> arbitrary
+<span class="ot">&gt;</span>   (<span class="dt">Positive</span> m2) <span class="ot">&lt;-</span> arbitrary
+<span class="ot">&gt;</span>   <span class="kw">let</span> n1  <span class="fu">=</span> n <span class="ot">`div`</span> (m1<span class="fu">+</span><span class="dv">1</span>)
+<span class="ot">&gt;</span>   <span class="kw">let</span> n2 <span class="fu">=</span> n <span class="ot">`div`</span> (m2<span class="fu">+</span><span class="dv">1</span>)
+<span class="ot">&gt;</span>   t1 <span class="ot">&lt;-</span> (arbTreeCan n1)
+<span class="ot">&gt;</span>   t2 <span class="ot">&lt;-</span> (arbTreeCan n2)
+<span class="ot">&gt;</span>   a <span class="ot">&lt;-</span> arbitrary
+<span class="ot">&gt;</span>   return <span class="fu">$</span> <span class="dt">Bin</span> a t1 t2
+<span class="ot">&gt;</span> 
+<span class="ot">&gt; map1 ::</span> (a <span class="ot">-&gt;</span> b) <span class="ot">-&gt;</span> <span class="dt">Tree</span> a <span class="ot">-&gt;</span> <span class="dt">Tree</span> b 
+<span class="ot">&gt;</span> map1 _ <span class="dt">Tip</span> <span class="fu">=</span> <span class="dt">Tip</span> 
+<span class="ot">&gt;</span> map1 f (<span class="dt">Bin</span> x l r) <span class="fu">=</span> <span class="dt">Bin</span> (f x) (map1 f l) (map1 f r)
+<span class="ot">&gt;</span> 
+<span class="ot">&gt; map2 ::</span> (a <span class="ot">-&gt;</span> b) <span class="ot">-&gt;</span> <span class="dt">Tree</span> a <span class="ot">-&gt;</span> <span class="dt">Tree</span> b 
+<span class="ot">&gt;</span> map2 _ <span class="dt">Tip</span> <span class="fu">=</span> <span class="dt">Tip</span> 
+<span class="ot">&gt;</span> map2 f (<span class="dt">Bin</span> x l r) <span class="fu">=</span> <span class="dt">Bin</span> (f x) (map2 f l) (map2 f r) 
+<span class="ot">&gt;</span> 
+<span class="ot">&gt; testMap ::</span> <span class="dt">Tree</span> <span class="dt">Int</span> <span class="ot">-&gt;</span> <span class="dt">Tree</span> <span class="dt">String</span> <span class="ot">-&gt;</span> <span class="dt">Bool</span>
+<span class="ot">&gt;</span> testMap t1 t2 <span class="fu">=</span> map1 (<span class="fu">+</span><span class="dv">1</span>) t1 <span class="fu">==</span> map2 (<span class="fu">+</span><span class="dv">1</span>) t1 <span class="fu">&amp;&amp;</span>
+<span class="ot">&gt;</span>                 map1 (<span class="fu">++</span><span class="st">&quot;!&quot;</span>) t2 <span class="fu">==</span> map2 (<span class="fu">++</span><span class="st">&quot;!&quot;</span>) t2</code></pre></div>
+        </div>
+        <div id="footer">
+            Site proudly generated by
+            <a href="http://jaspervdj.be/hakyll">Hakyll</a>
+        </div>
+    </body>
+</html>
