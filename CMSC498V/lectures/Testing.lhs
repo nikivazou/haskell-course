@@ -196,7 +196,8 @@ Second, the head of the result is the minimum element of the input
 
 \begin{code}
 prop_fsort_min :: [Int] -> Bool
-prop_fsort_min xs = head (fsort xs) == minimum xs
+-- prop_fsort_min [] = True 
+prop_fsort_min xs = null xs ||  head (fsort xs) == minimum xs
 \end{code}
 
 However, when we run this, we run into a glitch
@@ -224,6 +225,18 @@ prop_fsort_nn_min    :: [Int] -> Property
 prop_fsort_nn_min xs =
   not (null xs) ==> head (fsort xs) == minimum xs
 \end{code}
+
+
+\begin{code}
+prop_Eq :: Int -> Int -> Property 
+prop_Eq x y = (show (x) ++ "Foo") === (show y)
+
+prop_fsort_nn_max    :: [Int] -> Property
+prop_fsort_nn_max xs =
+  not (null xs) ==> last (fsort xs) == maximum xs
+\end{code}
+
+
 
 This time around, both the property holds!
 
@@ -607,6 +620,20 @@ which returns a generator that produces values drawn from the input list
 < elements :: [a] -> Gen a
 < elements = error "Define me!"
 
+\begin{code}
+elems :: [a] -> Gen a 
+elems xs = do 
+  i <- choose (0, length xs-1) -- :: (a, a) -> Gen a 
+  return $ xs!!i
+
+
+myoneOf :: [Gen a] -> Gen a 
+myoneOf xs = do 
+  i <- choose (0, length xs-1)  
+  xs!!i
+
+\end{code}
+
 A third combinator is `oneof`
 
 < oneof :: [Gen a] -> Gen a
@@ -644,12 +671,22 @@ We can use the above combinators to write generators for lists
 
 \begin{code}
 genList1 ::  (Arbitrary a) => Gen [a]
-genList1 = (:) <$> arbitrary <*> genList1
+genList1 = do 
+  x  <- arbitrary 
+  xs <- genList1
+  return (x:xs)
+
+genList ::  (Arbitrary a) => Gen [a]
+genList = myoneOf [return [] , (:) <$> arbitrary <*> genList]
+
+genList' ::  (Arbitrary a) => Gen [a]
+genList' = frequency [(1, return []) , (100,genList)]
+
 \end{code}
 
 Let's sample it! 
 
-> sample genList1 
+< sample genList1 
 
 Can you spot a problem in the above?
 

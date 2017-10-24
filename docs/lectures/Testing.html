@@ -120,7 +120,8 @@ ghci<span class="fu">&gt;</span> fsort <span class="fu">$</span> [<span class="d
 <span class="ot">&gt;</span> prop_fsort_idemp xs <span class="fu">=</span> fsort (fsort xs) <span class="fu">==</span> fsort xs</code></pre></div>
 <p>Second, the head of the result is the minimum element of the input</p>
 <div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt; prop_fsort_min ::</span> [<span class="dt">Int</span>] <span class="ot">-&gt;</span> <span class="dt">Bool</span>
-<span class="ot">&gt;</span> prop_fsort_min xs <span class="fu">=</span> head (fsort xs) <span class="fu">==</span> minimum xs</code></pre></div>
+<span class="ot">&gt;</span> <span class="co">-- prop_fsort_min [] = True </span>
+<span class="ot">&gt;</span> prop_fsort_min xs <span class="fu">=</span> null xs <span class="fu">||</span>  head (fsort xs) <span class="fu">==</span> minimum xs</code></pre></div>
 <p>However, when we run this, we run into a glitch</p>
 <div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell">ghci<span class="fu">&gt;</span> quickCheck prop_fsort_min
 <span class="fu">***</span> <span class="dt">Failed</span><span class="fu">!</span> <span class="dt">Exception</span><span class="fu">:</span> <span class="ch">'Prelude.head: empty list'</span> (after <span class="dv">1</span> test)<span class="fu">:</span>
@@ -131,6 +132,12 @@ ghci<span class="fu">&gt;</span> fsort <span class="fu">$</span> [<span class="d
 <div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt; prop_fsort_nn_min    ::</span> [<span class="dt">Int</span>] <span class="ot">-&gt;</span> <span class="dt">Property</span>
 <span class="ot">&gt;</span> prop_fsort_nn_min xs <span class="fu">=</span>
 <span class="ot">&gt;</span>   not (null xs) <span class="fu">==&gt;</span> head (fsort xs) <span class="fu">==</span> minimum xs</code></pre></div>
+<div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt; prop_Eq ::</span> <span class="dt">Int</span> <span class="ot">-&gt;</span> <span class="dt">Int</span> <span class="ot">-&gt;</span> <span class="dt">Property</span> 
+<span class="ot">&gt;</span> prop_Eq x y <span class="fu">=</span> (show (x) <span class="fu">++</span> <span class="st">&quot;Foo&quot;</span>) <span class="fu">===</span> (show y)
+<span class="ot">&gt;</span> 
+<span class="ot">&gt; prop_fsort_nn_max    ::</span> [<span class="dt">Int</span>] <span class="ot">-&gt;</span> <span class="dt">Property</span>
+<span class="ot">&gt;</span> prop_fsort_nn_max xs <span class="fu">=</span>
+<span class="ot">&gt;</span>   not (null xs) <span class="fu">==&gt;</span> last (fsort xs) <span class="fu">==</span> maximum xs</code></pre></div>
 <p>This time around, both the property holds!</p>
 <div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell">ghci<span class="fu">&gt;</span> quickCheckN <span class="dv">1000</span> prop_fsort_nn_min
 <span class="fu">+++</span> <span class="dt">OK</span>, passed <span class="dv">1000</span> tests<span class="fu">.</span></code></pre></div>
@@ -319,6 +326,16 @@ ghci<span class="fu">&gt;</span> fsort <span class="fu">$</span> [<span class="d
 <p><strong>Q:</strong> Lets try to figure out the implementation of elements</p>
 <div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="ot">elements ::</span> [a] <span class="ot">-&gt;</span> <span class="dt">Gen</span> a
 elements <span class="fu">=</span> error <span class="st">&quot;Define me!&quot;</span></code></pre></div>
+<div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt; elems ::</span> [a] <span class="ot">-&gt;</span> <span class="dt">Gen</span> a 
+<span class="ot">&gt;</span> elems xs <span class="fu">=</span> <span class="kw">do</span> 
+<span class="ot">&gt;</span>   i <span class="ot">&lt;-</span> choose (<span class="dv">0</span>, length xs<span class="fu">-</span><span class="dv">1</span>) <span class="co">-- :: (a, a) -&gt; Gen a </span>
+<span class="ot">&gt;</span>   return <span class="fu">$</span> xs<span class="fu">!!</span>i
+<span class="ot">&gt;</span> 
+<span class="ot">&gt;</span> 
+<span class="ot">&gt; myoneOf ::</span> [<span class="dt">Gen</span> a] <span class="ot">-&gt;</span> <span class="dt">Gen</span> a 
+<span class="ot">&gt;</span> myoneOf xs <span class="fu">=</span> <span class="kw">do</span> 
+<span class="ot">&gt;</span>   i <span class="ot">&lt;-</span> choose (<span class="dv">0</span>, length xs<span class="fu">-</span><span class="dv">1</span>)  
+<span class="ot">&gt;</span>   xs<span class="fu">!!</span>i</code></pre></div>
 <p>A third combinator is <code>oneof</code></p>
 <div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="ot">oneof ::</span> [<span class="dt">Gen</span> a] <span class="ot">-&gt;</span> <span class="dt">Gen</span> a</code></pre></div>
 <p>which allows us to randomly choose between multiple generators</p>
@@ -343,9 +360,18 @@ oneOf <span class="fu">=</span> error <span class="st">&quot;Define me!&quot;</s
 <h2 id="generating-ordered-lists">Generating Ordered Lists</h2>
 <p>We can use the above combinators to write generators for lists</p>
 <div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt; genList1 ::</span>  (<span class="dt">Arbitrary</span> a) <span class="ot">=&gt;</span> <span class="dt">Gen</span> [a]
-<span class="ot">&gt;</span> genList1 <span class="fu">=</span> (<span class="fu">:</span>) <span class="fu">&lt;$&gt;</span> arbitrary <span class="fu">&lt;*&gt;</span> genList1</code></pre></div>
+<span class="ot">&gt;</span> genList1 <span class="fu">=</span> <span class="kw">do</span> 
+<span class="ot">&gt;</span>   x  <span class="ot">&lt;-</span> arbitrary 
+<span class="ot">&gt;</span>   xs <span class="ot">&lt;-</span> genList1
+<span class="ot">&gt;</span>   return (x<span class="fu">:</span>xs)
+<span class="ot">&gt;</span> 
+<span class="ot">&gt; genList ::</span>  (<span class="dt">Arbitrary</span> a) <span class="ot">=&gt;</span> <span class="dt">Gen</span> [a]
+<span class="ot">&gt;</span> genList <span class="fu">=</span> myoneOf [return [] , (<span class="fu">:</span>) <span class="fu">&lt;$&gt;</span> arbitrary <span class="fu">&lt;*&gt;</span> genList]
+<span class="ot">&gt;</span> 
+<span class="ot">&gt; genList' ::</span>  (<span class="dt">Arbitrary</span> a) <span class="ot">=&gt;</span> <span class="dt">Gen</span> [a]
+<span class="ot">&gt;</span> genList' <span class="fu">=</span> frequency [(<span class="dv">1</span>, return []) , (<span class="dv">100</span>,genList)]</code></pre></div>
 <p>Let’s sample it!</p>
-<div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt;</span> sample genList1 </code></pre></div>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell">sample genList1 </code></pre></div>
 <p>Can you spot a problem in the above?</p>
 <p><em>Problem:</em> <code>genList1</code> only generates infinite lists! Hmm. Lets try again,</p>
 <div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt; genList2 ::</span>  (<span class="dt">Arbitrary</span> a) <span class="ot">=&gt;</span> <span class="dt">Gen</span> [a]
