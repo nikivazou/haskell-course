@@ -5,7 +5,7 @@ QuickCheck: Type-directed Property Testing
 module Testing where
 import Test.QuickCheck
 import Data.Char
-import Data.List (sort)
+import Data.List (sort, nubBy)
 \end{code}
 
 In this lecture, we will look at 
@@ -789,74 +789,219 @@ prop_isPrime_best (Positive n) =
 User Defined Aribitrary Instances: The balkans
 ------------------------------------------
 
-\begin{code}
--- Example 3: Simple Aribitrary Instance 
+Recall the HW1, problem 3, the graph coloring problem.
 
+\begin{code}
 data Balkan = Albania | Bulgaria | BosniaAndHerzegovina
             | Kosovo | Macedonia | Montenegro
   deriving (Show, Eq)
 
 data Color = Blue | Red | Green | Yellow
   deriving (Show, Eq)
-  
-instance Arbitrary Balkan where
-  arbitrary = elements [Albania, Bulgaria, BosniaAndHerzegovina, Kosovo, Macedonia, Montenegro]
 
-instance Arbitrary Color where
-  arbitrary = elements [Blue, Red, Green, Yellow]
+balkans :: [Balkan]
+balkans = [Albania, Bulgaria, BosniaAndHerzegovina, Kosovo, Macedonia, Montenegro]
 
-isGoodColoring1 :: [(Balkan, Balkan)] -> [(Balkan,Color)] -> Bool 
-isGoodColoring1 adj coloring 
+colors :: [Color]
+colors = [Blue, Red, Green, Yellow]
+\end{code}
+
+Recall the `isGoodColoring` function, which, given
+a list of adjacent Balkans and a coloring of those
+Balkans, returns true if the coloring was good and
+false otherwise. Here are two solutions, the
+student solution "_stud" and the teacher solution
+"_teach."
+
+\begin{code}
+isGoodColoring_teach :: [(Balkan, Balkan)] -> [(Balkan,Color)] -> Bool 
+isGoodColoring_teach adj coloring 
   = null [ (c1,c2) | (c1,c2) <- adj, lookup c1 coloring == lookup c2 coloring && lookup c1 coloring /= Nothing]
 
-isGoodColoring2 :: [(Balkan, Balkan)] -> [(Balkan,Color)] -> Bool 
-isGoodColoring2 adj coloring = null $ do
+isGoodColoring_stud :: [(Balkan, Balkan)] -> [(Balkan,Color)] -> Bool 
+isGoodColoring_stud adj coloring = null $ do
   (c1, c2) <- adj
   if ((lookup c1 coloring)==(lookup c2 coloring))&& (lookup c1 coloring /= Nothing)
     then
     return (c1, c2)
     else
     []
-
-testColoring :: [(Balkan, Balkan)] -> [(Balkan, Color)] -> Bool
-testColoring adj coloring =
-  isGoodColoring1 adj coloring == isGoodColoring2 adj coloring
 \end{code}
 
-User Defined Aribitrary Instances: The balkans
+In order to grade your `isGoodColoring` function, we
+first defined simple Arbitrary instances for
+both Balkan and Color using `elements`.
+
+\begin{code}
+instance Arbitrary Balkan where
+  arbitrary = elements balkans
+
+instance Arbitrary Color where
+  arbitrary = elements colors
+\end{code}
+
+Here is a naive test using only these arbitrary instances:
+
+\begin{code}
+testColoringNaive :: [(Balkan, Balkan)] -> [(Balkan, Color)] -> Bool
+testColoringNaive adj col =
+  isGoodColoring_teach adj col == isGoodColoring_stud adj col
+\end{code}
+
+Why might this test be bad?
+
+First, we would like to guarentee that the tested coloring
+is "complete":
+
+\begin{code}
+sameElems :: Eq a => [a] -> [a] -> Bool 
+sameElems xs ys =  length xs == length ys && all (`elem` ys) xs
+
+complete :: [(Balkan, Color)] -> Bool
+complete coloring = balkans `sameElems` col_balks
+  where
+    col_balks = map fst coloring
+
+testColoringComplete :: [(Balkan, Balkan)] -> [(Balkan, Color)] -> Property
+testColoringComplete adj col =
+  complete col ==>
+  isGoodColoring_teach adj col == isGoodColoring_stud adj col
+\end{code}
+
+This is better, but now how do we actually generate only
+complete colorings?
+
+\begin{code}
+genRandCompleteColoring = do
+  c1 <- arbitrary
+  c2 <- arbitrary
+  c3 <- arbitrary
+  c4 <- arbitrary
+  c5 <- arbitrary
+  c6 <- arbitrary  
+  return [(Albania, c1), (Bulgaria, c2), (BosniaAndHerzegovina, c3), (Kosovo, c4),
+          (Macedonia, c5), (Montenegro, c6)]
+\end{code}
+
+Finally, let's guarentee that there is no repetition
+in the adjacency list.
+
+\begin{code}
+genRandAdjacencies :: Gen [(Balkan, Balkan)]
+genRandAdjacencies = do
+  adj <- arbitrary
+  return $ nubBy (\(x1,y1) (x2,y2) -> (x1,y1) == (x2,y2) || (x1,y1) == (y2, x2)) adj
+\end{code}
+
+So now we finally have:
+
+\begin{code}
+testColoring :: Property
+testColoring =
+  forAll genRandCompleteColoring $ \coloring ->
+  forAll genRandAdjacencies $ \adj ->
+  complete coloring ==>
+  isGoodColoring_teach adj coloring == isGoodColoring_stud adj coloring
+\end{code}
+
+User Defined Aribitrary Instances: Binary Trees
 ------------------------------------------
 
-\begin{code} 
--- Example 4: More Interesting Arbitrary Instance
+Recall our binary trees from HW2, problem 1.
 
+\begin{code}
 data Tree a = Tip | Bin a (Tree a) (Tree a)
   deriving (Eq, Show)
+\end{code}
 
+We had you define `map` over trees, as follows:
+
+\begin{code}
+map_stud :: (a -> b) -> Tree a -> Tree b 
+map_stud _ Tip = Tip 
+map_stud f (Bin x l r) = Bin (f x) (map_stud f l) (map_stud f r)
+
+map_teach :: (a -> b) -> Tree a -> Tree b 
+map_teach _ Tip = Tip 
+map_teach f (Bin x l r) = Bin (f x) (map_teach f l) (map_teach f r) 
+\end{code}
+
+How can we create arbitrary Binary trees to pass to map?
+
+Let's try to model this after genList1/2/3 from earlier.
+
+\begin{code}
+genArbTree :: (Arbitrary a) => Gen (Tree a)
+genArbTree = frequency [ (1, return Tip)
+                       , (7, genArbBin)]
+\end{code}
+
+This returns either empty or an arbitrary, non-empty
+Binary Tree. What does that look like?
+
+\begin{code}
+genArbBin :: (Arbitrary a) => Gen (Tree a)
+genArbBin = do
+  v <- arbitrary
+  t1 <- genArbTree
+  t2 <- genArbTree
+  return $ Bin v t1 t2
+\end{code}
+
+Let's define a test for this:
+
+\begin{code}
+intFuns :: [Int -> Int]
+intFuns = [(+1), (*42),(^3), ((+4) . (*3))]
+
+testMap1 :: Property
+testMap1 =
+  forAll genArbTree $
+  \t ->
+    all (\f -> map_teach f t == map_stud f t) intFuns
+\end{code}
+
+This looks pretty good... What problems might arise?
+
+Let's try a slightly modified approach:
+
+\begin{code}
+genArbTree2 :: (Arbitrary a) => Gen (Tree a)
+genArbTree2 = oneof [ return Tip
+                    , Bin <$> arbitrary <*> genArbTree2 <*> genArbTree2 ]
+
+genArbTree3 :: (Arbitrary a) => Gen (Tree a)
+genArbTree3 = frequency [ (1, return Tip)
+                        , (3, Bin <$> arbitrary <*> genArbTree2 <*> genArbTree2)]
+
+testMap2 :: Property
+testMap2 =
+  forAll genArbTree3 $
+  \t ->
+    all (\f -> map_stud f t == map_teach f t) intFuns
+\end{code}
+
+A final, alternative approach:
+
+\begin{code}
 instance (Arbitrary a) => Arbitrary (Tree a) where
-  arbitrary = sized arbTreeCan
+  arbitrary = sized arbTree
 
-arbTreeCan :: Arbitrary a => Int -> Gen (Tree a)
-arbTreeCan 0 = do
-  return $ Tip
-arbTreeCan n = do
+arbTree :: Arbitrary a => Int -> Gen (Tree a)
+arbTree 0 = do
+  return Tip
+arbTree n = do
   (Positive m1) <- arbitrary
   (Positive m2) <- arbitrary
   let n1  = n `div` (m1+1)
   let n2 = n `div` (m2+1)
-  t1 <- (arbTreeCan n1)
-  t2 <- (arbTreeCan n2)
+  t1 <- (arbTree n1)
+  t2 <- (arbTree n2)
   a <- arbitrary
   return $ Bin a t1 t2
 
-map1 :: (a -> b) -> Tree a -> Tree b 
-map1 _ Tip = Tip 
-map1 f (Bin x l r) = Bin (f x) (map1 f l) (map1 f r)
-
-map2 :: (a -> b) -> Tree a -> Tree b 
-map2 _ Tip = Tip 
-map2 f (Bin x l r) = Bin (f x) (map2 f l) (map2 f r) 
-
-testMap :: Tree Int -> Tree String -> Bool
-testMap t1 t2 = map1 (+1) t1 == map2 (+1) t1 &&
-                map1 (++"!") t2 == map2 (++"!") t2
+testMap3 :: Tree Int -> Bool
+testMap3 t =
+    all (\f -> map_stud f t == map_teach f t) intFuns
 \end{code}
+
