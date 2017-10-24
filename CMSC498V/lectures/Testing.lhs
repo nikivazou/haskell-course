@@ -32,11 +32,12 @@ run to verify (or rather, falsify) the property.
 
 By emphasizing the importance of specifications, QuickCheck yields several benefits:
 
-1. The developer is forced to think about what the code should do,
+1. The developer is forced to **think** about what the code should do,
 
-2. The tool finds corner-cases where the specification is violated, which leads to either the code or the specification getting fixed,
+2. The tool finds **corner-cases** where the specification is violated, which leads to either the code or the specification getting fixed,
 
-3. The specifications live on as rich, machine-checkable documentation about how the code should behave.
+3. The specifications live on as rich, machine-checkable **documentation**
+about how the code should behave.
 
 Properties
 ----------
@@ -83,7 +84,8 @@ Of course, those of you who are paying attention will realize there was a bug in
 
 \begin{code}
 prop_revapp_ok :: [Int] -> [Int] -> Bool
-prop_revapp_ok xs ys = reverse (xs ++ ys) == reverse ys ++ reverse xs
+prop_revapp_ok xs ys = 
+  reverse (xs ++ ys) == reverse ys ++ reverse xs
 \end{code}
 
 because `reverse` will flip the order of the two parts 
@@ -199,9 +201,12 @@ prop_fsort_min xs = head (fsort xs) == minimum xs
 
 However, when we run this, we run into a glitch
 
-< ghci> quickCheck prop_qsort_min
+< ghci> quickCheck prop_fsort_min
 < *** Failed! Exception: 'Prelude.head: empty list' (after 1 test):
 < []
+
+**Q:** Can you modify the property `prop_fsort_min` 
+to get rid of the runtime exception?
 
 But of course! 
 The earlier properties held for all inputs while this property 
@@ -489,15 +494,17 @@ One can easily (and we shall see, profitably!) turn
 `Gen` into a `Monad` by
 
 < instance Monad Gen where
-<   return x =
-<     MkGen (\_ _ -> x)
+<  -- return :: a -> Gen a 
+<     return x =
+<       MkGen (\_ _ -> x)
 <
-<   MkGen m >>= k =
-<     MkGen (\r n ->
-<       let (r1, r2)  = split r
-<           MkGen m' = k (m r1 n)
-<        in m' r2 n
-<     )
+<  -- (>>=) :: Gen a -> (a -> Gen b) -> Gen b
+<     MkGen a >>= f =
+<       MkGen (\r n ->
+<         let (r1, r2)  = split r
+<            MkGen b = f (a r1 n)
+<         in b r2 n
+<       )
 
 The function `split` simply forks the random number 
 generator into two parts; 
@@ -536,7 +543,7 @@ much like we did for JSON a few lectures back.
 or more simply
 
 < instance (Arbitrary a, Arbitrary b) => Arbitrary (a,b) where
-<   arbitrary = liftM2 (,) arbitrary arbitrary
+<   arbitrary = (,) <$> arbitrary <*> arbitrary
 
 
 Generator Combinators
@@ -639,6 +646,10 @@ We can use the above combinators to write generators for lists
 genList1 ::  (Arbitrary a) => Gen [a]
 genList1 = (:) <$> arbitrary <*> genList1
 \end{code}
+
+Let's sample it! 
+
+> sample genList1 
 
 Can you spot a problem in the above?
 

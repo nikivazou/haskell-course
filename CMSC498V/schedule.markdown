@@ -10,10 +10,9 @@
 - *Tue, 10/10:* <span style="color:red"> **Tournament.**</span>
 - *Thu, 10/12:* [Monads](lectures/Monads.html)
 - *Tue, 10/17:* <span style="color:red">**Project Proposal.**</span>
-- *Thu, 10/19:* <span style="color:white"> Type Classes </span>
-- *Tue, 10/24:* <span style="color:white"> Monads </span>
+- *Tue, 10/24:* [Testing](lectures/Testing.html)
 - *Thu, 10/26:* [Yesod](https://www.yesodweb.com/) *by James Parker*
-- *Tue, 10/31:* **HW3 due, HW4 out**
+- *Tue, 10/31:* **HW3 due, HW4 out** 
 - *Thu, 11/02:* <span style="color:white"> Monad Transformers </span>
 - *Tue, 11/07:* <span style="color:red">**Project Updates.**</span> 
 - *Thu, 11/09:* <span style="color:white"> Functional Reactive Programming </span>
