@@ -1,0 +1,148 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+        <title>CMSC498V - HW4</title>
+        <link rel="stylesheet" type="text/css" href="../css/default.css" />
+        <link rel="stylesheet" type="text/css" href="../css/syntax.css" />
+    </head>
+    <body>
+        <div id="header">
+            <div id="logo">
+                <a href="../">CMSC498V</a>
+            </div>
+            <div id="navigation">
+                <a href="../schedule.html">Schedule</a>
+                <a href="../homeworks.html">Homeworks</a>
+                <a href="../project.html">Projects</a>
+                <a href="../resources.html">Resources</a>
+            </div>
+        </div>
+
+        <div id="content">
+            <h1 id="homework-4">Homework 4</h1>
+<h2 id="instructions">Instructions</h2>
+<p>The source code of this homework can be found <a href="https://raw.githubusercontent.com/nikivazou/CMSC498V/master/CMSC498V/homeworks/HW4.lhs">here</a>. You should fill in the definitions of the required functions but <strong>do not</strong> change the types of the functions.</p>
+<p><strong>How to submit:</strong> Submit this file via the submit server.</p>
+<div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt;</span> <span class="ot">{-# LANGUAGE DeriveFoldable #-}</span>
+<span class="ot">&gt;</span> <span class="kw">module</span> <span class="dt">HW4</span> <span class="kw">where</span>
+<span class="ot">&gt;</span> <span class="kw">import </span><span class="dt">Test.QuickCheck</span>
+<span class="ot">&gt;</span> <span class="kw">import </span><span class="dt">Prelude</span> <span class="kw">hiding</span> (length, map, foldr, fold1, zipWith, concat, replicate)
+<span class="ot">&gt;</span> <span class="co">{-@ LIQUID &quot;--no-termination&quot; @-}</span>
+<span class="ot">&gt;</span> <span class="co">{-@ LIQUID &quot;--no-totality&quot;    @-}</span>
+<span class="ot">&gt;</span> <span class="co">{-@ type True = {v:Bool | v}  @-}</span></code></pre></div>
+<h2 id="problem-1-monadic-lambda-evaluation"><strong>Problem 1:</strong> Monadic Lambda Evaluation</h2>
+<p>Given the data type of expressions</p>
+<div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt;</span> <span class="kw">data</span> <span class="dt">Exp</span> a <span class="fu">=</span> <span class="dt">EVar</span> a <span class="fu">|</span> <span class="dt">EVal</span> <span class="dt">Int</span> <span class="fu">|</span> <span class="dt">EAdd</span> (<span class="dt">Exp</span> a) (<span class="dt">Exp</span> a)</code></pre></div>
+<p>you are asked to define its monadic instance.</p>
+<ol style="list-style-type: decimal">
+<li><strong>Functors:</strong> Define the <code>Functor</code> instance of <code>Exp</code>.</li>
+</ol>
+<div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt;</span> <span class="kw">instance</span> <span class="dt">Functor</span> <span class="dt">Exp</span> <span class="kw">where</span>
+<span class="ot">&gt;</span>   <span class="co">-- fmap :: (a -&gt; b) -&gt; Exp a -&gt; Exp b</span>
+<span class="ot">&gt;</span>   fmap f (<span class="dt">EVar</span> x)   <span class="fu">=</span> undefined <span class="st">&quot;Define me!&quot;</span>
+<span class="ot">&gt;</span>   fmap f (<span class="dt">EVal</span> n)   <span class="fu">=</span> undefined <span class="st">&quot;Define me!&quot;</span>
+<span class="ot">&gt;</span>   fmap f (<span class="dt">EAdd</span> x y) <span class="fu">=</span> undefined <span class="st">&quot;Define me!&quot;</span></code></pre></div>
+<ol start="2" style="list-style-type: decimal">
+<li><strong>Applicatives:</strong> Define the <code>Applicative</code> instance of <code>Exp</code>.</li>
+</ol>
+<div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt;</span> <span class="kw">instance</span> <span class="dt">Applicative</span> <span class="dt">Exp</span> <span class="kw">where</span>
+<span class="ot">&gt;</span>   <span class="co">-- pure :: a -&gt; Exp a </span>
+<span class="ot">&gt;</span>   pure x <span class="fu">=</span> undefined <span class="st">&quot;Define me!&quot;</span>
+<span class="ot">&gt;</span> 
+<span class="ot">&gt;</span>   <span class="co">-- (&lt;*&gt;) :: Exp (a -&gt; b) -&gt; Exp a -&gt; Exp b</span>
+<span class="ot">&gt;</span>   ef <span class="fu">&lt;*&gt;</span> e <span class="fu">=</span> undefined <span class="st">&quot;Define me!&quot;</span></code></pre></div>
+<ol start="3" style="list-style-type: decimal">
+<li><strong>Monads:</strong> Define the <code>Monad</code> instance of <code>Exp</code>.</li>
+</ol>
+<div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt;</span> <span class="kw">instance</span> <span class="dt">Monad</span> <span class="dt">Exp</span> <span class="kw">where</span>
+<span class="ot">&gt;</span>   <span class="co">-- return :: a -&gt; Expr a </span>
+<span class="ot">&gt;</span>   return x <span class="fu">=</span> undefined <span class="st">&quot;Define me!&quot;</span>
+<span class="ot">&gt;</span> 
+<span class="ot">&gt;</span>   <span class="co">-- (&gt;&gt;=) :: Exp a -&gt; (a -&gt; Exp b) -&gt; Exp b </span>
+<span class="ot">&gt;</span>   (<span class="dt">EVar</span> x)   <span class="fu">&gt;&gt;=</span> f <span class="fu">=</span> undefined <span class="st">&quot;Define me!&quot;</span>
+<span class="ot">&gt;</span>   (<span class="dt">EVal</span> n)   <span class="fu">&gt;&gt;=</span> f <span class="fu">=</span> undefined <span class="st">&quot;Define me!&quot;</span>
+<span class="ot">&gt;</span>   (<span class="dt">EAdd</span> x y) <span class="fu">&gt;&gt;=</span> f <span class="fu">=</span> undefined <span class="st">&quot;Define me!&quot;</span></code></pre></div>
+<ol start="4" style="list-style-type: decimal">
+<li><strong>Optional</strong> What does the <code>(&gt;&gt;=)</code> operator for this type do?</li>
+</ol>
+<h2 id="problem-2-quick-check-list-properties"><strong>Problem 2:</strong> Quick Check List Properties</h2>
+<p>We define up our own <code>List</code> data type from scratch:</p>
+<div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt;</span> <span class="kw">data</span> <span class="dt">List</span> a <span class="fu">=</span> <span class="dt">Nil</span>
+<span class="ot">&gt;</span>             <span class="fu">|</span> <span class="dt">C</span> a (<span class="dt">List</span> a)
+<span class="ot">&gt;</span>             <span class="kw">deriving</span> (<span class="dt">Eq</span>, <span class="dt">Ord</span>, <span class="dt">Show</span>, <span class="dt">Foldable</span>)</code></pre></div>
+<p>and it’s <code>length</code> function</p>
+<div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt;</span> <span class="co">{-@ measure length @-}</span>
+<span class="ot">&gt;</span> <span class="co">{-@ length      :: x:List a -&gt; Nat @-}</span>
+<span class="ot">&gt; length          ::</span> <span class="dt">List</span> a <span class="ot">-&gt;</span> <span class="dt">Int</span>
+<span class="ot">&gt;</span> length <span class="dt">Nil</span>      <span class="fu">=</span> <span class="dv">0</span>
+<span class="ot">&gt;</span> length (<span class="dt">C</span> _ xs) <span class="fu">=</span> <span class="dv">1</span> <span class="fu">+</span> length xs</code></pre></div>
+<ol style="list-style-type: decimal">
+<li>Define an arbitrary instance for the <code>List</code> data type</li>
+</ol>
+<div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt;</span> <span class="kw">instance</span> <span class="dt">Arbitrary</span> a <span class="ot">=&gt;</span> <span class="dt">Arbitrary</span> (<span class="dt">List</span> a) <span class="kw">where</span>
+<span class="ot">&gt;</span>   arbitrary <span class="fu">=</span> undefined <span class="st">&quot;Define me!&quot;</span></code></pre></div>
+<p>Once you define it, should should be able to quickcheck that adding an element to the list increases the length by 1.</p>
+<div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt; prop_cons ::</span> a <span class="ot">-&gt;</span> <span class="dt">List</span> a <span class="ot">-&gt;</span> <span class="dt">Bool</span> 
+<span class="ot">&gt;</span> prop_cons x xs <span class="fu">=</span> length (<span class="dt">C</span> x xs) <span class="fu">==</span> length xs <span class="fu">+</span> <span class="dv">1</span></code></pre></div>
+<p>That is</p>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell">ghci<span class="fu">&gt;</span> quickCheck prop_cons
+<span class="fu">+++</span> <span class="dt">OK</span>, passed <span class="dv">100</span> tests<span class="fu">.</span></code></pre></div>
+<ol start="2" style="list-style-type: decimal">
+<li>Define list concatenation:</li>
+</ol>
+<div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt; concat ::</span> <span class="dt">List</span> (<span class="dt">List</span> a) <span class="ot">-&gt;</span> <span class="dt">List</span> a 
+<span class="ot">&gt;</span> concat xss <span class="fu">=</span> undefined <span class="st">&quot;Define me!&quot;</span></code></pre></div>
+<p>So that you can quickeck the following property:</p>
+<div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt; prop_concat ::</span> <span class="dt">List</span> (<span class="dt">List</span> a) <span class="ot">-&gt;</span> <span class="dt">Bool</span> 
+<span class="ot">&gt;</span> prop_concat xss <span class="fu">=</span> length (concat xss) <span class="fu">==</span> sum (map length xss)</code></pre></div>
+<ol start="3" style="list-style-type: decimal">
+<li>Define the function <code>replicate i x</code> that returns a list that containts the value <code>x</code>, <code>i</code> times</li>
+</ol>
+<div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt; replicate ::</span> <span class="dt">Int</span> <span class="ot">-&gt;</span> a <span class="ot">-&gt;</span> <span class="dt">List</span> a 
+<span class="ot">&gt;</span> replicate i a <span class="fu">=</span> undefined <span class="st">&quot;Define me!&quot;</span></code></pre></div>
+<p>When you are done, the following property should quickcheck.</p>
+<div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt;</span> <span class="co">{-@ prop_replicate :: Nat -&gt; a -&gt; Property @-}</span>
+<span class="ot">&gt; prop_replicate ::</span> <span class="dt">Int</span> <span class="ot">-&gt;</span> a <span class="ot">-&gt;</span> <span class="dt">Property</span>
+<span class="ot">&gt;</span> prop_replicate n x <span class="fu">=</span> <span class="dv">0</span> <span class="fu">&lt;=</span> n <span class="fu">==&gt;</span> n <span class="fu">==</span> length (replicate n x)</code></pre></div>
+<h2 id="problem-3-verify-list-properties"><strong>Problem 3:</strong> Verify List Properties</h2>
+<p>We used Quickcheck to gain high confidence on the correctness of our definitions but we already observed one limitation: <code>replicate</code> behaves as expected but only on non-negative inputs. What about negative ones?</p>
+<ol style="list-style-type: decimal">
+<li><strong>Partial Functions:</strong> <code>replicate</code></li>
+</ol>
+<p>We can use a Liquid type for <code>replicate</code> that specifies that <code>replicate</code> is only defined on <code>i</code> that is a natural number.</p>
+<div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt;</span> <span class="co">{-@ replicate :: i:Nat -&gt; a -&gt; {v:List a | true } @-}</span></code></pre></div>
+<p>But what about its result type? Edit the result type of replicate in the above type, so the following is accepted by Liquid Haskell.</p>
+<div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt;</span> <span class="co">{-@ prop_replicate_lh :: Nat -&gt; a -&gt; True @-}</span> 
+<span class="ot">&gt; prop_replicate_lh ::</span> <span class="dt">Int</span> <span class="ot">-&gt;</span> a <span class="ot">-&gt;</span> <span class="dt">Bool</span> 
+<span class="ot">&gt;</span> prop_replicate_lh n x <span class="fu">=</span> n <span class="fu">==</span> length (replicate n x)</code></pre></div>
+<ol start="2" style="list-style-type: decimal">
+<li><strong>Higher Order Functions:</strong> With Liquid Haskell you can also easily check properties of higher order functions.</li>
+</ol>
+Refine properly the result type of <code>map</code>
+<div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt;</span> <span class="co">{-@ map :: (a -&gt; b) -&gt; xs:List a -&gt; {v:List b  | true } @-}</span>
+<span class="ot">&gt;</span> map f <span class="dt">Nil</span>      <span class="fu">=</span> <span class="dt">Nil</span>
+<span class="ot">&gt;</span> map f (<span class="dt">C</span> x xs) <span class="fu">=</span> f x <span class="ot">`C`</span> map f xs</code></pre></div>
+<p>So that the below length preserving property is accepted by Liquid Haskell</p>
+<div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt;</span> <span class="co">{-@ prop_map :: (a -&gt; b) -&gt; List a -&gt; True @-}</span> 
+<span class="ot">&gt; prop_map ::</span> (a <span class="ot">-&gt;</span> b) <span class="ot">-&gt;</span> <span class="dt">List</span> a <span class="ot">-&gt;</span> <span class="dt">Bool</span> 
+<span class="ot">&gt;</span> prop_map f xs <span class="fu">=</span> length xs <span class="fu">==</span> length (map f xs)</code></pre></div>
+<ol start="3" style="list-style-type: decimal">
+<li><strong>Higher Order, Partial Functions:</strong></li>
+</ol>
+<p>Finally, fix the specification for <code>foldr1</code> so that the call to <code>error</code> is verified by Liquid Haskell, as dead code:</p>
+<div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt;</span> <span class="co">{-@ foldr1 :: (a -&gt; a -&gt; a) -&gt; {v:List a | true } -&gt; a @-}</span>
+<span class="ot">&gt;</span> foldr1 op (<span class="dt">C</span> x xs) <span class="fu">=</span> foldr op x xs
+<span class="ot">&gt;</span> foldr1 op <span class="dt">Nil</span>      <span class="fu">=</span> error <span class="st">&quot;Cannot call foldr1 with empty list&quot;</span>
+<span class="ot">&gt;</span> 
+<span class="ot">&gt; foldr ::</span> (a <span class="ot">-&gt;</span> b <span class="ot">-&gt;</span> b) <span class="ot">-&gt;</span> b <span class="ot">-&gt;</span> <span class="dt">List</span> a <span class="ot">-&gt;</span> b
+<span class="ot">&gt;</span> foldr _  b <span class="dt">Nil</span>       <span class="fu">=</span> b
+<span class="ot">&gt;</span> foldr op b (<span class="dt">C</span> x  xs) <span class="fu">=</span> x <span class="ot">`op`</span> (foldr op b xs)</code></pre></div>
+        </div>
+        <div id="footer">
+            Site proudly generated by
+            <a href="http://jaspervdj.be/hakyll">Hakyll</a>
+        </div>
+    </body>
+</html>
