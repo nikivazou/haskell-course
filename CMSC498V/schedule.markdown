@@ -12,7 +12,7 @@
 - *Tue, 10/17:* <span style="color:red">**Project Proposal.**</span>
 - *Tue, 10/24:* [Testing](lectures/Testing.html)
 - *Thu, 10/26:* [Yesod](https://www.yesodweb.com/) *by James Parker*
-- *Tue, 10/31:* **HW3 due, HW4 out** 
+- *Tue, 10/31:* [Dependent Haskell](lectures/DependentHaskell.html)
 - *Thu, 11/02:* <span style="color:white"> Monad Transformers </span>
 - *Tue, 11/07:* <span style="color:red">**Project Updates.**</span> 
 - *Thu, 11/09:* <span style="color:white"> Functional Reactive Programming </span>

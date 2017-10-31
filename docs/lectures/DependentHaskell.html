@@ -34,13 +34,19 @@
 <li><p><a href="https://xkcd.com/1312/">Some</a> <a href="https://ro-che.info/ccc/1">funny</a> <a href="http://thecodelesscode.com/case/143">pages</a> <a href="http://i.imgur.com/6FhL6QJ.jpg">about</a> <a href="https://www.youtube.com/watch?v=Ci48kqp11F8">Haskell</a>. Notes: Randall Munroe writes xkcd; his sidekick, davean, is active in the Haskell community. <a href="https://ranjitjhala.github.io/">Ranjit Jhala</a> is the star in the YouTube video (last link) and I was glad he is my academic supervisor!</p></li>
 </ul>
 <p>As a rule, the Haskell community is welcoming, mostly because we’ve all seen how awesome Haskell is and we want to share the love!</p>
-<p>I will not teach any furter Haskell coding. You have learnt everything you need to know! In the rest lectures I will show you how use types to reason about your programs. Remember we already saw how to use type to test your programs! We will take this further!</p>
-<p>In this lecture we will see how you can use Haskell’s types to enforce sophisticated program properties, and next we will see how similar reasoning is done using <a href="https://ucsd-progsys.github.io/liquidhaskell-blog/">Liquid Haskell</a>.</p>
+<p>One of the reasons why we love Haskell is <em>purity</em>. Haskell has no side effect, other than</p>
+<ul>
+<li>divergence: your function may not terminate,</li>
+<li>run time error:</li>
+</ul>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="fu">***</span> <span class="dt">Exception</span><span class="fu">:</span> Prelude.head<span class="fu">:</span> empty list</code></pre></div>
+<p>Today we will see how Haskell’s types are extended to prevent such errors. Next we will see how similar reasoning is done using <a href="https://ucsd-progsys.github.io/liquidhaskell-blog/">Liquid Haskell</a>.</p>
 <h1 id="dependent-haskell">Dependent Haskell</h1>
 <p>This lecture is adjusted from <a href="https://cs.brynmawr.edu/~rae/courses/17spring380/index.html">Richard Eisenberg’s class</a>.</p>
 <p>As we’ve seen a few times, Haskell supports <em>extensions</em>, enabling you to turn on certain language features if you want them. From here on out, we’ll be using a bunch.</p>
 <div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt;</span> <span class="ot">{-# LANGUAGE GADTs                    #-}</span>
 <span class="ot">&gt;</span> <span class="ot">{-# LANGUAGE TypeInType               #-}</span> 
+<span class="ot">&gt;</span> <span class="ot">{-# LANGUAGE DataKinds                #-}</span> 
 <span class="ot">&gt;</span> <span class="ot">{-# LANGUAGE ScopedTypeVariables      #-}</span>
 <span class="ot">&gt;</span> <span class="ot">{-# LANGUAGE StandaloneDeriving       #-}</span>
 <span class="ot">&gt;</span> <span class="ot">{-# LANGUAGE TypeFamilies             #-}</span>
@@ -62,12 +68,12 @@
 <span class="ot">&gt;</span>   <span class="dt">MkGInt</span><span class="ot">  ::</span> <span class="dt">Int</span>  <span class="ot">-&gt;</span> <span class="dt">G</span> <span class="dt">Int</span>
 <span class="ot">&gt;</span>   <span class="dt">MkGBool</span><span class="ot"> ::</span> <span class="dt">Bool</span> <span class="ot">-&gt;</span> <span class="dt">G</span> <span class="dt">Bool</span></code></pre></div>
 <div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt; foo ::</span> <span class="dt">G</span> a <span class="ot">-&gt;</span> a
-<span class="ot">&gt;</span> foo (<span class="dt">MkGInt</span> n)  <span class="fu">=</span> n <span class="fu">+</span> <span class="dv">5</span>
+<span class="ot">&gt;</span> foo (<span class="dt">MkGInt</span>  n) <span class="fu">=</span> n <span class="fu">+</span> <span class="dv">5</span>
 <span class="ot">&gt;</span> foo (<span class="dt">MkGBool</span> b) <span class="fu">=</span> not b</code></pre></div>
-<div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt; bar ::</span> forall a<span class="fu">.</span> <span class="dt">G</span> a <span class="ot">-&gt;</span> a <span class="ot">-&gt;</span> <span class="dt">Bool</span>
-<span class="ot">&gt;</span> bar (<span class="dt">MkGInt</span> _)  x <span class="fu">=</span> ((<span class="ot">x ::</span> a)<span class="ot"> ::</span> <span class="dt">Int</span>) <span class="fu">&gt;</span> <span class="dv">0</span>
-<span class="ot">&gt;</span> bar (<span class="dt">MkGBool</span> _) x <span class="fu">=</span> x</code></pre></div>
-<p>Note that <code>x</code> has type <code>a</code> here. After the pattern-match, though, we know what <code>a</code> is and can use that fact to produce a <code>Bool</code>.</p>
+<p>Note how <code>n</code> is an integer while <code>b</code> is a boolean!</p>
+<p><strong>Q:</strong> Define the function <code>negG</code> that negates the values inside <code>G</code>:</p>
+<div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt; negG ::</span> <span class="dt">G</span> a <span class="ot">-&gt;</span> <span class="dt">G</span> a 
+<span class="ot">&gt;</span> negG <span class="fu">=</span> error <span class="st">&quot;Define me!&quot;</span></code></pre></div>
 <p>We can now make a definition usable to represent a Haskell type:</p>
 <div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt;</span> <span class="kw">data</span> <span class="dt">TypeRep</span> a <span class="kw">where</span>
 <span class="ot">&gt;</span>   <span class="dt">TInt</span><span class="ot">    ::</span> <span class="dt">TypeRep</span> <span class="dt">Int</span>
@@ -82,26 +88,47 @@
 <span class="ot">&gt;</span> zero (<span class="dt">TMaybe</span> _) <span class="fu">=</span> <span class="dt">Nothing</span>
 <span class="ot">&gt;</span> zero (<span class="dt">TFun</span> _ b) <span class="fu">=</span> \ _ <span class="ot">-&gt;</span> zero b</code></pre></div>
 <h2 id="data-kinds">Data Kinds</h2>
-<p>We’ve been talking about algebraic datatypes for months now, so these are nothing new. But, with the right <code>LANGUAGE</code> extensions (I recommend <code>TypeInType</code>, but the older <code>DataKinds</code> also works), you can use an algebraic datatype in a <em>kind</em>. So, if we have</p>
+<p>There is even another way to declare the definition of <code>Maybe</code>:</p>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="kw">data</span> <span class="dt">Maybe</span> a <span class="kw">where</span>
+  <span class="dt">Nothing</span><span class="ot"> ::</span> <span class="dt">Maybe</span> a
+  <span class="dt">Just</span><span class="ot">    ::</span> a <span class="ot">-&gt;</span> <span class="dt">Maybe</span> a</code></pre></div>
+<p>Can also be written as</p>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="kw">data</span> <span class="dt">Maybe</span><span class="ot"> ::</span> <span class="dt">Type</span> <span class="ot">-&gt;</span> <span class="dt">Type</span> <span class="kw">where</span>
+  <span class="dt">Nothing</span><span class="ot">  ::</span> <span class="dt">Maybe</span> a
+  <span class="dt">Just</span><span class="ot">     ::</span> a <span class="ot">-&gt;</span> <span class="dt">Maybe</span> a</code></pre></div>
+<p>Indicating that given some type <code>t</code>, <code>Maybe t</code> returns a type. Let’s go and generalize that to allow type constructors take data arguments!</p>
+<p>We’ve been talking about algebraic datatypes for months now, so these are nothing new. But, with the right <code>LANGUAGE</code> extensions (I recommend <code>TypeInType</code>, but the older <code>DataKinds</code> also works), you can use an algebraic datatype as a <em>type</em>. So, if we have</p>
 <div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt;</span> <span class="kw">data</span> <span class="dt">Nat</span> <span class="kw">where</span>
 <span class="ot">&gt;</span>   <span class="dt">Zero</span><span class="ot"> ::</span> <span class="dt">Nat</span>
 <span class="ot">&gt;</span>   <span class="dt">Succ</span><span class="ot"> ::</span> <span class="dt">Nat</span> <span class="ot">-&gt;</span> <span class="dt">Nat</span></code></pre></div>
 <p>then we can say</p>
 <div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt;</span> <span class="kw">data</span> <span class="dt">T</span><span class="ot"> ::</span> <span class="dt">Nat</span> <span class="ot">-&gt;</span> <span class="dt">Type</span> <span class="kw">where</span>
-<span class="ot">&gt;</span>   <span class="dt">MkT</span><span class="ot"> ::</span> <span class="dt">String</span> <span class="ot">-&gt;</span> <span class="dt">T</span> n</code></pre></div>
-<p>With this defintion, the constructor <code>MkT</code> (when applied to a <code>String</code>) gives us a <code>T n</code> for any <code>Nat</code> <code>n</code>. For example, we could have <code>MkT &quot;hi&quot; :: T Zero</code> or <code>MkT &quot;bye&quot; :: T (Succ (Succ Zero))</code>. Here, <code>Zero</code> and <code>Succ</code> are being used in <em>types</em>, not ordinary expressions. (They’re to the <em>right</em> of the <code>::</code>.) So far, this feature looks utterly useless, but it won’t be, soon.</p>
-<p>One point of complication arises here, though: Haskell has two separate namespaces: one for constructors and one for types. This is why we can have types like</p>
+<span class="ot">&gt;</span>   <span class="dt">MkT</span><span class="ot"> ::</span> <span class="dt">String</span> <span class="ot">-&gt;</span> <span class="dt">T</span> n
+<span class="ot">&gt;</span>  <span class="kw">deriving</span> <span class="dt">Show</span> </code></pre></div>
+<p>With this defintion, the constructor <code>MkT</code> (when applied to a <code>String</code>) gives us a <code>T n</code> for any <code>Nat</code> <code>n</code>. For example, we could have</p>
+<div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt; temp ::</span> <span class="dt">T</span> <span class="dt">Zero</span>
+<span class="ot">&gt;</span> temp <span class="fu">=</span> <span class="dt">MkT</span> <span class="st">&quot;&quot;</span></code></pre></div>
+<p>or</p>
+<div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt; hi ::</span> <span class="dt">T</span> (<span class="dt">Succ</span> (<span class="dt">Succ</span> <span class="dt">Zero</span>))
+<span class="ot">&gt;</span> hi <span class="fu">=</span> <span class="dt">MkT</span> <span class="st">&quot;hi&quot;</span></code></pre></div>
+<p>or</p>
+<div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt; bye ::</span> <span class="dt">T</span> (<span class="dt">Succ</span> (<span class="dt">Succ</span> (<span class="dt">Succ</span> <span class="dt">Zero</span>)))
+<span class="ot">&gt;</span> bye <span class="fu">=</span> <span class="dt">MkT</span> <span class="st">&quot;bye&quot;</span></code></pre></div>
+<p>Here, <code>Zero</code> and <code>Succ</code> are being used in <em>types</em>, not ordinary expressions. In these examples the type tells us how many characters the value string has, but this <em>invariant</em> is not enforced by the type system. One can just violate it:</p>
+<div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt;</span> unsafe <span class="fu">=</span> <span class="dt">MkT</span> <span class="st">&quot;unsafe&quot;</span></code></pre></div>
+<p><strong>Q:</strong> Which two are bad types for <code>unsafe</code>?</p>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="ot">unsafe ::</span> <span class="dt">T</span> n                         <span class="co">-- 1)</span>
+<span class="ot">unsafe ::</span> <span class="dt">T</span> <span class="dt">Zero</span>                      <span class="co">-- 2)</span>
+<span class="ot">unsafe ::</span> <span class="dt">T</span> (<span class="dt">Maybe</span> <span class="dt">Zero</span>)              <span class="co">-- 3)</span>
+<span class="ot">unsafe ::</span> <span class="dt">T</span> (<span class="dt">Succ</span> (<span class="dt">Succ</span> (<span class="dt">Succ</span> <span class="dt">Zero</span>))) <span class="co">-- 4) </span>
+<span class="ot">unsafe ::</span> <span class="dt">Succ</span> (<span class="dt">Succ</span> (<span class="dt">Succ</span> <span class="dt">Zero</span>))     <span class="co">-- 5)</span></code></pre></div>
+<p>Reminder:</p>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell"> <span class="kw">data</span> <span class="dt">T</span><span class="ot"> ::</span> <span class="dt">Nat</span> <span class="ot">-&gt;</span> <span class="dt">Type</span> <span class="kw">where</span> <span class="dt">MkT</span><span class="ot"> ::</span> <span class="dt">String</span> <span class="ot">-&gt;</span> <span class="dt">T</span> n</code></pre></div>
+<p>We will see how such invariant can be enforced via length index vectors. But first let’s clarify one technicality.</p>
+<p><em>Technicality:</em> One point of complication arises here, though: Haskell has two separate namespaces: one for constructors and one for types. This is why we can have types like</p>
 <div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt;</span> <span class="kw">data</span> <span class="dt">SameName</span> <span class="kw">where</span>
 <span class="ot">&gt;</span>   <span class="dt">SameName</span><span class="ot"> ::</span> <span class="dt">Bool</span> <span class="ot">-&gt;</span> <span class="dt">SameName</span></code></pre></div>
 <p>Here, <code>SameName</code> is a type and its constructor. This is idiomatic in Haskell, if confusing for newcomers to the language. Normally, constructors and types are written in different places in your code, so the re-use of the name isn’t problematic. However, if we can use constructors in types (as we have with <code>Zero</code> and <code>Succ</code>) this <em>is</em> problematic. Haskell’s solution is to use <code>'</code> (that is, an apostrophe) to disambiguate. So, if a name is used as both a constructor and a type, use <code>'</code> in a type to choose the constructor. So, the kind of the type <code>SameName</code> is <code>Type</code>, but the kind of the type <code>'SameName</code> is <code>Bool -&gt; SameName</code>. GHC prints out constructors in types with the tick-marks.</p>
-<p>There is also some new syntax in the definition of <code>T</code>: instead of listing some type variables after the type name <code>T</code>, this definition lists <code>T</code>’s <em>kind</em>, which is <code>Nat -&gt; Type</code>. (<code>Type</code> is the more modern way of spelling the kind <code>*</code>. It is imported from <code>Data.Kind</code>. <code>*</code> gets awfully confusing when you also have multiplication in types – which we will have soon enough. In any case, <code>Type</code> and <code>*</code> are treated identically.) That is, if the type <code>T</code> is given a <code>Nat</code>, it will be a <code>Type</code>. This syntax can be used for other constructions. For example:</p>
-<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="kw">data</span> <span class="dt">Tree</span> a <span class="fu">=</span> <span class="dt">Leaf</span> a
-            <span class="fu">|</span> <span class="dt">Node</span> a (<span class="dt">Tree</span> a) (<span class="dt">Tree</span> a)</code></pre></div>
-<p>can be also writen as</p>
-<div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt;</span> <span class="kw">data</span> <span class="dt">Tree</span><span class="ot"> ::</span> <span class="dt">Type</span> <span class="ot">-&gt;</span> <span class="dt">Type</span> <span class="kw">where</span>
-<span class="ot">&gt;</span>   <span class="dt">Leaf</span><span class="ot"> ::</span> <span class="dt">Tree</span> a
-<span class="ot">&gt;</span>   <span class="dt">Node</span><span class="ot"> ::</span> a <span class="ot">-&gt;</span> <span class="dt">Tree</span> a <span class="ot">-&gt;</span> <span class="dt">Tree</span> a <span class="ot">-&gt;</span> <span class="dt">Tree</span> a</code></pre></div>
-<p>Note that the kind of <code>Tree</code> is <code>Type -&gt; Type</code>. This is the same as it always was, but now the kind is written explicitly.</p>
 <h2 id="length-indexed-vectors">Length-indexed vectors</h2>
 <p>One of the most common examples of a GADT is a length-indexed vector, which we’ll call <code>Vec</code>. It is a common example because we can explore all the interesting aspects of GADTs with them, but they’re simpler than many other examples. They also have a practical use, but it may be some time before we can get there.</p>
 <p>Here is the definition of length-indexed vectors:</p>
@@ -121,16 +148,22 @@
 <p>In a standalone-deriving declaration, you write <code>deriving</code> away from any other definition and you give the entire instance header, including any necessary context. You must also specify the <code>StandaloneDeriving</code> language extension. (If you forget either the context or the extension, GHC helpfully reminds you. Try this out!)</p>
 <p>Now, we can define an example <code>Vec</code>:</p>
 <div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt;</span> stuff <span class="fu">=</span> <span class="dv">5</span> <span class="fu">:&gt;</span> <span class="dv">3</span> <span class="fu">:&gt;</span> <span class="dv">8</span> <span class="fu">:&gt;</span> <span class="dt">Nil</span></code></pre></div>
-<p>First off, GHCi can happily print out <code>stuff</code>, showing us <code>5 :&gt; (3 :&gt; (8 :&gt; Nil))</code>. Those parentheses can be omitted, but the <code>Show</code> instance isn’t quite smart enough. What is <code>stuff</code>s type? (Think before you look.) GHCi reports that it’s <code>Vec ('Succ ('Succ ('Succ 'Zero))) Integer</code>. Note the tick-marks in the printout. This type says that the length of the <code>Vec</code> is 3. This should not be terribly surprising.</p>
+<p>First off, GHCi can happily print out <code>stuff</code>, showing us <code>5 :&gt; (3 :&gt; (8 :&gt; Nil))</code>. Those parentheses can be omitted, but the <code>Show</code> instance isn’t quite smart enough. What is <code>stuff</code>s type? (Think before you look.) GHCi reports that it’s</p>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell">ghci<span class="fu">&gt;</span> <span class="fu">:</span>t stuff
+<span class="ot">stuff ::</span> <span class="dt">Vec</span> (<span class="ch">'Succ ('</span><span class="dt">Succ</span> (<span class="ch">'Succ '</span><span class="dt">Zero</span>))) <span class="dt">Integer</span></code></pre></div>
+<p>Note the tick-marks in the printout. This type says that the length of the <code>Vec</code> is 3. This should not be terribly surprising.</p>
 <p>How can we use this? Let’s walk through several examples.</p>
 <p>First, we can define a <code>head</code> function that is guaranteed to be safe:</p>
 <div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt; safeHead ::</span> <span class="dt">Vec</span> (<span class="dt">Succ</span> n) a <span class="ot">-&gt;</span> a
 <span class="ot">&gt;</span> safeHead (x <span class="fu">:&gt;</span> _) <span class="fu">=</span> x</code></pre></div>
-<p>Despite having only one equation, this function is total. GHC can see that the index on the type of the argument is <code>(Succ n)</code>; therefore, the argument cannot be <code>Nil</code>, whose index is <code>Zero</code>. Trying to add an equation <code>safeHead Zero = error &quot;urk&quot;</code> is actually an error with <code>Inaccessible code</code>. (Try it!) Being able to define <code>safeHead</code> is already a nice advantage of use <code>Vec</code> over lists.</p>
-<p>Naturally, we can have the counterpart to <code>safeHead</code>, <code>safeTail</code>. But the type here will be a bit more involved, requiring us to think about the index of the resulting <code>Vec</code>. If the input type’s index is <code>Succ n</code>, well, the output type’s index had better be <code>n</code>:</p>
-<div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt; safeTail ::</span> <span class="dt">Vec</span> (<span class="dt">Succ</span> n) a <span class="ot">-&gt;</span> <span class="dt">Vec</span> n a
-<span class="ot">&gt;</span> safeTail (_ <span class="fu">:&gt;</span> xs) <span class="fu">=</span> xs</code></pre></div>
-<p>Once again, this function is total even though it misses the <code>Nil</code> case. Also of interest is that GHC checks to make sure that the return value really is one element shorter than the input. See what happens if you try <code>safeTail xs = xs</code>. GHC will notice that the index on the input <code>Vec</code> is not <code>Succ</code> applied to the index on the output <code>Vec</code>.</p>
+<p>We did it! <code>safeHead</code> now cannot be applied to the empty list!</p>
+<p><strong>Q:</strong> What happens if I try applying <code>safeHead</code> to the empty list:</p>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell">ghci<span class="fu">&gt;</span>  safeHead <span class="dt">Nil</span></code></pre></div>
+<p>Despite having only one equation, <code>safeHead</code> is a total function. GHC can see that the index on the type of the argument is <code>(Succ n)</code>; therefore, the argument cannot be <code>Nil</code>, whose index is <code>Zero</code>. Trying to add an equation <code>safeHead Zero = error &quot;urk&quot;</code> is actually an error with <code>Inaccessible code</code>. (Try it!) Being able to define <code>safeHead</code> is already a nice advantage of use <code>Vec</code> over lists.</p>
+<p>Naturally, we can have the counterpart to <code>safeHead</code>, <code>safeTail</code>.</p>
+<p><strong>Q:</strong> Define the <code>safeTail</code></p>
+<div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt;</span> safeTail <span class="fu">=</span> error <span class="st">&quot;Define me!&quot;</span></code></pre></div>
+<p>But the type here is be a bit more involved, requiring us to think about the index of the resulting <code>Vec</code>. If the input type’s index is <code>Succ n</code>, well, the output type’s index had better be <code>n</code>: Once again, this function is total even though it misses the <code>Nil</code> case. Also of interest is that GHC checks to make sure that the return value really is one element shorter than the input. See what happens if you try <code>safeTail xs = xs</code>. GHC will notice that the index on the input <code>Vec</code> is not <code>Succ</code> applied to the index on the output <code>Vec</code>.</p>
 <p>Let’s now write a recursive function, <code>snoc</code>. This function (<code>cons</code> spelled backwards) appends to the <em>end</em> of a <code>Vec</code>. It takes an input <code>Vec</code>, a new element, and produces an output <code>Vec</code>, one longer than the input:</p>
 <div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt; snoc ::</span> <span class="dt">Vec</span> n a <span class="ot">-&gt;</span> a <span class="ot">-&gt;</span> <span class="dt">Vec</span> (<span class="dt">Succ</span> n) a
 <span class="ot">&gt;</span> snoc <span class="dt">Nil</span>       x <span class="fu">=</span> x <span class="fu">:&gt;</span> <span class="dt">Nil</span>

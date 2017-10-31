@@ -58,15 +58,17 @@ As a rule, the Haskell community is welcoming, mostly because we've all seen
 how awesome Haskell is and we want to share the love!
 
 
-I will not teach any furter Haskell coding. 
-You have learnt everything you need to know! 
-In the rest lectures I will show you how use types to reason about your programs. 
-Remember we already saw how to use type to test your programs!
-We will take this further! 
+One of the reasons why we love Haskell is *purity*. 
+Haskell has no side effect, other than 
 
-In this lecture we will see how you can use Haskell's types 
-to enforce sophisticated program properties, and next 
-we will see how similar reasoning is done using 
+- divergence: your function may not terminate, 
+- run time error: 
+
+< *** Exception: Prelude.head: empty list
+
+Today we will see how Haskell's types are extended to prevent 
+such errors. 
+Next we will see how similar reasoning is done using 
 [Liquid Haskell](https://ucsd-progsys.github.io/liquidhaskell-blog/).
 
 
@@ -83,6 +85,7 @@ using a bunch.
 
 > {-# LANGUAGE GADTs                    #-}
 > {-# LANGUAGE TypeInType               #-} 
+> {-# LANGUAGE DataKinds                #-} 
 > {-# LANGUAGE ScopedTypeVariables      #-}
 > {-# LANGUAGE StandaloneDeriving       #-}
 > {-# LANGUAGE TypeFamilies             #-}
@@ -112,6 +115,7 @@ data Maybe a where
 
 that declares the types of the data constructors `Nothing` and `Just`. 
 
+
 When we declare the `Nothing` and `Just` constructors, we give them types that
 end in `Maybe a`, the datatype we are declaring. But, what if the parameter to
 `Maybe` there isn't `a`?
@@ -120,16 +124,18 @@ end in `Maybe a`, the datatype we are declaring. But, what if the parameter to
 >   MkGInt  :: Int  -> G Int
 >   MkGBool :: Bool -> G Bool
 
+
 > foo :: G a -> a
-> foo (MkGInt n)  = n + 5
+> foo (MkGInt  n) = n + 5
 > foo (MkGBool b) = not b
 
-> bar :: forall a. G a -> a -> Bool
-> bar (MkGInt _)  x = ((x :: a) :: Int) > 0
-> bar (MkGBool _) x = x
+Note how `n` is an integer while `b` is a boolean!
 
-Note that `x` has type `a` here. After the pattern-match, though, we know what
-`a` is and can use that fact to produce a `Bool`.
+**Q:** Define the function `negG` that negates the values inside `G`: 
+
+> negG :: G a -> G a 
+> negG = error "Define me!"
+
 
 We can now make a definition usable to represent a Haskell type:
 
@@ -151,9 +157,29 @@ We can now make a definition usable to represent a Haskell type:
 Data Kinds
 ----------
 
+There is even another way to declare the definition of `Maybe`: 
+
+```haskell
+data Maybe a where
+  Nothing :: Maybe a
+  Just    :: a -> Maybe a
+```
+
+Can also be written as 
+
+```haskell
+data Maybe :: Type -> Type where
+  Nothing  :: Maybe a
+  Just     :: a -> Maybe a
+```
+
+Indicating that given some type `t`, `Maybe t` returns a type. 
+Let's go and generalize that to allow type constructors take 
+data arguments!
+
 We've been talking about algebraic datatypes for months now, so these are nothing
 new. But, with the right `LANGUAGE` extensions (I recommend `TypeInType`, but the
-older `DataKinds` also works), you can use an algebraic datatype in a *kind*. So,
+older `DataKinds` also works), you can use an algebraic datatype as a *type*. So,
 if we have
 
 > data Nat where
@@ -164,13 +190,51 @@ then we can say
 
 > data T :: Nat -> Type where
 >   MkT :: String -> T n
+>  deriving Show 
 
 With this defintion, the constructor `MkT` (when applied to a `String`) gives us
-a `T n` for any `Nat` `n`. For example, we could have `MkT "hi" :: T Zero` or
-`MkT "bye" :: T (Succ (Succ Zero))`. Here, `Zero` and `Succ` are being used in
-*types*, not ordinary expressions. (They're to the *right* of the `::`.)
-So far, this feature looks utterly useless, but it won't be, soon.
+a `T n` for any `Nat` `n`. For example, we could have 
 
+> temp :: T Zero
+> temp = MkT ""
+
+or
+
+> hi :: T (Succ (Succ Zero))
+> hi = MkT "hi"
+
+or 
+
+> bye :: T (Succ (Succ (Succ Zero)))
+> bye = MkT "bye"
+
+Here, `Zero` and `Succ` are being used in
+*types*, not ordinary expressions. 
+In these examples the type tells us how many characters the 
+value string has, but this *invariant* is not enforced by the type system. 
+One can just violate it: 
+
+> unsafe = MkT "unsafe"
+
+
+**Q:** Which two are bad types for `unsafe`?
+
+< unsafe :: T n                         -- 1)
+< unsafe :: T Zero                      -- 2)
+< unsafe :: T (Maybe Zero)              -- 3)
+< unsafe :: T (Succ (Succ (Succ Zero))) -- 4) 
+< unsafe :: Succ (Succ (Succ Zero))     -- 5)
+
+Reminder: 
+
+<  data T :: Nat -> Type where MkT :: String -> T n
+
+
+We will see how such invariant can be enforced via 
+length index vectors. 
+But first let's clarify one technicality. 
+
+*Technicality:*
 One point of complication arises here, though: Haskell has two separate namespaces:
 one for constructors and one for types. This is why we can have types like
 
@@ -187,26 +251,7 @@ a type, use `'` in a type to choose the constructor. So, the kind of the type
 `SameName` is `Type`, but the kind of the type `'SameName` is `Bool -> SameName`.
 GHC prints out constructors in types with the tick-marks.
 
-There is also some new syntax in the definition of `T`: instead of listing
-some type variables after the type name `T`, this definition lists `T`'s
-*kind*, which is `Nat -> Type`. (`Type` is the more modern way of spelling the
-kind `*`. It is imported from `Data.Kind`. `*` gets awfully confusing when you
-also have multiplication in types -- which we will have soon enough. In any case,
-`Type` and `*` are treated identically.) That is, if the type `T` is given a
-`Nat`, it will be a `Type`. This syntax can be used for other constructions.
-For example:
 
-< data Tree a = Leaf a
-<             | Node a (Tree a) (Tree a)
-
-can be also writen as 
-
-> data Tree :: Type -> Type where
->   Leaf :: Tree a
->   Node :: a -> Tree a -> Tree a -> Tree a
-
-Note that the kind of `Tree` is `Type -> Type`. This is the same as it always
-was, but now the kind is written explicitly.
 
 Length-indexed vectors
 ----------------------
@@ -264,9 +309,14 @@ Now, we can define an example `Vec`:
 > stuff = 5 :> 3 :> 8 :> Nil
 
 First off, GHCi can happily print out `stuff`, showing us
-`5 :> (3 :> (8 :> Nil))`. Those parentheses can be omitted, but the `Show`
+`5 :> (3 :> (8 :> Nil))`.
+ Those parentheses can be omitted, but the `Show`
 instance isn't quite smart enough. What is `stuff`s type? (Think before you
-look.) GHCi reports that it's `Vec ('Succ ('Succ ('Succ 'Zero))) Integer`.
+look.) GHCi reports that it's 
+
+< ghci> :t stuff
+< stuff :: Vec ('Succ ('Succ ('Succ 'Zero))) Integer
+
 Note the tick-marks in the printout. This type says that the length of the
 `Vec` is 3. This should not be terribly surprising.
 
@@ -277,21 +327,33 @@ First, we can define a `head` function that is guaranteed to be safe:
 > safeHead :: Vec (Succ n) a -> a
 > safeHead (x :> _) = x
 
-Despite having only one equation, this function is total. GHC can see that
-the index on the type of the argument is `(Succ n)`; therefore, the argument
+
+We did it! `safeHead` now cannot be applied to the empty list!
+
+
+**Q:** What happens if I try applying `safeHead` to the empty list:
+
+< ghci>  safeHead Nil
+
+
+Despite having only one equation, `safeHead` is a total function. 
+GHC can see that the index on the type of the argument is `(Succ n)`; therefore, the argument
 cannot be `Nil`, whose index is `Zero`. Trying to add an equation
 `safeHead Zero = error "urk"` is actually an error with `Inaccessible code`.
 (Try it!) Being able to define `safeHead` is already a nice advantage of
 use `Vec` over lists.
 
-Naturally, we can have the counterpart to `safeHead`, `safeTail`. But the
-type here will be a bit more involved, requiring us to think about the index
+Naturally, we can have the counterpart to `safeHead`, `safeTail`.
+
+**Q:** Define the `safeTail`
+
+> safeTail = error "Define me!"
+
+
+But the type here is be a bit more involved, 
+requiring us to think about the index
 of the resulting `Vec`. If the input type's index is `Succ n`, well, the
 output type's index had better be `n`:
-
-> safeTail :: Vec (Succ n) a -> Vec n a
-> safeTail (_ :> xs) = xs
-
 Once again, this function is total even though it misses the `Nil` case.
 Also of interest is that GHC checks to make sure that the return value really
 is one element shorter than the input. See what happens if you try
