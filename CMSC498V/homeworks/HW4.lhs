@@ -134,7 +134,7 @@ prop_concat xss = length (concat xss) == sum (map length xss)
 
 
 3. Define the function `replicate i x` 
-that returns a list that containts the value `x`, 
+that returns a list that contains the value `x`, 
 `i` times
 
 \begin{code}
