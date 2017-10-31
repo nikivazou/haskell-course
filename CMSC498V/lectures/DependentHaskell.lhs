@@ -134,7 +134,8 @@ Note how `n` is an integer while `b` is a boolean!
 **Q:** Define the function `negG` that negates the values inside `G`: 
 
 > negG :: G a -> G a 
-> negG = error "Define me!"
+> negG (MkGInt i) = MkGInt (-i)
+> negG (MkGBool b) = MkGBool (not b)
 
 
 We can now make a definition usable to represent a Haskell type:
@@ -347,7 +348,9 @@ Naturally, we can have the counterpart to `safeHead`, `safeTail`.
 
 **Q:** Define the `safeTail`
 
-> safeTail = error "Define me!"
+> safeTail :: Vec (Succ n) a -> Vec n a
+> safeTail (_ :> xs) = xs
+
 
 
 But the type here is be a bit more involved, 

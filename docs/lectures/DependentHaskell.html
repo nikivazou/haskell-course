@@ -73,7 +73,8 @@
 <p>Note how <code>n</code> is an integer while <code>b</code> is a boolean!</p>
 <p><strong>Q:</strong> Define the function <code>negG</code> that negates the values inside <code>G</code>:</p>
 <div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt; negG ::</span> <span class="dt">G</span> a <span class="ot">-&gt;</span> <span class="dt">G</span> a 
-<span class="ot">&gt;</span> negG <span class="fu">=</span> error <span class="st">&quot;Define me!&quot;</span></code></pre></div>
+<span class="ot">&gt;</span> negG (<span class="dt">MkGInt</span> i) <span class="fu">=</span> <span class="dt">MkGInt</span> (<span class="fu">-</span>i)
+<span class="ot">&gt;</span> negG (<span class="dt">MkGBool</span> b) <span class="fu">=</span> <span class="dt">MkGBool</span> (not b)</code></pre></div>
 <p>We can now make a definition usable to represent a Haskell type:</p>
 <div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt;</span> <span class="kw">data</span> <span class="dt">TypeRep</span> a <span class="kw">where</span>
 <span class="ot">&gt;</span>   <span class="dt">TInt</span><span class="ot">    ::</span> <span class="dt">TypeRep</span> <span class="dt">Int</span>
@@ -162,7 +163,8 @@
 <p>Despite having only one equation, <code>safeHead</code> is a total function. GHC can see that the index on the type of the argument is <code>(Succ n)</code>; therefore, the argument cannot be <code>Nil</code>, whose index is <code>Zero</code>. Trying to add an equation <code>safeHead Zero = error &quot;urk&quot;</code> is actually an error with <code>Inaccessible code</code>. (Try it!) Being able to define <code>safeHead</code> is already a nice advantage of use <code>Vec</code> over lists.</p>
 <p>Naturally, we can have the counterpart to <code>safeHead</code>, <code>safeTail</code>.</p>
 <p><strong>Q:</strong> Define the <code>safeTail</code></p>
-<div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt;</span> safeTail <span class="fu">=</span> error <span class="st">&quot;Define me!&quot;</span></code></pre></div>
+<div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt; safeTail ::</span> <span class="dt">Vec</span> (<span class="dt">Succ</span> n) a <span class="ot">-&gt;</span> <span class="dt">Vec</span> n a
+<span class="ot">&gt;</span> safeTail (_ <span class="fu">:&gt;</span> xs) <span class="fu">=</span> xs</code></pre></div>
 <p>But the type here is be a bit more involved, requiring us to think about the index of the resulting <code>Vec</code>. If the input type’s index is <code>Succ n</code>, well, the output type’s index had better be <code>n</code>: Once again, this function is total even though it misses the <code>Nil</code> case. Also of interest is that GHC checks to make sure that the return value really is one element shorter than the input. See what happens if you try <code>safeTail xs = xs</code>. GHC will notice that the index on the input <code>Vec</code> is not <code>Succ</code> applied to the index on the output <code>Vec</code>.</p>
 <p>Let’s now write a recursive function, <code>snoc</code>. This function (<code>cons</code> spelled backwards) appends to the <em>end</em> of a <code>Vec</code>. It takes an input <code>Vec</code>, a new element, and produces an output <code>Vec</code>, one longer than the input:</p>
 <div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt; snoc ::</span> <span class="dt">Vec</span> n a <span class="ot">-&gt;</span> a <span class="ot">-&gt;</span> <span class="dt">Vec</span> (<span class="dt">Succ</span> n) a
