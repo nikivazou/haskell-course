@@ -129,7 +129,16 @@ So that you can quickeck the following property:
 
 \begin{code}
 prop_concat :: List (List a) -> Bool 
-prop_concat xss = length (concat xss) == sum (map length xss)
+prop_concat xss = length (concat xss) == lengths xss
+\end{code}
+
+where `lengths` computes the sum of lengths of a list of lists 
+
+\begin{code}
+{-@ measure lengths @-}
+lengths :: List (List a) -> Int 
+lengths Nil      = 0 
+lengths (C x xs) = length x + lengths xs 
 \end{code}
 
 
@@ -217,6 +226,22 @@ foldr op b (C x  xs) = x `op` (foldr op b xs)
 \end{code}
 
 
+4. Verification of checked properties.
+
+You can use Liquid Haskell to check all the properties 
+of Problem 2. 
+For the homework, let's just check `prop_concat`:
+
+Give the proper specification to `concat`: 
+\begin{code}
+{-@ concat :: xs:List (List a) -> {v:List a | true } @-}
+\end{code}
+
+So that the length preserving property is checked by Liquid Haskell
+
+\begin{code}
+{-@ prop_concat :: List (List a) -> True @-}
+\end{code}
 
 
 
