@@ -13,7 +13,7 @@
 - *Tue, 10/24:* [Testing](lectures/Testing.html)
 - *Thu, 10/26:* [Yesod](https://www.yesodweb.com/) *by James Parker*
 - *Tue, 10/31:* [Dependent Haskell](lectures/DependentHaskell.html)
-- *Thu, 11/02:* <span style="color:white"> Monad Transformers </span>
+- *Thu, 11/02:* [Liquid Haskell](http://goto.ucsd.edu/~nvazou/presentations/CMSC498V/01-index.html)
 - *Tue, 11/07:* <span style="color:red">**Project Updates.**</span> 
 - *Thu, 11/09:* <span style="color:white"> Functional Reactive Programming </span>
 - *Tue, 11/14:* <span style="color:white"> Lambda Calculus </span>
