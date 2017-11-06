@@ -16,6 +16,7 @@ import Test.QuickCheck
 import Prelude hiding (length, map, foldr, fold1, zipWith, concat, replicate)
 {-@ LIQUID "--no-termination" @-}
 {-@ LIQUID "--no-totality"    @-}
+{-@ LIQUID "--prune-unsorted" @-}
 {-@ type True = {v:Bool | v}  @-}
 \end{code}
 

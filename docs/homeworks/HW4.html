@@ -31,6 +31,7 @@
 <span class="ot">&gt;</span> <span class="kw">import </span><span class="dt">Prelude</span> <span class="kw">hiding</span> (length, map, foldr, fold1, zipWith, concat, replicate)
 <span class="ot">&gt;</span> <span class="co">{-@ LIQUID &quot;--no-termination&quot; @-}</span>
 <span class="ot">&gt;</span> <span class="co">{-@ LIQUID &quot;--no-totality&quot;    @-}</span>
+<span class="ot">&gt;</span> <span class="co">{-@ LIQUID &quot;--prune-unsorted&quot; @-}</span>
 <span class="ot">&gt;</span> <span class="co">{-@ type True = {v:Bool | v}  @-}</span></code></pre></div>
 <h2 id="problem-1-monadic-lambda-evaluation"><strong>Problem 1:</strong> Monadic Lambda Evaluation</h2>
 <p>Given the data type of expressions</p>
