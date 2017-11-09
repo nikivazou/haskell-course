@@ -15,7 +15,7 @@
 - *Tue, 10/31:* [Dependent Haskell](lectures/DependentHaskell.html)
 - *Thu, 11/02:* [Liquid Haskell](http://goto.ucsd.edu/~nvazou/presentations/CMSC498V/01-index.html)
 - *Tue, 11/07:* <span style="color:red">**Project Updates.**</span> 
-- *Thu, 11/09:* <span style="color:white"> Functional Reactive Programming </span>
+- *Thu, 11/09:* [Termination](http://goto.ucsd.edu/~nvazou/presentations/CMSC498V/05-termination.html)
 - *Tue, 11/14:* <span style="color:white"> Lambda Calculus </span>
 - *Thu, 11/16:* GHC magic by *Joachim Breitner* 
 - *Tue, 11/21:* **HW4 due**, Monad Tranformers by *David Darais* 
