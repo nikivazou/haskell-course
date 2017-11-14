@@ -16,7 +16,7 @@
 - *Thu, 11/02:* [Liquid Haskell](http://goto.ucsd.edu/~nvazou/presentations/CMSC498V/01-index.html)
 - *Tue, 11/07:* <span style="color:red">**Project Updates.**</span> 
 - *Thu, 11/09:* [Termination](http://goto.ucsd.edu/~nvazou/presentations/CMSC498V/05-termination.html)
-- *Tue, 11/14:* <span style="color:white"> Lambda Calculus </span>
+- *Thu, 11/14:* [Programs as Proofs](http://goto.ucsd.edu/~nvazou/presentations/CMSC498V/06-reflection.html)
 - *Thu, 11/16:* GHC magic by *Joachim Breitner* 
 - *Tue, 11/21:* **HW4 due**, Monad Tranformers by *David Darais* 
 - *Thu, 11/23:* <span style="color:green">**No class: Thanks Giving.**</span> 
