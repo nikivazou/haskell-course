@@ -17,7 +17,7 @@
 - *Tue, 11/07:* <span style="color:red">**Project Updates.**</span> 
 - *Thu, 11/09:* [Termination](http://goto.ucsd.edu/~nvazou/presentations/CMSC498V/05-termination.html)
 - *Thu, 11/14:* [Programs as Proofs](http://goto.ucsd.edu/~nvazou/presentations/CMSC498V/06-reflection.html)
-- *Thu, 11/16:* GHC magic by *Joachim Breitner* 
+- *Thu, 11/16:* How ghc is implemented? by *Joachim Breitner* 
 - *Tue, 11/21:* **HW4 due**, Monad Tranformers by *David Darais* 
 - *Thu, 11/23:* <span style="color:green">**No class: Thanks Giving.**</span> 
 - *Tue, 11/28:* Software Transactional Memory by *Jose Calderon*
