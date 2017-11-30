@@ -21,7 +21,7 @@
 - *Tue, 11/21:* **HW4 due**, Monad Tranformers by *David Darais* 
 - *Thu, 11/23:* <span style="color:green">**No class: Thanks Giving.**</span> 
 - *Tue, 11/28:* Software Transactional Memory by *Jose Calderon*
-- *Thu, 11/30:* <span style="color:white"> Natural Deduction </span>
+- *Thu, 11/30:* [Natural Deduction](http://goto.ucsd.edu/~nvazou/presentations/CMSC498V/09-natural-deduction.html)
 - *Tue, 12/05:* <span style="color:red">**Project Presentation.**</span> 
 - *Thu, 12/07:* <span style="color:red">**Project Presentation.**</span> 
 
