@@ -82,6 +82,7 @@ Check it out:
 
 - Neural Convnets *by Kevin Chen & Suteerth Vishnu*
 
+<img src="https://user-images.githubusercontent.com/13123651/33686363-a47288f4-daa2-11e7-867f-351855631fc2.jpg" alt="Neural" style="width: 200px;"/>
 Demonstrate that Haskell's powerful abstractions allow for the implementation of sophisticated network architectures which would be difficult to do with standard approaches (i.e Tensorflow/Pytorch).
 Check it out: 
 [github@kevchn/neural-convnets](https://github.com/kevchn/neural-convnets)
