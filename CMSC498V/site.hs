@@ -48,6 +48,7 @@ main = hakyllWith config $ do
               , "resources.markdown"
               , "homeworks.markdown"
               , "project.markdown"
+              , "student-projects-2017.markdown"
               ]) $ do
         route   $ setExtension "html"
         compile $ myPandocCompiler
