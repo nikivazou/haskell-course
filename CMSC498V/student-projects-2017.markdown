@@ -75,8 +75,8 @@ Check it out:
 
 - Mancala *by Vlad Rachev & Marc Eastman*
 
-<img src="https://raw.githubusercontent.com/vrachev/mancalahaskell/master/mancala.jpg" alt="Checkers" style="width: 200px;"/>
-Create a playable game between human or computer players, GUI using Javascript React.
+<img src="https://raw.githubusercontent.com/vrachev/mancalahaskell/master/mancala.jpg" alt="mancala board" style="width: 200px;"/>
+Implementation of 2 player game using Haskell and Javascript.
 Check it out:
 [github@vrachev/mancalahaskell](https://github.com/vrachev/mancalahaskell)
 
