@@ -16,6 +16,7 @@ check it out:
 [github@8Gitbrix/2048Haskell](https://github.com/8Gitbrix/2048Haskell)
 
 - Wires Game *by Davis Silveman & Kristian Osborne* 
+
 This is a simplistic spiderman-physics game based off of [Double Wires](http://www.freewebarcade.com/game/double-wires/). That game is definitely better, so probably play that instead.
 Check it out:
 [github@sinistersnare/wires](https://github.com/sinistersnare/wires)
@@ -93,6 +94,7 @@ Check it out:
 [github@rkiernan/haskell-id3](https://github.com/rkiernan/haskell-id3)
 
 - Super Gomoku *by Pedro Carvalho & Mikey Saugstad*
+
 GUI for the Super Gomoku. Try the game [here](https://super-gomoku.herokuapp.com/).
 Check it out: 
 [github@payros/super-gomoku](https://github.com/payros/super-gomoku)
