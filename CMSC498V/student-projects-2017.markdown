@@ -90,8 +90,7 @@ Check it out:
 - Id3 *by Ryan Kiernan & Nick Condron*
 
 Check it out:
-[github@rkiernan/haskell-id3
-](https://github.com/rkiernan/haskell-id3)
+[github@rkiernan/haskell-id3](https://github.com/rkiernan/haskell-id3)
 
 - Super Gomoku *by Pedro Carvalho & Mikey Saugstad*
 GUI for the Super Gomoku. Try the game [here](https://super-gomoku.herokuapp.com/).
@@ -113,7 +112,12 @@ For example suppose the assumptions are, {if A then B, if B then C, A} and the g
 Check it out: 
 [github@saturnerianis/Haskell_Proposition_Prover](https://github.com/saturnerianis/Haskell_Proposition_Prover)
 
-- Private *by Andrew Putlock & Brian Oluwo*
+- Comms *by Andrew Putlock & Brian Oluwo*
+
+Decentralized email on Ethereum.
+Comms implements a minimally spec compliant version of both SMTP and POP3 w/ Ethereum as the *database* of sorts.
+Check it out:
+[github@aputlock/comms](https://github.com/aputlock/comms)
 
 - Rubiks Cube *by Jonathan Chan & Vivian Yung*
 
