@@ -175,7 +175,7 @@ Every user defined data type comes with three operations
 - **Construction:** How to construct such the data type 
 
 < Value 42          :: IntError 
-< Error "Not Valid" :: IntValue
+< Error "Not Valid" :: IntError
 
 - **Selection:** Select value from data type 
 
@@ -197,7 +197,8 @@ We use `IntError` to return `Error` when `fib` is called on negative numbers.
 \begin{code}
 fibError :: Int -> IntError
 fibError 0 = Value 0 
-fibError 1 = Value 1     -- construction 
+fibError 1 = Value 1     -- construction
+fibError i | i < 0 = Error (show i) 
 fibError i =
   case fibError (i-1) of -- case analysis 
     Value j -> case fibError (i-2) of 
