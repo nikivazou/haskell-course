@@ -9,13 +9,10 @@
     </head>
     <body>
         <div id="header">
-            <div id="logo">
-                <a href="../">CMSC498V</a>
-            </div>
             <div id="navigation">
-                <a href="../schedule.html">Schedule</a>
+                <a href="../index.html">Home</a>
+                <a href="../schedule.html">Schelude</a>
                 <a href="../homeworks.html">Homeworks</a>
-                <a href="../project.html">Projects</a>
                 <a href="../resources.html">Resources</a>
             </div>
         </div>
@@ -121,7 +118,7 @@
 <li><strong>Construction:</strong> How to construct such the data type</li>
 </ul>
 <div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="dt">Value</span> <span class="dv">42</span><span class="ot">          ::</span> <span class="dt">IntError</span> 
-<span class="dt">Error</span> <span class="st">&quot;Not Valid&quot;</span><span class="ot"> ::</span> <span class="dt">IntValue</span></code></pre></div>
+<span class="dt">Error</span> <span class="st">&quot;Not Valid&quot;</span><span class="ot"> ::</span> <span class="dt">IntError</span></code></pre></div>
 <ul>
 <li><strong>Selection:</strong> Select value from data type</li>
 </ul>
@@ -139,7 +136,8 @@
 <p>We use <code>IntError</code> to return <code>Error</code> when <code>fib</code> is called on negative numbers.</p>
 <div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt; fibError ::</span> <span class="dt">Int</span> <span class="ot">-&gt;</span> <span class="dt">IntError</span>
 <span class="ot">&gt;</span> fibError <span class="dv">0</span> <span class="fu">=</span> <span class="dt">Value</span> <span class="dv">0</span> 
-<span class="ot">&gt;</span> fibError <span class="dv">1</span> <span class="fu">=</span> <span class="dt">Value</span> <span class="dv">1</span>     <span class="co">-- construction </span>
+<span class="ot">&gt;</span> fibError <span class="dv">1</span> <span class="fu">=</span> <span class="dt">Value</span> <span class="dv">1</span>     <span class="co">-- construction</span>
+<span class="ot">&gt;</span> fibError i <span class="fu">|</span> i <span class="fu">&lt;</span> <span class="dv">0</span> <span class="fu">=</span> <span class="dt">Error</span> (show i) 
 <span class="ot">&gt;</span> fibError i <span class="fu">=</span>
 <span class="ot">&gt;</span>   <span class="kw">case</span> fibError (i<span class="fu">-</span><span class="dv">1</span>) <span class="kw">of</span> <span class="co">-- case analysis </span>
 <span class="ot">&gt;</span>     <span class="dt">Value</span> j <span class="ot">-&gt;</span> <span class="kw">case</span> fibError (i<span class="fu">-</span><span class="dv">2</span>) <span class="kw">of</span> 
