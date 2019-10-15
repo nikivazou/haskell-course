@@ -61,7 +61,8 @@ rmLines (x:xs)
   | otherwise  = x:rmLines xs 
 \end{code}
 
-2. Let's remove the `|`` from lines:
+2. Let's remove the `|` from lines:
+
 \begin{code}
 rmSep :: [Char] -> [Char] 
 rmSep [] = []
@@ -71,6 +72,7 @@ rmSep (x:xs)
 \end{code}
 
 3. Programming Patterns: Can you spot the difference?
+
 \begin{code}
 rm :: (a -> Bool) -> [a] -> [a] 
 rm p [] = []
@@ -87,7 +89,7 @@ rmSep' xs = rm p xs
   where p x = '|' == x  
 \end{code}
 
-4. Use Lib Functions!!!!!
+4. Use Lib Functions! Which? Ask [hoogle](https://hoogle.haskell.org).
 
 \begin{code}
 rmLines'' :: [[Char]] -> [[Char]]  
@@ -127,9 +129,9 @@ clean' xs = map rmSep (rmLines xs)
 Using Diagrams
 ----------------------
 
-clean DIAGRAM:
 
-\begin{spec}
+
+\begin{code}% clean DIAGRAM:
     [
     "-------",
     "|43|..|", 
@@ -160,14 +162,14 @@ map rmSep ::[[Char]] -> [[Char]]
     "..2.",
     "21..",
     ]
-\end{spec}
+\end{code}
 
-DIAGRAM SUMMARY: 
-\begin{spec}
+ 
+\begin{code}% DIAGRAM SUMMARY:
 clean         :: [[Char]] -> [[Char]]
  1. rmLines   :: [[Char]] -> [[Char]]
  2. map rmSep :: [[Char]] -> [[Char]]
-\end{spec}
+\end{code}
 
 
 Compositional Programming! 
@@ -186,8 +188,8 @@ SUMMARY
 1. Use library function (i.e., hoogle)! 
 2. Higher Order Programming Patterns, e.g., filter, map
 3. Compositional Programming 
-   a) depompose problem to subprobles
-   b) solve them independently 
-   c) solution is composition of solutions! 
+  a) depompose problem to subprobles
+  b) solve them independently 
+  c) solution is composition of solutions! 
 
 Apply these steps to [solve this sudoku](lectures/SudokuSolver.html)!

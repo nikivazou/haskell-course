@@ -60,20 +60,31 @@
 <span class="ot">&gt;</span>   <span class="fu">|</span> elem <span class="ch">'-'</span> x <span class="fu">=</span> rmLines xs 
 <span class="ot">&gt;</span>   <span class="fu">|</span> otherwise  <span class="fu">=</span> x<span class="fu">:</span>rmLines xs </code></pre></div>
 <ol start="2" style="list-style-type: decimal">
-<li>Let’s remove the `|`` from lines:
+<li>Let’s remove the <code>|</code> from lines:</li>
+</ol>
 <div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt; rmSep ::</span> [<span class="dt">Char</span>] <span class="ot">-&gt;</span> [<span class="dt">Char</span>] 
 <span class="ot">&gt;</span> rmSep [] <span class="fu">=</span> []
 <span class="ot">&gt;</span> rmSep (x<span class="fu">:</span>xs) 
 <span class="ot">&gt;</span>   <span class="fu">|</span> <span class="ch">'|'</span> <span class="fu">==</span> x <span class="fu">=</span> rmSep xs 
-<span class="ot">&gt;</span>   <span class="fu">|</span> otherwise <span class="fu">=</span> x<span class="fu">:</span>rmSep xs  </code></pre></div></li>
-<li>Programming Patterns: Can you spot the difference? \begin{code} rm :: (a -&gt; Bool) -&gt; [a] -&gt; [a] rm p [] = [] rm p (x:xs) | p x = rm p xs | otherwise = x:rm p xs</li>
+<span class="ot">&gt;</span>   <span class="fu">|</span> otherwise <span class="fu">=</span> x<span class="fu">:</span>rmSep xs  </code></pre></div>
+<ol start="3" style="list-style-type: decimal">
+<li>Programming Patterns: Can you spot the difference?</li>
 </ol>
-<p>rmLines’ :: [[Char]] -&gt; [[Char]]<br />
-rmLines’ xs = rm p xs where p x = elem ‘-’ x</p>
-<p>rmSep’ :: [Char] -&gt; [Char] rmSep’ xs = rm p xs where p x = ‘|’ == x<br />
-\end{code}</p>
+<div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt; rm ::</span> (a <span class="ot">-&gt;</span> <span class="dt">Bool</span>) <span class="ot">-&gt;</span> [a] <span class="ot">-&gt;</span> [a] 
+<span class="ot">&gt;</span> rm p [] <span class="fu">=</span> []
+<span class="ot">&gt;</span> rm p (x<span class="fu">:</span>xs) 
+<span class="ot">&gt;</span>   <span class="fu">|</span> p x       <span class="fu">=</span> rm p xs 
+<span class="ot">&gt;</span>   <span class="fu">|</span> otherwise <span class="fu">=</span> x<span class="fu">:</span>rm p xs
+<span class="ot">&gt;</span> 
+<span class="ot">&gt; rmLines' ::</span> [[<span class="dt">Char</span>]] <span class="ot">-&gt;</span> [[<span class="dt">Char</span>]]  
+<span class="ot">&gt;</span> rmLines' xs  <span class="fu">=</span> rm p xs 
+<span class="ot">&gt;</span>   <span class="kw">where</span> p x <span class="fu">=</span> elem <span class="ch">'-'</span> x
+<span class="ot">&gt;</span> 
+<span class="ot">&gt; rmSep' ::</span> [<span class="dt">Char</span>] <span class="ot">-&gt;</span> [<span class="dt">Char</span>] 
+<span class="ot">&gt;</span> rmSep' xs <span class="fu">=</span> rm p xs
+<span class="ot">&gt;</span>   <span class="kw">where</span> p x <span class="fu">=</span> <span class="ch">'|'</span> <span class="fu">==</span> x  </code></pre></div>
 <ol start="4" style="list-style-type: decimal">
-<li>Use Lib Functions!!!!!</li>
+<li>Use Lib Functions! Which? Ask <a href="https://hoogle.haskell.org">hoogle</a>.</li>
 </ol>
 <div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt; rmLines'' ::</span> [[<span class="dt">Char</span>]] <span class="ot">-&gt;</span> [[<span class="dt">Char</span>]]  
 <span class="ot">&gt;</span> rmLines'' xs  <span class="fu">=</span> filter p xs 
@@ -95,9 +106,7 @@ rmLines’ xs = rm p xs where p x = elem ‘-’ x</p>
 <div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt; clean' ::</span> [[<span class="dt">Char</span>]] <span class="ot">-&gt;</span> [[<span class="dt">Char</span>]]
 <span class="ot">&gt;</span> clean' xs <span class="fu">=</span> map rmSep (rmLines xs)</code></pre></div>
 <h2 id="using-diagrams">Using Diagrams</h2>
-<p>clean DIAGRAM:</p>
 
-DIAGRAM SUMMARY:
 
 <p>Compositional Programming!</p>
 <div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt; clean'' ::</span> [[<span class="dt">Char</span>]] <span class="ot">-&gt;</span> [[<span class="dt">Char</span>]]
