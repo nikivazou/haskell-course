@@ -1,2 +1,9 @@
-The schedule will be updated after the lectures. 
-See [CMSC498V/schedule.html](https://nikivazou.github.io/CMSC498V/schedule.html) for what to expect. 
+- *Wed, 16/10:* [Intro](lectures/Intro.html)
+- *Mon, 28/10:* Laziness & Reality 
+- *Wed, 30/10:* Type Classes
+- *Mon, 4/11:* Monoids & Foldables
+- *Wed, 6/11:* Functors & Applicatives
+- *Mon, 18/11:* **Tournament** & Monads
+- *Wed, 20/11:* Testing
+- *Mon, 25/11:* Liquid Haskell
+- *Wed, 27/11:* Theorem Proving 
