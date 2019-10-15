@@ -18,7 +18,102 @@
         </div>
 
         <div id="content">
-            
+            <h1 id="sudoku-representation">Sudoku Representation</h1>
+<div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt;</span> <span class="kw">module</span> <span class="dt">SudokuInput</span> <span class="kw">where</span> </code></pre></div>
+<h2 id="sudoku-examples">Sudoku Examples</h2>
+<p>Here is a Sudoku puzzle:</p>
+<div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt;</span> example1 
+<span class="ot">&gt;</span>  <span class="fu">=</span> [
+<span class="ot">&gt;</span>     <span class="st">&quot;-------------&quot;</span>,    
+<span class="ot">&gt;</span>     <span class="st">&quot;|2..|..1|.38|&quot;</span>,
+<span class="ot">&gt;</span>     <span class="st">&quot;|...|...|..5|&quot;</span>,
+<span class="ot">&gt;</span>     <span class="st">&quot;|.7.|..6|...|&quot;</span>,
+<span class="ot">&gt;</span>     <span class="st">&quot;|-----------|&quot;</span>,
+<span class="ot">&gt;</span>     <span class="st">&quot;|...|...|.13|&quot;</span>,
+<span class="ot">&gt;</span>     <span class="st">&quot;|.98|1..|257|&quot;</span>,
+<span class="ot">&gt;</span>     <span class="st">&quot;|31.|...|8..|&quot;</span>,
+<span class="ot">&gt;</span>     <span class="st">&quot;|-----------|&quot;</span>,
+<span class="ot">&gt;</span>     <span class="st">&quot;|9..|8..|.2.|&quot;</span>,
+<span class="ot">&gt;</span>     <span class="st">&quot;|.5.|.69|784|&quot;</span>,
+<span class="ot">&gt;</span>     <span class="st">&quot;|4..|25.|...|&quot;</span>,
+<span class="ot">&gt;</span>     <span class="st">&quot;-------------&quot;</span> 
+<span class="ot">&gt;</span>     ]</code></pre></div>
+<p>and a smaller one:</p>
+<div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt;</span> example0 
+<span class="ot">&gt;</span>   <span class="fu">=</span> [
+<span class="ot">&gt;</span>     <span class="st">&quot;-------&quot;</span>,
+<span class="ot">&gt;</span>     <span class="st">&quot;|43|..|&quot;</span>, 
+<span class="ot">&gt;</span>     <span class="st">&quot;|12|3.|&quot;</span>,
+<span class="ot">&gt;</span>     <span class="st">&quot;-------&quot;</span>,
+<span class="ot">&gt;</span>     <span class="st">&quot;|..|2.|&quot;</span>,
+<span class="ot">&gt;</span>     <span class="st">&quot;|21|..|&quot;</span>,
+<span class="ot">&gt;</span>     <span class="st">&quot;-------&quot;</span>
+<span class="ot">&gt;</span>     ]</code></pre></div>
+<p><strong>Q:</strong> What is the type of a Sudoku?</p>
+<h2 id="remove-redundant-info">Remove Redundant Info</h2>
+<ol style="list-style-type: decimal">
+<li>Let’s remove the <code>--...</code> lines:</li>
+</ol>
+<div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt; rmLines ::</span> [[<span class="dt">Char</span>]] <span class="ot">-&gt;</span> [[<span class="dt">Char</span>]]
+<span class="ot">&gt;</span> rmLines [] <span class="fu">=</span> []
+<span class="ot">&gt;</span> rmLines (x<span class="fu">:</span>xs)
+<span class="ot">&gt;</span>   <span class="fu">|</span> elem <span class="ch">'-'</span> x <span class="fu">=</span> rmLines xs 
+<span class="ot">&gt;</span>   <span class="fu">|</span> otherwise  <span class="fu">=</span> x<span class="fu">:</span>rmLines xs </code></pre></div>
+<ol start="2" style="list-style-type: decimal">
+<li>Let’s remove the `|`` from lines:
+<div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt; rmSep ::</span> [<span class="dt">Char</span>] <span class="ot">-&gt;</span> [<span class="dt">Char</span>] 
+<span class="ot">&gt;</span> rmSep [] <span class="fu">=</span> []
+<span class="ot">&gt;</span> rmSep (x<span class="fu">:</span>xs) 
+<span class="ot">&gt;</span>   <span class="fu">|</span> <span class="ch">'|'</span> <span class="fu">==</span> x <span class="fu">=</span> rmSep xs 
+<span class="ot">&gt;</span>   <span class="fu">|</span> otherwise <span class="fu">=</span> x<span class="fu">:</span>rmSep xs  </code></pre></div></li>
+<li>Programming Patterns: Can you spot the difference? \begin{code} rm :: (a -&gt; Bool) -&gt; [a] -&gt; [a] rm p [] = [] rm p (x:xs) | p x = rm p xs | otherwise = x:rm p xs</li>
+</ol>
+<p>rmLines’ :: [[Char]] -&gt; [[Char]]<br />
+rmLines’ xs = rm p xs where p x = elem ‘-’ x</p>
+<p>rmSep’ :: [Char] -&gt; [Char] rmSep’ xs = rm p xs where p x = ‘|’ == x<br />
+\end{code}</p>
+<ol start="4" style="list-style-type: decimal">
+<li>Use Lib Functions!!!!!</li>
+</ol>
+<div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt; rmLines'' ::</span> [[<span class="dt">Char</span>]] <span class="ot">-&gt;</span> [[<span class="dt">Char</span>]]  
+<span class="ot">&gt;</span> rmLines'' xs  <span class="fu">=</span> filter p xs 
+<span class="ot">&gt;</span>   <span class="kw">where</span> p x <span class="fu">=</span> notElem <span class="ch">'-'</span> x
+<span class="ot">&gt;</span> 
+<span class="ot">&gt; rmSep'' ::</span> [<span class="dt">Char</span>] <span class="ot">-&gt;</span> [<span class="dt">Char</span>]  
+<span class="ot">&gt;</span> rmSep'' xs <span class="fu">=</span> filter p xs
+<span class="ot">&gt;</span>   <span class="kw">where</span> p x <span class="fu">=</span> <span class="ch">'|'</span> <span class="fu">/=</span> x </code></pre></div>
+<ol start="5" style="list-style-type: decimal">
+<li>How do I apply <code>rmSep</code> to all lines?</li>
+</ol>
+<div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt; rmSepAll ::</span> [[<span class="dt">Char</span>]] <span class="ot">-&gt;</span> [[<span class="dt">Char</span>]]
+<span class="ot">&gt;</span> rmSepAll [] <span class="fu">=</span> []
+<span class="ot">&gt;</span> rmSepAll (x<span class="fu">:</span>xs) <span class="fu">=</span> rmSep'' x<span class="fu">:</span>rmSepAll xs </code></pre></div>
+<p>Recursion is <strong>BAD</strong>!!!! Let’s remove it:</p>
+<div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt; rmSepAll' ::</span> [[<span class="dt">Char</span>]] <span class="ot">-&gt;</span> [[<span class="dt">Char</span>]]
+<span class="ot">&gt;</span> rmSepAll' <span class="fu">=</span> map rmSep </code></pre></div>
+<p>FINALLY: Put them all together</p>
+<div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt; clean' ::</span> [[<span class="dt">Char</span>]] <span class="ot">-&gt;</span> [[<span class="dt">Char</span>]]
+<span class="ot">&gt;</span> clean' xs <span class="fu">=</span> map rmSep (rmLines xs)</code></pre></div>
+<h2 id="using-diagrams">Using Diagrams</h2>
+<p>clean DIAGRAM:</p>
+
+DIAGRAM SUMMARY:
+
+<p>Compositional Programming!</p>
+<div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt; clean'' ::</span> [[<span class="dt">Char</span>]] <span class="ot">-&gt;</span> [[<span class="dt">Char</span>]]
+<span class="ot">&gt;</span> clean'' <span class="fu">=</span> map rmSep <span class="fu">.</span> rmLines</code></pre></div>
+<h2 id="summary">SUMMARY</h2>
+<ol style="list-style-type: decimal">
+<li>Use library function (i.e., hoogle)!</li>
+<li>Higher Order Programming Patterns, e.g., filter, map</li>
+<li>Compositional Programming</li>
+</ol>
+<ol style="list-style-type: lower-alpha">
+<li>depompose problem to subprobles</li>
+<li>solve them independently</li>
+<li>solution is composition of solutions!</li>
+</ol>
+<p>Apply these steps to <a href="lectures/SudokuSolver.html">solve this sudoku</a>!</p>
         </div>
         <div id="footer">
             Site proudly generated by

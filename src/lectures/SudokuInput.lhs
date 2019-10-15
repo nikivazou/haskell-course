@@ -169,6 +169,7 @@ clean         :: [[Char]] -> [[Char]]
  2. map rmSep :: [[Char]] -> [[Char]]
 \end{spec}
 
+
 Compositional Programming! 
 
 \begin{code}

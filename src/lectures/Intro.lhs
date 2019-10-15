@@ -7,4 +7,4 @@ Today we will learn:
 - Higher Order Programming Patterns, and  
 - Compositional Style of Programming.
 
-By an example: Let's [solve](lectures/SudokuSolver.html) a [Sudoku](/SudokuInput.html)
+By an example: Let's [solve](/SudokuSolver.html) a [Sudoku](/SudokuInput.html).
