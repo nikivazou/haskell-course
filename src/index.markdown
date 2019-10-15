@@ -10,13 +10,12 @@ Lectures
 ----------
 - *Period:* October - November, 2019 (9 * 2 hours lectures)
 - *Language:* English 
-- *Time:* TBA
-- *Location:* TBA
+
 
 
 Discussion
 ------
-- *Class Slack Link:* https://join.slack.com/t/haskellacmupm/shared_invite/enQtNzk4NjQwOTI4NDU0LWRkNDJkY2Y3NmMzYjU0NmZiMjdhZjE4MmFkOTk5NjNmYTIxNjk4YzUxOTA1YWJiZDJiMzRkZDQxNDdkNWJiZjc
+- *Class Slack Link:* (link)[https://join.slack.com/t/haskellacmupm/shared_invite/enQtNzk4NjQwOTI4NDU0LWRkNDJkY2Y3NmMzYjU0NmZiMjdhZjE4MmFkOTk5NjNmYTIxNjk4YzUxOTA1YWJiZDJiMzRkZDQxNDdkNWJiZjc]
 
 
 Description
