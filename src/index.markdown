@@ -16,7 +16,7 @@ Lectures
 
 Discussion
 ------
-- *Class Slack Link:* TBA
+- *Class Slack Link:* https://join.slack.com/t/haskellacmupm/shared_invite/enQtNzk4NjQwOTI4NDU0LWRkNDJkY2Y3NmMzYjU0NmZiMjdhZjE4MmFkOTk5NjNmYTIxNjk4YzUxOTA1YWJiZDJiMzRkZDQxNDdkNWJiZjc
 
 
 Description
