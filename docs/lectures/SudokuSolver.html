@@ -18,7 +18,380 @@
         </div>
 
         <div id="content">
-            
+            <h1 id="sudoku-solver">Sudoku Solver</h1>
+<p>Based on <a href="http://www.cs.nott.ac.uk/~pszgmh/sudoku.lhs">Graham Hutton’s implementation</a>.</p>
+<div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt;</span> <span class="kw">module</span> <span class="dt">SudokuSolver</span> <span class="kw">where</span> 
+<span class="ot">&gt;</span> 
+<span class="ot">&gt;</span> <span class="kw">import </span><span class="dt">Data.List</span>
+<span class="ot">&gt;</span> <span class="kw">import </span><span class="dt">Constants</span> 
+<span class="ot">&gt;</span> 
+<span class="ot">&gt;</span> <span class="co">{- solve DIAGRAM</span>
+<span class="ot">&gt;</span><span class="co"> </span>
+<span class="ot">&gt;</span><span class="co">    [&quot;43..&quot;, </span>
+<span class="ot">&gt;</span><span class="co">     &quot;123.&quot;,</span>
+<span class="ot">&gt;</span><span class="co">     &quot;..2.&quot;,</span>
+<span class="ot">&gt;</span><span class="co">     &quot;21..&quot;]</span>
+<span class="ot">&gt;</span><span class="co"> </span>
+<span class="ot">&gt;</span><span class="co">        ||</span>
+<span class="ot">&gt;</span><span class="co"> solve ::[[Char]] -&gt; [[Char]]</span>
+<span class="ot">&gt;</span><span class="co">        ||</span>
+<span class="ot">&gt;</span><span class="co">        \/ </span>
+<span class="ot">&gt;</span><span class="co"> </span>
+<span class="ot">&gt;</span><span class="co">    [&quot;4312&quot;, </span>
+<span class="ot">&gt;</span><span class="co">     &quot;1234&quot;,</span>
+<span class="ot">&gt;</span><span class="co">     &quot;3421&quot;,</span>
+<span class="ot">&gt;</span><span class="co">     &quot;2143&quot;]</span>
+<span class="ot">&gt;</span><span class="co"> </span>
+<span class="ot">&gt;</span><span class="co"> Break to subproblems! </span>
+<span class="ot">&gt;</span><span class="co"> </span>
+<span class="ot">&gt;</span><span class="co"> </span>
+<span class="ot">&gt;</span><span class="co">    [&quot;43..&quot;, </span>
+<span class="ot">&gt;</span><span class="co">     &quot;123.&quot;,</span>
+<span class="ot">&gt;</span><span class="co">     &quot;..2.&quot;,</span>
+<span class="ot">&gt;</span><span class="co">     &quot;21..&quot;]</span>
+<span class="ot">&gt;</span><span class="co"> </span>
+<span class="ot">&gt;</span><span class="co">        ||</span>
+<span class="ot">&gt;</span><span class="co"> choices :: [[Char]] -&gt; [[[Char]]]</span>
+<span class="ot">&gt;</span><span class="co">        ||</span>
+<span class="ot">&gt;</span><span class="co">        \/ </span>
+<span class="ot">&gt;</span><span class="co"> </span>
+<span class="ot">&gt;</span><span class="co">    [[[4],[3],[1,2,3,4],[1,2,3,4]], </span>
+<span class="ot">&gt;</span><span class="co">     [[1],[2],[3],[1,2,3,4]],</span>
+<span class="ot">&gt;</span><span class="co">     [[1,2,3,4],[1,2,3,4],[2],[1,2,3,4]],</span>
+<span class="ot">&gt;</span><span class="co">     [[2],[1],[1,2,3,4][1,2,3,4]]</span>
+<span class="ot">&gt;</span><span class="co"> </span>
+<span class="ot">&gt;</span><span class="co">        ||</span>
+<span class="ot">&gt;</span><span class="co"> collapse :: [[[Char]]] -&gt; [[[Char]]]</span>
+<span class="ot">&gt;</span><span class="co">        ||</span>
+<span class="ot">&gt;</span><span class="co">        \/ </span>
+<span class="ot">&gt;</span><span class="co"> </span>
+<span class="ot">&gt;</span><span class="co">   [[&quot;4311&quot;, [&quot;4311&quot;, [&quot;4311&quot;, [&quot;4311&quot;, [&quot;4311&quot;,</span>
+<span class="ot">&gt;</span><span class="co">     &quot;1231&quot;,  &quot;1231&quot;,  &quot;1231&quot;,  &quot;1231&quot;,  &quot;1231&quot;,</span>
+<span class="ot">&gt;</span><span class="co">     &quot;1121&quot;,  &quot;1121&quot;,  &quot;1121&quot;,  &quot;1121&quot;,  &quot;1121&quot;,</span>
+<span class="ot">&gt;</span><span class="co">     &quot;2111&quot;], &quot;2112&quot;], &quot;2113&quot;], &quot;2114&quot;], &quot;2121&quot;],... </span>
+<span class="ot">&gt;</span><span class="co"> </span>
+<span class="ot">&gt;</span><span class="co">        ||</span>
+<span class="ot">&gt;</span><span class="co"> filter valid :: [[[Char]]] -&gt; [[[Char]]]</span>
+<span class="ot">&gt;</span><span class="co">        ||</span>
+<span class="ot">&gt;</span><span class="co">        \/ </span>
+<span class="ot">&gt;</span><span class="co"> </span>
+<span class="ot">&gt;</span><span class="co">   [[&quot;4312&quot;, </span>
+<span class="ot">&gt;</span><span class="co">     &quot;1234&quot;,</span>
+<span class="ot">&gt;</span><span class="co">     &quot;3421&quot;,</span>
+<span class="ot">&gt;</span><span class="co">     &quot;2143&quot;]]</span>
+<span class="ot">&gt;</span><span class="co"> </span>
+<span class="ot">&gt;</span><span class="co"> DIAGRAM SUMMARY: </span>
+<span class="ot">&gt;</span><span class="co"> solve            :: [[Char]] -&gt; [[Char]]</span>
+<span class="ot">&gt;</span><span class="co">  1. choices      :: [[Char]] -&gt; [[[Char]]]</span>
+<span class="ot">&gt;</span><span class="co">  2. collapse     :: [[[Char]]] -&gt; [[[Char]]]</span>
+<span class="ot">&gt;</span><span class="co">  3. filter valid :: [[[Char]]] -&gt; [[[Char]]]</span>
+<span class="ot">&gt;</span><span class="co"> -}</span>
+<span class="ot">&gt;</span> 
+<span class="ot">&gt;</span> <span class="co">-- Problem 1: Is Char a choice or a value?</span>
+<span class="ot">&gt;</span> 
+<span class="ot">&gt;</span> <span class="kw">type</span> <span class="dt">Sudoku</span> <span class="fu">=</span> <span class="dt">Matrix</span> <span class="dt">Value</span> 
+<span class="ot">&gt;</span> <span class="kw">type</span> <span class="dt">Matrix</span> a <span class="fu">=</span> [[a]]
+<span class="ot">&gt;</span> 
+<span class="ot">&gt;</span> <span class="kw">type</span> <span class="dt">Choice</span> <span class="fu">=</span> [<span class="dt">Char</span>]
+<span class="ot">&gt;</span> <span class="kw">type</span> <span class="dt">Value</span>  <span class="fu">=</span> <span class="dt">Char</span> 
+<span class="ot">&gt;</span> 
+<span class="ot">&gt;</span> 
+<span class="ot">&gt;</span> 
+<span class="ot">&gt;</span> 
+<span class="ot">&gt;</span> 
+<span class="ot">&gt;</span> 
+<span class="ot">&gt;</span> 
+<span class="ot">&gt;</span> <span class="co">-- Problem 2: Types don't really compose! </span>
+<span class="ot">&gt;</span> 
+<span class="ot">&gt;</span> 
+<span class="ot">&gt;</span> 
+<span class="ot">&gt;</span> 
+<span class="ot">&gt;</span> 
+<span class="ot">&gt;</span> 
+<span class="ot">&gt;</span> 
+<span class="ot">&gt;</span> 
+<span class="ot">&gt;</span> 
+<span class="ot">&gt;</span> 
+<span class="ot">&gt;</span> 
+<span class="ot">&gt;</span> 
+<span class="ot">&gt;</span> <span class="co">{- </span>
+<span class="ot">&gt;</span><span class="co"> DIAGRAM SUMMARY: </span>
+<span class="ot">&gt;</span><span class="co"> solve            :: Sudoku -&gt; Sudoku</span>
+<span class="ot">&gt;</span><span class="co">  1. choices      :: Sudoku -&gt; Matrix Choice </span>
+<span class="ot">&gt;</span><span class="co">  2. collapse     :: Matrix Choice -&gt; [Matrix Value]</span>
+<span class="ot">&gt;</span><span class="co">  3. filter valid :: [Matrix Value] -&gt; [Matrix Value]</span>
+<span class="ot">&gt;</span><span class="co">  4. ??           :: [Sudoku] -&gt; Sudoku</span>
+<span class="ot">&gt;</span><span class="co"> -}</span>
+<span class="ot">&gt;</span> 
+<span class="ot">&gt;</span> 
+<span class="ot">&gt;</span> 
+<span class="ot">&gt; solve ::</span> <span class="dt">Sudoku</span> <span class="ot">-&gt;</span> [<span class="dt">Sudoku</span>]
+<span class="ot">&gt;</span> solve <span class="fu">=</span> filter valid <span class="fu">.</span> collapse <span class="fu">.</span> choices 
+<span class="ot">&gt;</span>     
+<span class="ot">&gt;</span> 
+<span class="ot">&gt;</span> 
+<span class="ot">&gt;</span> <span class="fu">--------------------------------------</span>
+<span class="ot">&gt; choices ::</span> <span class="dt">Matrix</span> <span class="dt">Char</span> <span class="ot">-&gt;</span> <span class="dt">Matrix</span> [<span class="dt">Char</span>] 
+<span class="ot">&gt;</span> <span class="fu">--------------------------------------</span>
+<span class="ot">&gt;</span> choices <span class="fu">=</span> map (map toChoices)
+<span class="ot">&gt;</span> 
+<span class="ot">&gt; toChoices ::</span> <span class="dt">Char</span> <span class="ot">-&gt;</span> [<span class="dt">Char</span>]
+<span class="ot">&gt;</span> toChoices <span class="ch">'.'</span> <span class="fu">=</span> values 
+<span class="ot">&gt;</span> toChoices x   <span class="fu">=</span> [x]
+<span class="ot">&gt;</span> 
+<span class="ot">&gt;</span> 
+<span class="ot">&gt;</span> 
+<span class="ot">&gt;</span> <span class="fu">--------------------------------------</span>
+<span class="ot">&gt; collapse ::</span> <span class="dt">Matrix</span> <span class="dt">Choice</span> <span class="ot">-&gt;</span> [<span class="dt">Matrix</span> <span class="dt">Value</span>]
+<span class="ot">&gt;</span> <span class="fu">--------------------------------------</span>
+<span class="ot">&gt;</span> 
+<span class="ot">&gt;</span> <span class="co">{- collapse DIAGRAM</span>
+<span class="ot">&gt;</span><span class="co"> </span>
+<span class="ot">&gt;</span><span class="co">    [[[1,2],[3,4]], </span>
+<span class="ot">&gt;</span><span class="co">     [[1],[2,3]]  ]</span>
+<span class="ot">&gt;</span><span class="co"> </span>
+<span class="ot">&gt;</span><span class="co">        ||</span>
+<span class="ot">&gt;</span><span class="co"> collapse ::[[[Char]]] -&gt; [[[Char]]]</span>
+<span class="ot">&gt;</span><span class="co">        ||</span>
+<span class="ot">&gt;</span><span class="co">        \/ </span>
+<span class="ot">&gt;</span><span class="co"> </span>
+<span class="ot">&gt;</span><span class="co">    [ [[1,3]  [[1,3]  [[1,4]  [[1,4]  [[2,3]  [[2,3]  [[2,4]  [[2,4]</span>
+<span class="ot">&gt;</span><span class="co">      ,[1,2]], [1,3]], [1,2]], [1,3]], [1,2]], [1,3]], [1,2]], [1,3]]]</span>
+<span class="ot">&gt;</span><span class="co"> </span>
+<span class="ot">&gt;</span><span class="co"> Break to subproblems! </span>
+<span class="ot">&gt;</span><span class="co"> </span>
+<span class="ot">&gt;</span><span class="co">    [[[1,2],[3,4]], </span>
+<span class="ot">&gt;</span><span class="co">     [[1],[2,3]]  ]</span>
+<span class="ot">&gt;</span><span class="co"> </span>
+<span class="ot">&gt;</span><span class="co">        ||</span>
+<span class="ot">&gt;</span><span class="co"> map prod ::[[[Char]]] -&gt; [[[Char]]]</span>
+<span class="ot">&gt;</span><span class="co">        ||</span>
+<span class="ot">&gt;</span><span class="co">        \/ </span>
+<span class="ot">&gt;</span><span class="co"> </span>
+<span class="ot">&gt;</span><span class="co">    [[[1,3],[1,4],[2,3],[2,4]], </span>
+<span class="ot">&gt;</span><span class="co">     [[1,2],[1,3]]            ]</span>
+<span class="ot">&gt;</span><span class="co"> </span>
+<span class="ot">&gt;</span><span class="co">        ||</span>
+<span class="ot">&gt;</span><span class="co"> prod ::[[[Char]]] -&gt; [[[Char]]]</span>
+<span class="ot">&gt;</span><span class="co">        ||</span>
+<span class="ot">&gt;</span><span class="co">        \/ </span>
+<span class="ot">&gt;</span><span class="co">    [ [[1,3]  [[1,3]  [[1,4]  [[1,4]  [[2,3]  [[2,3]  [[2,4]  [[2,4]</span>
+<span class="ot">&gt;</span><span class="co">      ,[1,2]], [1,3]], [1,2]], [1,3]], [1,2]], [1,3]], [1,2]], [1,3]]]</span>
+<span class="ot">&gt;</span><span class="co">  </span>
+<span class="ot">&gt;</span><span class="co"> DIAGRAM SUMMARY: </span>
+<span class="ot">&gt;</span><span class="co"> collapse       :: Martix Choices -&gt; [Matrix Value]</span>
+<span class="ot">&gt;</span><span class="co"> 1. map prod    :: [[[Char]]] -&gt; [[[Char]]]</span>
+<span class="ot">&gt;</span><span class="co"> 2. prod        :: [[[Char]]] -&gt; [[[Char]]]</span>
+<span class="ot">&gt;</span><span class="co"> </span>
+<span class="ot">&gt;</span><span class="co"> -}</span>
+<span class="ot">&gt;</span> 
+<span class="ot">&gt;</span> collapse <span class="fu">=</span> prod <span class="fu">.</span> map prod
+<span class="ot">&gt;</span> 
+<span class="ot">&gt; prod ::</span> [[a]] <span class="ot">-&gt;</span> [[a]]
+<span class="ot">&gt;</span> prod [] <span class="fu">=</span> [[]]
+<span class="ot">&gt;</span> prod (xs<span class="fu">:</span>xss) <span class="fu">=</span> [y<span class="fu">:</span>ys <span class="fu">|</span> y <span class="ot">&lt;-</span> xs, ys <span class="ot">&lt;-</span> prod xss]
+<span class="ot">&gt;</span> 
+<span class="ot">&gt;</span> 
+<span class="ot">&gt;</span> 
+<span class="ot">&gt;</span> <span class="fu">--------------------------------------</span>
+<span class="ot">&gt; valid ::</span> <span class="dt">Matrix</span> <span class="dt">Value</span> <span class="ot">-&gt;</span> <span class="dt">Bool</span> 
+<span class="ot">&gt;</span> <span class="fu">--------------------------------------</span>
+<span class="ot">&gt;</span> valid xs <span class="fu">=</span>  all nodups (rows xs)
+<span class="ot">&gt;</span>          <span class="fu">&amp;&amp;</span> all nodups (cols xs)
+<span class="ot">&gt;</span>          <span class="fu">&amp;&amp;</span> all nodups (boxs xs)
+<span class="ot">&gt;</span> 
+<span class="ot">&gt;</span> 
+<span class="ot">&gt; nodups ::</span> <span class="dt">Eq</span> a <span class="ot">=&gt;</span> [a] <span class="ot">-&gt;</span> <span class="dt">Bool</span> 
+<span class="ot">&gt;</span> nodups []     <span class="fu">=</span> <span class="dt">True</span> 
+<span class="ot">&gt;</span> nodups (x<span class="fu">:</span>xs) <span class="fu">=</span> notElem x xs <span class="fu">&amp;&amp;</span> nodups xs 
+<span class="ot">&gt;</span> 
+<span class="ot">&gt;</span> 
+<span class="ot">&gt; rows ::</span> <span class="dt">Matrix</span> a <span class="ot">-&gt;</span> [[a]]
+<span class="ot">&gt;</span> rows xs <span class="fu">=</span> xs  
+<span class="ot">&gt;</span> 
+<span class="ot">&gt; cols ::</span> [[a]] <span class="ot">-&gt;</span> [[a]]
+<span class="ot">&gt;</span> cols <span class="fu">=</span> transpose   
+<span class="ot">&gt;</span> 
+<span class="ot">&gt; boxs ::</span> <span class="dt">Matrix</span> a <span class="ot">-&gt;</span> [[a]]
+<span class="ot">&gt;</span> boxs <span class="fu">=</span> unpack <span class="fu">.</span> map cols <span class="fu">.</span> pack
+<span class="ot">&gt;</span>   <span class="kw">where</span>
+<span class="ot">&gt;</span>   pack   <span class="fu">=</span> split <span class="fu">.</span> map split
+<span class="ot">&gt;</span>   split  <span class="fu">=</span> chop boxsize
+<span class="ot">&gt;</span>   unpack <span class="fu">=</span> map concat <span class="fu">.</span> concat
+<span class="ot">&gt;</span> 
+<span class="ot">&gt; chop  ::</span> <span class="dt">Int</span> <span class="ot">-&gt;</span> [a] <span class="ot">-&gt;</span> [[a]]
+<span class="ot">&gt;</span> chop n []  <span class="fu">=</span>  []
+<span class="ot">&gt;</span> chop n xs  <span class="fu">=</span>  take n xs <span class="fu">:</span> chop n (drop n xs)
+<span class="ot">&gt;</span> 
+<span class="ot">&gt;</span> <span class="co">{- </span>
+<span class="ot">&gt;</span><span class="co"> Example: if boxsize = 2, then we have </span>
+<span class="ot">&gt;</span><span class="co"> </span>
+<span class="ot">&gt;</span><span class="co">    [[1,2,3,4],[5,6,7,8],[9,10,11,12],[13,14,15,16]]</span>
+<span class="ot">&gt;</span><span class="co"> </span>
+<span class="ot">&gt;</span><span class="co">                           |</span>
+<span class="ot">&gt;</span><span class="co">                          pack</span>
+<span class="ot">&gt;</span><span class="co">                           |</span>
+<span class="ot">&gt;</span><span class="co">                           v</span>
+<span class="ot">&gt;</span><span class="co"> </span>
+<span class="ot">&gt;</span><span class="co">    [[[[1,2],[3,4]],[[5,6],[7,8]]],[[[9,10],[11,12]],[[13,14],[15,16]]]]</span>
+<span class="ot">&gt;</span><span class="co"> </span>
+<span class="ot">&gt;</span><span class="co">                           |</span>
+<span class="ot">&gt;</span><span class="co">                        map cols</span>
+<span class="ot">&gt;</span><span class="co">                           |</span>
+<span class="ot">&gt;</span><span class="co">                           v</span>
+<span class="ot">&gt;</span><span class="co"> </span>
+<span class="ot">&gt;</span><span class="co">    [[[[1,2],[5,6]],[[3,4],[7,8]]],[[[9,10],[13,14]],[[11,12],[15,16]]]]</span>
+<span class="ot">&gt;</span><span class="co"> </span>
+<span class="ot">&gt;</span><span class="co">                           | </span>
+<span class="ot">&gt;</span><span class="co">                         unpack</span>
+<span class="ot">&gt;</span><span class="co">                           |</span>
+<span class="ot">&gt;</span><span class="co">                           v</span>
+<span class="ot">&gt;</span><span class="co"> </span>
+<span class="ot">&gt;</span><span class="co">    [[1,2,5,6],[3,4,7,8],[9,10,13,14],[11,12,15,16]]</span>
+<span class="ot">&gt;</span><span class="co"> -}</span>
+<span class="ot">&gt;</span> 
+<span class="ot">&gt;</span> 
+<span class="ot">&gt;</span> <span class="co">-- Let's try it</span>
+<span class="ot">&gt;</span> 
+<span class="ot">&gt;</span> trysmall <span class="fu">=</span> solve sudokusmall 
+<span class="ot">&gt;</span> 
+<span class="ot">&gt;</span> trybig   <span class="fu">=</span> undefined 
+<span class="ot">&gt;</span> 
+<span class="ot">&gt;</span> <span class="co">-- Wait! Let's see the choises first... </span>
+<span class="ot">&gt;</span> 
+<span class="ot">&gt;</span> choicesBig <span class="fu">=</span> choices sudoku
+<span class="ot">&gt;</span> 
+<span class="ot">&gt;</span> 
+<span class="ot">&gt;</span> 
+<span class="ot">&gt;</span> 
+<span class="ot">&gt;</span> 
+<span class="ot">&gt;</span> <span class="co">-- Rows can be obsviously pruned! </span>
+<span class="ot">&gt;</span> pruneRows <span class="fu">=</span> undefined 
+<span class="ot">&gt;</span> 
+<span class="ot">&gt;</span> 
+<span class="ot">&gt;</span> 
+<span class="ot">&gt;</span> 
+<span class="ot">&gt;</span> 
+<span class="ot">&gt;</span> 
+<span class="ot">&gt;</span> 
+<span class="ot">&gt;</span> 
+<span class="ot">&gt;</span> 
+<span class="ot">&gt;</span> 
+<span class="ot">&gt;</span> 
+<span class="ot">&gt;</span> 
+<span class="ot">&gt;</span> <span class="co">-- Let's generalize pruning ... </span>
+<span class="ot">&gt; pruneAll ::</span> <span class="dt">Matrix</span> <span class="dt">Choice</span> <span class="ot">-&gt;</span> <span class="dt">Matrix</span> <span class="dt">Choice</span>
+<span class="ot">&gt;</span> pruneAll <span class="fu">=</span> pruneBy rows <span class="fu">.</span> pruneBy cols <span class="fu">.</span> pruneBy boxs
+<span class="ot">&gt;</span>   <span class="kw">where</span> pruneBy f <span class="fu">=</span> f <span class="fu">.</span> map prune <span class="fu">.</span> f
+<span class="ot">&gt;</span> 
+<span class="ot">&gt; prune ::</span> [[<span class="dt">Char</span>]] <span class="ot">-&gt;</span> [[<span class="dt">Char</span>]]
+<span class="ot">&gt;</span> prune xs <span class="fu">=</span> map remove xs
+<span class="ot">&gt;</span>   <span class="kw">where</span><span class="ot"> singles ::</span> [<span class="dt">Char</span>]
+<span class="ot">&gt;</span>         singles <span class="fu">=</span> concat <span class="fu">$</span> filter single xs 
+<span class="ot">&gt;         remove ::</span> [<span class="dt">Char</span>] <span class="ot">-&gt;</span> [<span class="dt">Char</span>]
+<span class="ot">&gt;</span>         remove [x] <span class="fu">=</span> [x]
+<span class="ot">&gt;</span>         remove ys <span class="fu">=</span> filter (<span class="ot">`notElem`</span> singles) ys  
+<span class="ot">&gt;</span> 
+<span class="ot">&gt; single ::</span> [a] <span class="ot">-&gt;</span> <span class="dt">Bool</span> 
+<span class="ot">&gt;</span> single [_] <span class="fu">=</span> <span class="dt">True</span> 
+<span class="ot">&gt;</span> single _   <span class="fu">=</span> <span class="dt">False</span> 
+<span class="ot">&gt;</span> 
+<span class="ot">&gt;</span> 
+<span class="ot">&gt; solve1 ::</span> <span class="dt">Sudoku</span> <span class="ot">-&gt;</span> [<span class="dt">Sudoku</span>]
+<span class="ot">&gt;</span> solve1 <span class="fu">=</span> filter valid <span class="fu">.</span> collapse <span class="fu">.</span> pruneAll <span class="fu">.</span> choices 
+<span class="ot">&gt;</span> 
+<span class="ot">&gt;</span> <span class="co">-- Oups! Too slow... </span>
+<span class="ot">&gt;</span> 
+<span class="ot">&gt;</span> 
+<span class="ot">&gt;</span> 
+<span class="ot">&gt;</span> 
+<span class="ot">&gt;</span> 
+<span class="ot">&gt;</span> 
+<span class="ot">&gt;</span> 
+<span class="ot">&gt;</span> 
+<span class="ot">&gt;</span> 
+<span class="ot">&gt;</span> 
+<span class="ot">&gt;</span> 
+<span class="ot">&gt;</span> 
+<span class="ot">&gt;</span> <span class="co">-- Can we prune more?</span>
+<span class="ot">&gt;</span> 
+<span class="ot">&gt;</span> 
+<span class="ot">&gt;</span> 
+<span class="ot">&gt;</span> 
+<span class="ot">&gt;</span> 
+<span class="ot">&gt; solve2 ::</span> <span class="dt">Sudoku</span> <span class="ot">-&gt;</span> [<span class="dt">Sudoku</span>]
+<span class="ot">&gt;</span> solve2 <span class="fu">=</span> filter valid <span class="fu">.</span> collapse <span class="fu">.</span> fix pruneAll <span class="fu">.</span> choices  
+<span class="ot">&gt;</span> 
+<span class="ot">&gt;</span> fix f x <span class="fu">=</span>  <span class="kw">if</span> x <span class="fu">==</span> x' <span class="kw">then</span> x <span class="kw">else</span> fix f (f x)
+<span class="ot">&gt;</span>   <span class="kw">where</span> x' <span class="fu">=</span> f x 
+<span class="ot">&gt;</span> 
+<span class="ot">&gt;</span> 
+<span class="ot">&gt;</span> 
+<span class="ot">&gt;</span> 
+<span class="ot">&gt;</span> 
+<span class="ot">&gt;</span> 
+<span class="ot">&gt;</span> 
+<span class="ot">&gt;</span> 
+<span class="ot">&gt;</span> 
+<span class="ot">&gt;</span> 
+<span class="ot">&gt;</span> 
+<span class="ot">&gt;</span> 
+<span class="ot">&gt;</span> 
+<span class="ot">&gt;</span> 
+<span class="ot">&gt;</span> 
+<span class="ot">&gt;</span> <span class="co">-- Still too slow... </span>
+<span class="ot">&gt;</span> <span class="co">-- The problem: it should backtrack: </span>
+<span class="ot">&gt;</span> <span class="co">-- Bad choices are first fully expanded and then checked for validity</span>
+<span class="ot">&gt;</span> <span class="co">-- Let's expand one choise at the time</span>
+<span class="ot">&gt;</span> 
+<span class="ot">&gt;</span> 
+<span class="ot">&gt;</span> 
+<span class="ot">&gt;</span> 
+<span class="ot">&gt;</span> <span class="co">-- Some predicates </span>
+<span class="ot">&gt;</span> 
+<span class="ot">&gt; complete ::</span> <span class="dt">Matrix</span> <span class="dt">Choice</span> <span class="ot">-&gt;</span> <span class="dt">Bool</span> 
+<span class="ot">&gt;</span> complete <span class="fu">=</span> all (all single)
+<span class="ot">&gt;</span> 
+<span class="ot">&gt; void  ::</span> <span class="dt">Matrix</span> <span class="dt">Choice</span> <span class="ot">-&gt;</span> <span class="dt">Bool</span>
+<span class="ot">&gt;</span> void  <span class="fu">=</span>  any (any null)
+<span class="ot">&gt;</span> 
+<span class="ot">&gt; safe    ::</span> <span class="dt">Matrix</span> <span class="dt">Choice</span> <span class="ot">-&gt;</span> <span class="dt">Bool</span>
+<span class="ot">&gt;</span> safe cm <span class="fu">=</span>  all consistent (rows cm) <span class="fu">&amp;&amp;</span>
+<span class="ot">&gt;</span>            all consistent (cols cm) <span class="fu">&amp;&amp;</span>
+<span class="ot">&gt;</span>            all consistent (boxs cm)
+<span class="ot">&gt;</span> 
+<span class="ot">&gt; consistent ::</span> [<span class="dt">Choice</span>] <span class="ot">-&gt;</span> <span class="dt">Bool</span>
+<span class="ot">&gt;</span> consistent <span class="fu">=</span>  nodups <span class="fu">.</span> concat <span class="fu">.</span> filter single
+<span class="ot">&gt;</span> 
+<span class="ot">&gt; blocked    ::</span> <span class="dt">Matrix</span> <span class="dt">Choice</span> <span class="ot">-&gt;</span> <span class="dt">Bool</span>
+<span class="ot">&gt;</span> blocked m  <span class="fu">=</span>  void m <span class="fu">||</span> not (safe m)
+<span class="ot">&gt;</span> 
+<span class="ot">&gt;</span> 
+<span class="ot">&gt;</span> <span class="co">-- Predicate based searching </span>
+<span class="ot">&gt;</span> 
+<span class="ot">&gt;</span> 
+<span class="ot">&gt; search                ::</span> <span class="dt">Matrix</span> <span class="dt">Choice</span> <span class="ot">-&gt;</span> [<span class="dt">Sudoku</span>]
+<span class="ot">&gt;</span> search m
+<span class="ot">&gt;</span>   <span class="fu">|</span> blocked m          <span class="fu">=</span>  []
+<span class="ot">&gt;</span>   <span class="fu">|</span> complete m         <span class="fu">=</span>  collapse m
+<span class="ot">&gt;</span>   <span class="fu">|</span> otherwise          <span class="fu">=</span>  [g <span class="fu">|</span> m' <span class="ot">&lt;-</span> expand m
+<span class="ot">&gt;</span>                              , g  <span class="ot">&lt;-</span> search (pruneAll m')]
+<span class="ot">&gt;</span> 
+<span class="ot">&gt;</span> <span class="co">-- Where expand only opens one choice at the time! </span>
+<span class="ot">&gt;</span> 
+<span class="ot">&gt;</span> 
+<span class="ot">&gt; expand                ::</span> <span class="dt">Matrix</span> <span class="dt">Choice</span> <span class="ot">-&gt;</span> [<span class="dt">Matrix</span> <span class="dt">Choice</span>]
+<span class="ot">&gt;</span> expand m              <span class="fu">=</span>
+<span class="ot">&gt;</span>    [rows1 <span class="fu">++</span> [row1 <span class="fu">++</span> [c] <span class="fu">:</span> row2] <span class="fu">++</span> rows2 <span class="fu">|</span> c <span class="ot">&lt;-</span> cs]
+<span class="ot">&gt;</span>    <span class="kw">where</span>
+<span class="ot">&gt;</span>       (rows1,row<span class="fu">:</span>rows2) <span class="fu">=</span> break (any (not <span class="fu">.</span> single)) m
+<span class="ot">&gt;</span>       (row1,cs<span class="fu">:</span>row2)    <span class="fu">=</span> break (not <span class="fu">.</span> single) row
+<span class="ot">&gt;</span> 
+<span class="ot">&gt;</span> 
+<span class="ot">&gt;</span> <span class="co">-- And finally a quick solution</span>
+<span class="ot">&gt;</span> 
+<span class="ot">&gt; solve3 ::</span> <span class="dt">Sudoku</span> <span class="ot">-&gt;</span> [<span class="dt">Sudoku</span>]
+<span class="ot">&gt;</span> solve3 <span class="fu">=</span>  search <span class="fu">.</span> pruneAll <span class="fu">.</span> choices</code></pre></div>
         </div>
         <div id="footer">
             Site proudly generated by
