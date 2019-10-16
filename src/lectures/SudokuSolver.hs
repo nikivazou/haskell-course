@@ -1,9 +1,3 @@
-Sudoku Solver
-==============
-
-Based on [Graham Hutton's implementation](http://www.cs.nott.ac.uk/~pszgmh/sudoku.lhs).
-
-\begin{code}
 module SudokuSolver where 
 
 import Data.List
@@ -376,4 +370,9 @@ expand m              =
 
 solve3 :: Sudoku -> [Sudoku]
 solve3 =  search . pruneAll . choices
-\end{code}
+
+
+
+
+
+

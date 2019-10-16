@@ -4,6 +4,7 @@ Intro
 Today we will learn: 
 
 - Basic Haskell Syntax, 
+- List Manipulation, 
 - Higher Order Programming Patterns, and  
 - Compositional Style of Programming.
 
