@@ -1,8 +1,8 @@
 module SudokuInput where 
 
----------------------------
--- Sudoku Examples --------
----------------------------
+-----------------------------------
+-- WarmUp: Sudoku Examples --------
+-----------------------------------
 
 -- Here is a Sudoku puzzle: 
 

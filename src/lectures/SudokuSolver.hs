@@ -1,7 +1,5 @@
 module SudokuSolver where 
 
-import Data.List
-import Constants 
 
 {- solve DIAGRAM
 
@@ -67,11 +65,9 @@ solve            :: [[Char]] -> [[Char]]
 
 -- Problem 1: Is Char a choice or a value?
 
-type Sudoku = Matrix Value 
-type Matrix a = [[a]]
 
-type Choice = [Char]
-type Value  = Char 
+
+
 
 
 
@@ -80,6 +76,9 @@ type Value  = Char
 
 
 -- Problem 2: Types don't really compose! 
+
+
+
 
 
 
@@ -103,25 +102,28 @@ solve            :: Sudoku -> Sudoku
 
 
 
-solve :: Sudoku -> [Sudoku]
-solve = filter valid . collapse . choices 
-    
-
-
---------------------------------------
-choices :: Matrix Char -> Matrix [Char] 
---------------------------------------
-choices = map (map toChoices)
-
-toChoices :: Char -> [Char]
-toChoices '.' = values 
-toChoices x   = [x]
 
 
 
---------------------------------------
-collapse :: Matrix Choice -> [Matrix Value]
---------------------------------------
+
+
+
+
+-- 1. define choices 
+
+
+
+
+
+
+
+
+
+
+
+
+
+-- 2. define collapse 
 
 {- collapse DIAGRAM
 
@@ -163,34 +165,67 @@ collapse       :: Martix Choices -> [Matrix Value]
 
 -}
 
-collapse = prod . map prod
-
-prod :: [[a]] -> [[a]]
-prod [] = [[]]
-prod (xs:xss) = [y:ys | y <- xs, ys <- prod xss]
 
 
 
---------------------------------------
-valid :: Matrix Value -> Bool 
---------------------------------------
-valid xs =  all nodups (rows xs)
-         && all nodups (cols xs)
-         && all nodups (boxs xs)
 
 
-nodups :: Eq a => [a] -> Bool 
-nodups []     = True 
-nodups (x:xs) = notElem x xs && nodups xs 
+
+-- 2a. Did you test collapse? 
 
 
-rows :: Matrix a -> [[a]]
-rows xs = xs  
+
+
+
+
+
+
+
+
+
+
+
+-- 2: Define Valid 
+-- 2a: Let's start from rows 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+-- 2b: Continue with columns... 
+--     Maybe ask hoogle directly...
 
 cols :: [[a]] -> [[a]]
-cols = transpose   
+cols = undefined 
 
-boxs :: Matrix a -> [[a]]
+
+
+
+
+
+
+
+
+
+
+
+-- 2c: Ok, boxes are more complicated...
+
+boxsize :: Int 
+boxsize = 3 
+
+boxs :: [[a]] -> [[a]]
 boxs = unpack . map cols . pack
   where
   pack   = split . map split
@@ -229,21 +264,45 @@ Example: if boxsize = 2, then we have
 -}
 
 
--- Let's try it
-
-trysmall = solve sudokusmall 
-
-trybig   = undefined 
-
--- Wait! Let's see the choises first... 
-
-choicesBig = choices sudoku
 
 
 
 
 
--- Rows can be obsviously pruned! 
+
+
+
+
+
+
+-- Let's try the small one! 
+
+
+
+
+
+
+
+
+
+
+
+
+-- Before we go big, let's see the choises first... 
+
+
+
+
+
+
+
+
+
+
+
+
+
+-- Ok, rows can be obsviously pruned! 
 pruneRows = undefined 
 
 
@@ -258,25 +317,25 @@ pruneRows = undefined
 
 
 -- Let's generalize pruning ... 
-pruneAll :: Matrix Choice -> Matrix Choice
-pruneAll = pruneBy rows . pruneBy cols . pruneBy boxs
-  where pruneBy f = f . map prune . f
-
-prune :: [[Char]] -> [[Char]]
-prune xs = map remove xs
-  where singles :: [Char]
-        singles = concat $ filter single xs 
-        remove :: [Char] -> [Char]
-        remove [x] = [x]
-        remove ys = filter (`notElem` singles) ys  
-
-single :: [a] -> Bool 
-single [_] = True 
-single _   = False 
 
 
-solve1 :: Sudoku -> [Sudoku]
-solve1 = filter valid . collapse . pruneAll . choices 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 -- Oups! Too slow... 
 
@@ -297,20 +356,6 @@ solve1 = filter valid . collapse . pruneAll . choices
 
 
 
-solve2 :: Sudoku -> [Sudoku]
-solve2 = filter valid . collapse . fix pruneAll . choices  
-
-fix f x =  if x == x' then x else fix f (f x)
-  where x' = f x 
-
-
-
-
-
-
-
-
-
 
 
 
@@ -320,59 +365,5 @@ fix f x =  if x == x' then x else fix f (f x)
 -- Still too slow... 
 -- The problem: it should backtrack: 
 -- Bad choices are first fully expanded and then checked for validity
--- Let's expand one choise at the time
-
-
-
-
--- Some predicates 
-
-complete :: Matrix Choice -> Bool 
-complete = all (all single)
-
-void  :: Matrix Choice -> Bool
-void  =  any (any null)
-
-safe    :: Matrix Choice -> Bool
-safe cm =  all consistent (rows cm) &&
-           all consistent (cols cm) &&
-           all consistent (boxs cm)
-
-consistent :: [Choice] -> Bool
-consistent =  nodups . concat . filter single
-
-blocked    :: Matrix Choice -> Bool
-blocked m  =  void m || not (safe m)
-
-
--- Predicate based searching 
-
-
-search                :: Matrix Choice -> [Sudoku]
-search m
-  | blocked m          =  []
-  | complete m         =  collapse m
-  | otherwise          =  [g | m' <- expand m
-                             , g  <- search (pruneAll m')]
-
--- Where expand only opens one choice at the time! 
-
-
-expand                :: Matrix Choice -> [Matrix Choice]
-expand m              =
-   [rows1 ++ [row1 ++ [c] : row2] ++ rows2 | c <- cs]
-   where
-      (rows1,row:rows2) = break (any (not . single)) m
-      (row1,cs:row2)    = break (not . single) row
-
-
--- And finally a quick solution
-
-solve3 :: Sudoku -> [Sudoku]
-solve3 =  search . pruneAll . choices
-
-
-
-
-
+-- We need to expand one choise at the time
 
