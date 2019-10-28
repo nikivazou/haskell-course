@@ -22,7 +22,7 @@
 <p>Let’s look how a real Haskell program looks like by examining the tic-tac-toc game in <a href="https://github.com/nikivazou/tic-tac-toe" class="uri">https://github.com/nikivazou/tic-tac-toe</a>.</p>
 <h2 id="basic-build">Basic build</h2>
 <p>We can build the game by running</p>
-<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell">cd src 
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell">cd tic<span class="fu">-</span>tac<span class="fu">-</span>toe<span class="fu">/</span>classic<span class="fu">/</span>src<span class="fu">/</span> 
 ghc <span class="co">--make TicTacToe.hs</span></code></pre></div>
 <p>Then the executable <code>TicTacToe</code> is created. This executable runs the function <code>main :: IO ()</code> inside the module <code>Main</code>. Usually, the Main module mostly interacts with the real world, while all the pure functions and types are defined in different modules. Here, all the types are defined in <code>Types</code> and all the playing strategies in the <code>Strategies.*</code>.</p>
 <h2 id="modules">Modules</h2>
@@ -53,7 +53,7 @@ ghc <span class="co">--make TicTacToe.hs</span></code></pre></div>
 </ul>
 <div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="kw">import qualified</span> <span class="dt">Data.Maybe</span> <span class="kw">as</span> <span class="dt">M</span> </code></pre></div>
 <h2 id="type-definitions">Type Definitions</h2>
-<p>Two ways to define types in Haskell are <code>data</code> and <code>type</code>. We already saw that <code>data</code> defines <strong>new</strong> data types, e.g.,</p>
+<p>Haskell has numerous buildin types (e.g., <code>Int</code>, <code>Char</code>, lists) and allows user to define many more types. Two ways to define types in Haskell are <code>data</code> and <code>type</code>. With <code>data</code> one defines <strong>new</strong> data types, e.g.,</p>
 <div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="kw">data</span> <span class="dt">Tile</span> <span class="fu">=</span> <span class="dt">EmptyTile</span> <span class="fu">|</span> <span class="dt">X</span> <span class="fu">|</span> <span class="dt">O</span> </code></pre></div>
 <p>On the other hand, type <code>type</code> is used to define type alias for existing types (why?). For example a move is a pair of integers,</p>
 <div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="kw">type</span> <span class="dt">Move</span>   <span class="fu">=</span> (<span class="dt">Int</span>,<span class="dt">Int</span>)</code></pre></div>

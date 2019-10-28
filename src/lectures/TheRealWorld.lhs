@@ -9,7 +9,7 @@ Basic build
 
 We can build the game by running 
 
-< cd src 
+< cd tic-tac-toe/classic/src/ 
 < ghc --make TicTacToe.hs
 
 Then the executable `TicTacToe` is created. 
@@ -59,8 +59,10 @@ name, e.g., `Data.List.intercalate` (why?)
 Type Definitions
 ----------------
 
+Haskell has numerous buildin types (e.g., `Int`, `Char`, lists)
+and allows user to define many more types. 
 Two ways to define types in Haskell are `data` and `type`. 
-We already saw that `data` defines **new** data types, e.g., 
+With `data` one defines **new** data types, e.g., 
 
 < data Tile = EmptyTile | X | O 
 
