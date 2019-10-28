@@ -42,12 +42,12 @@ When importing modules you again have many alternatives:
 
 < import Player.Human (playerHuman)
 
-- Hide some functions (why?)
+- Hide some functions (**why?**)
 
 < import Prelude hiding ((!!))
 
 - Import qualified module, where you have you call the functions using all the 
-name, e.g., `Data.List.intercalate` (why?)
+name, e.g., `Data.List.intercalate` (**why?**)
 
 < import qualified Data.List 
 
@@ -66,7 +66,7 @@ With `data` one defines **new** data types, e.g.,
 
 < data Tile = EmptyTile | X | O 
 
-On the other hand, type `type` is used to define type alias for existing types (why?). 
+On the other hand, type `type` is used to define type alias for existing types (**why?**). 
 For example a move is a pair of integers, 
 
 < type Move   = (Int,Int)
@@ -185,7 +185,7 @@ Code sharing
 
 When your project is ready, share it on Hackage so that other Haskellers enjoy it! 
 
-Until it is ready upload it on [github](https://github.com). Why?
+Until it is ready upload it on [github](https://github.com). **Why?**
 
 - Version control will answer many questions
     - what was that edit I made yesterday when my code was fast/worked?

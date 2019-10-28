@@ -41,11 +41,11 @@ ghc <span class="co">--make TicTacToe.hs</span></code></pre></div>
 </ul>
 <div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="kw">import </span><span class="dt">Player.Human</span> (playerHuman)</code></pre></div>
 <ul>
-<li>Hide some functions (why?)</li>
+<li>Hide some functions (<strong>why?</strong>)</li>
 </ul>
 <div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="kw">import </span><span class="dt">Prelude</span> <span class="kw">hiding</span> ((!!))</code></pre></div>
 <ul>
-<li>Import qualified module, where you have you call the functions using all the name, e.g., <code>Data.List.intercalate</code> (why?)</li>
+<li>Import qualified module, where you have you call the functions using all the name, e.g., <code>Data.List.intercalate</code> (<strong>why?</strong>)</li>
 </ul>
 <div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="kw">import qualified</span> <span class="dt">Data.List</span> </code></pre></div>
 <ul>
@@ -55,7 +55,7 @@ ghc <span class="co">--make TicTacToe.hs</span></code></pre></div>
 <h2 id="type-definitions">Type Definitions</h2>
 <p>Haskell has numerous buildin types (e.g., <code>Int</code>, <code>Char</code>, lists) and allows user to define many more types. Two ways to define types in Haskell are <code>data</code> and <code>type</code>. With <code>data</code> one defines <strong>new</strong> data types, e.g.,</p>
 <div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="kw">data</span> <span class="dt">Tile</span> <span class="fu">=</span> <span class="dt">EmptyTile</span> <span class="fu">|</span> <span class="dt">X</span> <span class="fu">|</span> <span class="dt">O</span> </code></pre></div>
-<p>On the other hand, type <code>type</code> is used to define type alias for existing types (why?). For example a move is a pair of integers,</p>
+<p>On the other hand, type <code>type</code> is used to define type alias for existing types (<strong>why?</strong>). For example a move is a pair of integers,</p>
 <div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="kw">type</span> <span class="dt">Move</span>   <span class="fu">=</span> (<span class="dt">Int</span>,<span class="dt">Int</span>)</code></pre></div>
 <p>while the board maps moves to tiles</p>
 <div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="kw">type</span> <span class="dt">Board</span>  <span class="fu">=</span> [(<span class="dt">Move</span>, <span class="dt">Tile</span>)]</code></pre></div>
@@ -122,7 +122,7 @@ cabal test </code></pre></div>
 <div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell">stack test</code></pre></div>
 <h2 id="code-sharing">Code sharing</h2>
 <p>When your project is ready, share it on Hackage so that other Haskellers enjoy it!</p>
-<p>Until it is ready upload it on <a href="https://github.com">github</a>. Why?</p>
+<p>Until it is ready upload it on <a href="https://github.com">github</a>. <strong>Why?</strong></p>
 <ul>
 <li>Version control will answer many questions
 <ul>
