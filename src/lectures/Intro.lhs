@@ -8,4 +8,4 @@ Today we will learn:
 - Higher Order Programming Patterns, and  
 - Compositional Style of Programming.
 
-By an example: Let's [solve](lectures/SudokuSolver.lhs) a [Sudoku](lectures/SudokuInput.lhs).
+By an example: Let's [solve](SudokuSolver.lhs) a [Sudoku](SudokuInput.lhs).
