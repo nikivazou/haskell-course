@@ -119,7 +119,11 @@ foldl<span class="ot"> ::</span> (b <span class="ot">-&gt;</span> a <span class=
 foldl _ z []     <span class="fu">=</span> z
 foldl f z (x<span class="fu">:</span>xs) <span class="fu">=</span> foldl f (f z x) xs</code></pre></div>
 <p><strong>Question:</strong> How will <code>foldl (+) 0 [1,2,3]</code> evaluate?</p>
-<pre><code>  foldl (+) 0 [1,2,3]</code></pre>
+<pre><code>  foldl (+) 0 [1,2,3]
+= foldl (+) (0 + 1) [2,3]
+= foldl (+) ((0 + 1) + 2) [3]
+= foldl (+) (((0 + 1) + 2) + 3) []
+= (((0 + 1) + 2) + 3)</code></pre>
 <p>Since the value of the accumulator is not demanded until recursing through the entire list, the accumulator simply builds up a big unevaluated expression <code>(((0+1)+2)+3)</code>, which finally gets reduced to a value at the end. There are at least two problems with this. One is that it’s simply inefficient: there’s no point in transferring all the numbers from the list into a different list-like thing (the accumulator thunk) before actually adding them up. The second problem is more subtle, and more insidious: evaluating the expression <code>(((0+1)+2)+3)</code> actually requires pushing the <code>3</code> and <code>2</code> onto a stack before being able to compute 0+1 and then unwinding the stack, adding along the way. This is not a problem for this small example, but for very long lists it’s a big problem: there is usually not as much space available for the stack, so this can lead to a stack overflow.</p>
 <p>The solution in this case is to use the <code>foldl'</code> function instead of <code>foldl</code>, which adds a bit of strictness: in particular, <code>foldl'</code> requires its second argument (the accumulator) to be evaluated before it proceeds, so a large thunk never builds up:</p>
 <pre><code>  foldl' (+) 0 [1,2,3]
@@ -141,13 +145,8 @@ foldl f z (x<span class="fu">:</span>xs) <span class="fu">=</span> foldl f (f z 
 <p><strong>Q:</strong> Why is it so slow?</p>
 <p>Let’s compute the first 6 fibonacci numbers, but evaluate each only one time:</p>
 <div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt; fibs ::</span> [<span class="dt">Int</span>]
-<span class="ot">&gt;</span> fibs <span class="fu">=</span> fib0<span class="fu">:</span>fib1<span class="fu">:</span>fib2<span class="fu">:</span>fib3<span class="fu">:</span>fib4<span class="fu">:</span>fib5<span class="fu">:</span>[<span class="co">{- ... -}</span>]
-<span class="ot">&gt;</span> fib0 <span class="fu">=</span> <span class="dv">0</span> 
-<span class="ot">&gt;</span> fib1 <span class="fu">=</span> <span class="dv">1</span> 
-<span class="ot">&gt;</span> fib2 <span class="fu">=</span> fibs<span class="fu">!!</span><span class="dv">0</span> <span class="fu">+</span> fibs<span class="fu">!!</span><span class="dv">1</span> 
-<span class="ot">&gt;</span> fib3 <span class="fu">=</span> fibs<span class="fu">!!</span><span class="dv">1</span> <span class="fu">+</span> fibs<span class="fu">!!</span><span class="dv">2</span> 
-<span class="ot">&gt;</span> fib4 <span class="fu">=</span> fibs<span class="fu">!!</span><span class="dv">2</span> <span class="fu">+</span> fibs<span class="fu">!!</span><span class="dv">3</span> 
-<span class="ot">&gt;</span> fib5 <span class="fu">=</span> fibs<span class="fu">!!</span><span class="dv">3</span> <span class="fu">+</span> fibs<span class="fu">!!</span><span class="dv">4</span> </code></pre></div>
+<span class="ot">&gt;</span> fibs <span class="fu">=</span> <span class="dv">1</span><span class="fu">:</span><span class="dv">1</span><span class="fu">:</span>zipWith (<span class="fu">+</span>) fibs (tail fibs)
+<span class="ot">&gt;</span> <span class="co">-- fibi i = fibs!!i + tail fibs!!i </span></code></pre></div>
 <p>Now use the transformation <code>l!!(i+1) = tail l!!i</code></p>
 <div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt; fibs1 ::</span> [<span class="dt">Int</span>]
 <span class="ot">&gt;</span> fibs1 <span class="fu">=</span> fib01<span class="fu">:</span>fib11<span class="fu">:</span>fib21<span class="fu">:</span>fib31<span class="fu">:</span>fib41<span class="fu">:</span>fib51<span class="fu">:</span>[<span class="co">{- ... -}</span>]

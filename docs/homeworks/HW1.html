@@ -20,32 +20,10 @@
         <div id="content">
             <h1 id="homework-1">Homework 1</h1>
 <h2 id="instructions">Instructions</h2>
-<p>The source code of this homework can be found <a href="https://raw.githubusercontent.com/nikivazou/CMSC498V/master/CMSC498V/homeworks/HW1.lhs">here</a>. You should fill in the definitions of the required functions but <strong>do not</strong> change the types of the functions.</p>
-<p><strong>How to submit:</strong> TBA</p>
-<div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt;</span> <span class="kw">module</span> <span class="dt">HW1</span> <span class="kw">where</span>
-<span class="ot">&gt;</span> <span class="kw">import </span><span class="dt">Data.Char</span> </code></pre></div>
-<h2 id="problem-1-strings"><strong>Problem 1:</strong> Strings</h2>
-<p>In Haskell the <code>String</code> data type is defined to be a list of <code>Char</code>acters, so <code>String</code> can be manipulated via list comprehension.</p>
-<p>For example, bellow list comprehension is used to combine each possible adjectives with each possible noun.</p>
-<pre><code> &gt; [adj ++ &quot; &quot; ++ noun | adj &lt;- [&quot;lazy&quot;, &quot;nasty&quot;], noun &lt;- [&quot;cat&quot;, &quot;language&quot;] ]
- [&quot;lazy cat&quot;,&quot;lazy language&quot;,&quot;nasty cat&quot;,&quot;nasty language&quot;]</code></pre>
-<p>You are requested to use list comprehension to define the following two functions on <code>String</code>s.</p>
-<ol style="list-style-type: decimal">
-<li>Complete the function <code>removeUpper</code> that removes all uppercase characters from its String argument. For example <code>removeUpper &quot;Hello World!&quot; = &quot;ello orld!&quot;</code>. <em>Hint:</em> use the library function <code>isLower</code>.</li>
-</ol>
-<div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt; removeUpper ::</span> <span class="dt">String</span> <span class="ot">-&gt;</span> <span class="dt">String</span>
-<span class="ot">&gt;</span> removeUpper xs <span class="fu">=</span> error <span class="st">&quot;Define me!&quot;</span></code></pre></div>
-<ol start="2" style="list-style-type: decimal">
-<li>Complete the function <code>noIdent</code> that removes any non-letter character of its String argument to lower. A letter is one of the characters <code>a..z</code> or <code>A..Z</code>. For example <code>noIdent &quot;Hello World!&quot; = &quot;HelloWorld&quot;</code>. <em>Hint:</em> use the library function <code>elem</code>.</li>
-</ol>
-<div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt; noIdent ::</span> <span class="dt">String</span> <span class="ot">-&gt;</span> <span class="dt">String</span>
-<span class="ot">&gt;</span> noIdent xs <span class="fu">=</span> error <span class="st">&quot;Define me!&quot;</span></code></pre></div>
-<ol start="3" style="list-style-type: decimal">
-<li>Now use recursion to define the function <code>isPrefixOf xs ys</code> that turns <code>True</code> if and only if <code>xs</code> is prefix of <code>ys</code>. For example <code>isPrefixOf &quot;Haskell&quot; &quot;I like Haskell&quot; = False</code> and <code>isPrefixOf &quot;I like&quot; &quot;I like Haskell&quot; = True</code>.</li>
-</ol>
-<div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt; isPrefixOf ::</span> <span class="dt">String</span> <span class="ot">-&gt;</span> <span class="dt">String</span> <span class="ot">-&gt;</span> <span class="dt">Bool</span> 
-<span class="ot">&gt;</span> isPrefixOf xs ys <span class="fu">=</span> error <span class="st">&quot;Define me!&quot;</span></code></pre></div>
-<h2 id="problem-2-factoring"><strong>Problem 2:</strong> Factoring</h2>
+<p>The source code of this homework can be found <a href="https://raw.githubusercontent.com/nikivazou/haskell-course/master/src/homeworks/HW1.lhs">here</a>. You should fill in the definitions of the required functions but <strong>do not</strong> change the types of the functions.</p>
+<p><strong>How to submit:</strong> Send an email to <code>niki.vazou@imdea.org</code> with subject <code>Haskell-Course'19:HW1</code> and attach this file and a <code>MinMax.lhs</code> file.</p>
+<div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt;</span> <span class="kw">module</span> <span class="dt">HW1</span> <span class="kw">where</span></code></pre></div>
+<h2 id="problem-1-factoring"><strong>Problem 1:</strong> Factoring</h2>
 <p>We say that <code>a</code> is a factor of <code>n</code> when there exists an integer <code>b</code> so that <code>n = a * b</code>.</p>
 <ol style="list-style-type: decimal">
 <li>Define a function <code>factors n</code> that returns all functors of <code>n</code>. For example, <code>factors 12 = [1,2,3,4,6,12]</code> and <code>factors 13 = [1,13]</code>.</li>
@@ -59,11 +37,17 @@
 <div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt; isPrime ::</span> <span class="dt">Int</span> <span class="ot">-&gt;</span> <span class="dt">Bool</span> 
 <span class="ot">&gt;</span> isPrime n <span class="fu">=</span> error <span class="st">&quot;Define me!&quot;</span></code></pre></div>
 <ol start="3" style="list-style-type: decimal">
+<li>Define the function <code>primes</code> that returns the list of all prime ints.</li>
+</ol>
+<div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt; primes ::</span> [<span class="dt">Int</span>]
+<span class="ot">&gt;</span> primes <span class="fu">=</span> error <span class="st">&quot;Define me!&quot;</span></code></pre></div>
+<p><em>Hint:</em> You can define the above function in 20 characters. If you want a challenge, you can use 5 more characters and define <code>primes</code> by only using library functions (from <code>Prelude</code> and <code>Data.List</code>).</p>
+<ol start="4" style="list-style-type: decimal">
 <li>Optimize the <code>factors n</code> function to only call the <code>mod</code> function at most <span style="white-space: nowrap; font-size:larger"> √<span style="text-decoration:overline;"> n </span> </span> times. Note that factors appear in pairs. If you found <code>i</code> to be a factor of <code>n</code>, then <code>div n i</code> is also a factor of <code>n</code>. <em>Hint:</em> define a helper recursive function <code>factorsRec n i</code> and recurse on increasing <code>i</code>.</li>
 </ol>
 <div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt; factorsOpt ::</span> <span class="dt">Int</span> <span class="ot">-&gt;</span> [<span class="dt">Int</span>]
 <span class="ot">&gt;</span> factorsOpt n <span class="fu">=</span> error <span class="st">&quot;Define me!&quot;</span></code></pre></div>
-<ol start="4" style="list-style-type: decimal">
+<ol start="5" style="list-style-type: decimal">
 <li><p>Test your optimization. The below function <code>sameElems xs ys</code> checks that the two input lists have the same elements, by checking that</p>
 <ul>
 <li>the two input lists have same length and</li>
@@ -76,36 +60,124 @@
 <p>Use <code>sameElems</code> to write a function <code>testFactors n</code> that tests that the two factor functions you wrote above return the same factors for every integer up to <code>n</code>. <em>Hint:</em> use the library function <code>and</code>.</p>
 <div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt; testFactors ::</span> <span class="dt">Int</span> <span class="ot">-&gt;</span> <span class="dt">Bool</span> 
 <span class="ot">&gt;</span> testFactors n <span class="fu">=</span> error <span class="st">&quot;Define me!&quot;</span></code></pre></div>
-<h2 id="problem-3-coloring"><strong>Problem 3:</strong> Coloring</h2>
-Let <code>Color</code> be the red, green, blue or yellow color data type.
-<div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt;</span> <span class="kw">data</span> <span class="dt">Color</span> 
-<span class="ot">&gt;</span>   <span class="fu">=</span> <span class="dt">Red</span> <span class="fu">|</span> <span class="dt">Green</span> <span class="fu">|</span> <span class="dt">Blue</span> <span class="fu">|</span> <span class="dt">Yellow</span> 
-<span class="ot">&gt;</span>   <span class="kw">deriving</span> (<span class="dt">Eq</span>, <span class="dt">Show</span>)</code></pre></div>
-<p><em>Note</em> the above <code>deriving</code> annotation teaches Haskell how to compare colors and how to turn them to strings for printing.</p>
-Similarly, the <code>Balkan</code> data type defines the countries that belong in the <a href="https://en.wikipedia.org/wiki/Balkans">Balkan area</a>.
-<div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt;</span> <span class="kw">data</span> <span class="dt">Balkan</span> 
-<span class="ot">&gt;</span>   <span class="fu">=</span>  <span class="dt">Albania</span> <span class="fu">|</span> <span class="dt">Bulgaria</span>   <span class="fu">|</span> <span class="dt">BosniaAndHerzegovina</span> 
-<span class="ot">&gt;</span>   <span class="fu">|</span>  <span class="dt">Kosovo</span>  <span class="fu">|</span>  <span class="dt">Macedonia</span> <span class="fu">|</span> <span class="dt">Montenegro</span>
-<span class="ot">&gt;</span>   <span class="kw">deriving</span> (<span class="dt">Eq</span>, <span class="dt">Show</span>)</code></pre></div>
-<p>Two countries are adjacent when they share the same border. The below <code>adjacencies</code> list captures all the balkan adjacencies: <code>x</code> is adjacent to <code>y</code> when either <code>elem (x,y) adjacencies</code> or <code>elem (y,x) adjacencies</code>.</p>
-<div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt; adjacencies ::</span> [(<span class="dt">Balkan</span>,<span class="dt">Balkan</span>)]
-<span class="ot">&gt;</span> adjacencies <span class="fu">=</span> 
-<span class="ot">&gt;</span>    [ (<span class="dt">Albania</span>, <span class="dt">Montenegro</span>), (<span class="dt">Albania</span>, <span class="dt">Kosovo</span>), (<span class="dt">Albania</span>, <span class="dt">Macedonia</span>)
-<span class="ot">&gt;</span>    , (<span class="dt">Bulgaria</span>,<span class="dt">Macedonia</span>)
-<span class="ot">&gt;</span>    , (<span class="dt">BosniaAndHerzegovina</span>, <span class="dt">Montenegro</span>)
-<span class="ot">&gt;</span>    , (<span class="dt">Kosovo</span>, <span class="dt">Macedonia</span>), (<span class="dt">Kosovo</span>, <span class="dt">Montenegro</span>)
-<span class="ot">&gt;</span>    ]</code></pre></div>
-<p>We call coloring a list of type <code>[(Balkan,Color)]</code> that related each Balkan country with a color. A coloring is good with respect to an adjacency matrix when every two adjacent countries have a different color. A coloring is complete with respect to an adjacency matrix when it colors every country in the matrix. Good colorings may be incomplete.</p>
+<h2 id="problem-2-merge-sort"><strong>Problem 2:</strong> Merge Sort</h2>
+<p>In this problem, you will implement the standard <a href="https://en.wikipedia.org/wiki/Merge_sort">merge sort</a> algorithm.</p>
+<p>The function <code>mergeSort</code> splits the input list at halves, recursively sorts both halves and merges the two sorted halves.</p>
+<div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt; mergeSort ::</span> [<span class="dt">Int</span>] <span class="ot">-&gt;</span> [<span class="dt">Int</span>]
+<span class="ot">&gt;</span> mergeSort []  <span class="fu">=</span> [] 
+<span class="ot">&gt;</span> mergeSort [x] <span class="fu">=</span> [x]
+<span class="ot">&gt;</span> mergeSort xs  <span class="fu">=</span> merge (mergeSort ys) (mergeSort zs)
+<span class="ot">&gt;</span>   <span class="kw">where</span> 
+<span class="ot">&gt;</span>   (ys,zs)     <span class="fu">=</span> splitHalf xs</code></pre></div>
 <ol style="list-style-type: decimal">
-<li>Write a function <code>isGoodColoring adj coloring</code> that returns <code>True</code> if and only if the <code>coloring</code> list is good with respect to the input <code>adj</code>acency list.</li>
+<li><strong>List splitting:</strong> Define the function <code>splitHalf xs</code> that split the input list into two sublists. For example:</li>
 </ol>
-<div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt; isGoodColoring ::</span> [(<span class="dt">Balkan</span>, <span class="dt">Balkan</span>)] <span class="ot">-&gt;</span> [(<span class="dt">Balkan</span>,<span class="dt">Color</span>)] <span class="ot">-&gt;</span> <span class="dt">Bool</span> 
-<span class="ot">&gt;</span> isGoodColoring adj coloring <span class="fu">=</span> error <span class="st">&quot;Define me!&quot;</span></code></pre></div>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell">splitHalf [<span class="dv">1</span><span class="fu">..</span><span class="dv">4</span>] <span class="fu">==</span> ([<span class="dv">1</span>,<span class="dv">2</span>],[<span class="dv">3</span>,<span class="dv">4</span>])
+splitHalf [<span class="dv">1</span><span class="fu">..</span><span class="dv">5</span>] <span class="fu">==</span> ([<span class="dv">1</span>,<span class="dv">2</span>],[<span class="dv">3</span>,<span class="dv">4</span>,<span class="dv">5</span>])</code></pre></div>
+<p><em>Hint:</em> You can use the function <code>splitAt</code>.</p>
+<div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt; splitHalf ::</span> [a] <span class="ot">-&gt;</span> ([a],[a])
+<span class="ot">&gt;</span> splitHalf xs <span class="fu">=</span> error <span class="st">&quot;Define me!&quot;</span></code></pre></div>
 <ol start="2" style="list-style-type: decimal">
-<li>Define<code>colorings</code> to return all the good and complete colorings of the adjacency list <code>adjacencies</code>.</li>
+<li><strong>Merging:</strong> Define the function <code>merge</code> that merges two sorted lists. For example,</li>
 </ol>
-<div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt; colorings ::</span> [[(<span class="dt">Balkan</span>, <span class="dt">Color</span>)]]
-<span class="ot">&gt;</span> colorings <span class="fu">=</span> error <span class="st">&quot;Define me!&quot;</span></code></pre></div>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell">merge [<span class="dv">1</span>, <span class="dv">5</span>, <span class="dv">9</span>] [<span class="dv">2</span>,<span class="dv">8</span>] <span class="fu">==</span> [<span class="dv">1</span>,<span class="dv">2</span>,<span class="dv">5</span>,<span class="dv">8</span>,<span class="dv">9</span>]</code></pre></div>
+<p>Your definition should satisfy the below type signature that reads as follows: The input lists contain elements of type <code>a</code> that satisfies the constraint <code>Ord</code>. This constraint lets you use any of the standard following comparison operators on elements of the input lists</p>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell">(<span class="fu">&lt;</span>), (<span class="fu">&lt;=</span>), (<span class="fu">&gt;</span>),<span class="ot"> (&gt;=) ::</span> <span class="dt">Ord</span> a <span class="ot">=&gt;</span> a <span class="ot">-&gt;</span> a <span class="ot">-&gt;</span> <span class="dt">Bool</span>   </code></pre></div>
+<div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt; merge ::</span> <span class="dt">Ord</span> a <span class="ot">=&gt;</span> [a] <span class="ot">-&gt;</span> [a] <span class="ot">-&gt;</span> [a]
+<span class="ot">&gt;</span> merge xs ys <span class="fu">=</span> error <span class="st">&quot;Define me!&quot;</span></code></pre></div>
+<ol start="3" style="list-style-type: decimal">
+<li><strong>Raising the Ord constraint:</strong> Haskell defines the data type <code>Ordering</code> as follows:</li>
+</ol>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="kw">data</span> <span class="dt">Ordering</span> <span class="fu">=</span> <span class="dt">LT</span> <span class="fu">|</span> <span class="dt">EQ</span> <span class="fu">|</span> <span class="dt">GT</span></code></pre></div>
+<p>to represent less, equal, and greater comparison respectively. Moreover the library function compare is defined so that</p>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell">compare x y <span class="fu">==</span> <span class="dt">LT</span> <span class="fu">&lt;=&gt;</span> x <span class="fu">&lt;</span>  y
+compare x y <span class="fu">==</span> <span class="dt">EQ</span> <span class="fu">&lt;=&gt;</span> x <span class="fu">==</span> y
+compare x y <span class="fu">==</span> <span class="dt">GT</span> <span class="fu">&lt;=&gt;</span> x <span class="fu">&gt;</span>  y</code></pre></div>
+<p>Redefine the <code>merge</code> and <code>mergeSort</code> functions to take an explicit comparison argument. That is, complete the definitions below so that</p>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell">mergeBy compare xs <span class="fu">==</span> merge xs </code></pre></div>
+<div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt; mergeBy ::</span> (a <span class="ot">-&gt;</span> a <span class="ot">-&gt;</span> <span class="dt">Ordering</span>) <span class="ot">-&gt;</span> [a] <span class="ot">-&gt;</span> [a] <span class="ot">-&gt;</span> [a]
+<span class="ot">&gt;</span> mergeBy cmp xs ys     <span class="fu">=</span> error <span class="st">&quot;Define me!&quot;</span>
+<span class="ot">&gt;</span> 
+<span class="ot">&gt; mergeSortBy ::</span> (a <span class="ot">-&gt;</span> a <span class="ot">-&gt;</span> <span class="dt">Ordering</span>) <span class="ot">-&gt;</span> [a] <span class="ot">-&gt;</span> [a] <span class="ot">-&gt;</span> [a]
+<span class="ot">&gt;</span> mergeSortBy cmp xs ys <span class="fu">=</span> error <span class="st">&quot;Define me!&quot;</span></code></pre></div>
+<h2 id="problem-3-fancy-sort"><strong>Problem 3:</strong> Fancy Sort</h2>
+<p>Merge sort is an efficient sorting algorithm, but it does not perform well when the input list is already sorted! The goal of this problem is to implement a different sorting algorithm, <code>fancySort</code> that performs excellent when the list is already increasing or even decreasing.</p>
+<p>The idea behind <code>fancySort</code> is the following.</p>
+<ul>
+<li>First, grap all the sorted sequences that appear in the input list and</li>
+<li>then, merge all the sorted sublists together.</li>
+</ul>
+<div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt; fancySort ::</span> <span class="dt">Ord</span> a <span class="ot">=&gt;</span> [a] <span class="ot">-&gt;</span> [a]
+<span class="ot">&gt;</span> fancySort <span class="fu">=</span> mergeAll <span class="fu">.</span> sequences</code></pre></div>
+<ol style="list-style-type: decimal">
+<li><strong>Merging:</strong> Define the function <code>mergeAll</code> that uses the <code>merge</code> from Problem 2 to merge a list of sorted lists into a single sorted list. For example,</li>
+</ol>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell">mergeAll [[<span class="dv">1</span>, <span class="dv">5</span>, <span class="dv">9</span>], [<span class="dv">2</span>,<span class="dv">8</span>], [<span class="dv">7</span>]] <span class="fu">==</span> [<span class="dv">1</span>,<span class="dv">2</span>,<span class="dv">5</span>,<span class="dv">7</span>,<span class="dv">8</span>,<span class="dv">9</span>]</code></pre></div>
+<div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt; mergeAll ::</span> <span class="dt">Ord</span> a <span class="ot">=&gt;</span> [[a]] <span class="ot">-&gt;</span> [a]
+<span class="ot">&gt;</span> mergeAll xs <span class="fu">=</span> error <span class="st">&quot;Define me!&quot;</span></code></pre></div>
+<p>The <code>fancySort</code> function creates the sorted sequences as follows. If the input list <code>(a:b:xs)</code> looks like ascending, that is <code>a &lt; b</code>, then we call <code>ascending'</code> with the “accumulated” sorted list <code>[a]</code> and a “pivot” element <code>b</code> with the goal to collect the rest of the ascending list. Otherwise we call <code>descending</code> with dual arguments and goals. For example,</p>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell">sequences [<span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">3</span>, <span class="dv">2</span>, <span class="dv">1</span>] <span class="fu">==</span> [[<span class="dv">1</span>,<span class="dv">2</span>,<span class="dv">3</span>],[<span class="dv">1</span>,<span class="dv">2</span>],[]]
+sequences [<span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">3</span>, <span class="dv">4</span>, <span class="dv">5</span>] <span class="fu">==</span> [[<span class="dv">1</span>,<span class="dv">2</span>,<span class="dv">3</span>,<span class="dv">4</span>,<span class="dv">5</span>],[]]
+sequences [<span class="dv">5</span>, <span class="dv">4</span>, <span class="dv">3</span>, <span class="dv">2</span>, <span class="dv">1</span>] <span class="fu">==</span> [[<span class="dv">1</span>,<span class="dv">2</span>,<span class="dv">3</span>,<span class="dv">4</span>,<span class="dv">5</span>],[]]</code></pre></div>
+<div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt; sequences ::</span> <span class="dt">Ord</span> a <span class="ot">=&gt;</span> [a] <span class="ot">-&gt;</span> [[a]]
+<span class="ot">&gt;</span> sequences (a<span class="fu">:</span>b<span class="fu">:</span>xs)
+<span class="ot">&gt;</span>   <span class="fu">|</span> a <span class="fu">&lt;</span> b     <span class="fu">=</span> ascending' b [a] xs
+<span class="ot">&gt;</span>   <span class="fu">|</span> otherwise <span class="fu">=</span> descending b [a] xs
+<span class="ot">&gt;</span> sequences xs  <span class="fu">=</span> [xs]</code></pre></div>
+<p>The function <code>ascending' a as (b:bs)</code> takes as input the pivot element <code>a</code>, the increasing accumulator <code>as</code>, and the unsorted list <code>xs</code>. If the pivot is less than <code>b</code>, it puts the pivot in the head of the accumulator and recurses, otherwise, it returns the first sorted sequence <code>reverse(a:as)</code> and calls back to <code>sequences</code> to construct the next descending sequence.</p>
+<div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt; ascending' ::</span> <span class="dt">Ord</span> a <span class="ot">=&gt;</span> a <span class="ot">-&gt;</span> [a] <span class="ot">-&gt;</span> [a] <span class="ot">-&gt;</span> [[a]]
+<span class="ot">&gt;</span> ascending' a as (b<span class="fu">:</span>bs)
+<span class="ot">&gt;</span>   <span class="fu">|</span> a <span class="fu">&lt;</span> b <span class="fu">=</span> ascending' b (a<span class="fu">:</span>as) bs
+<span class="ot">&gt;</span> ascending' a as bs <span class="fu">=</span> (reverse(a<span class="fu">:</span>as))<span class="fu">:</span>sequences bs</code></pre></div>
+<ol start="2" style="list-style-type: decimal">
+<li><strong>Define descending:</strong> Follow the definition of <code>ascending'</code> to define <code>descending</code> that returns the first descending sequence it finds and calls back to <code>sequences</code> for the rest. For example,</li>
+</ol>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell">descending <span class="dv">4</span> [] [<span class="dv">3</span>, <span class="dv">2</span>, <span class="dv">1</span>]       <span class="fu">==</span> [[<span class="dv">1</span>,<span class="dv">2</span>,<span class="dv">3</span>,<span class="dv">4</span>],[]]
+descending <span class="dv">0</span> [] [<span class="dv">3</span>, <span class="dv">2</span>, <span class="dv">1</span>]       <span class="fu">==</span> [[<span class="dv">0</span>],[<span class="dv">1</span>,<span class="dv">2</span>,<span class="dv">3</span>],[]]
+descending <span class="dv">0</span> [] [<span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">3</span>, <span class="dv">2</span>, <span class="dv">1</span>] <span class="fu">==</span> [[<span class="dv">0</span>],[<span class="dv">1</span>,<span class="dv">2</span>,<span class="dv">3</span>],[<span class="dv">1</span>,<span class="dv">2</span>],[]]</code></pre></div>
+<p>Note that <code>descending</code> should only find strictly descending sequences, i.e.</p>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell">descending <span class="dv">1</span> [] [<span class="dv">1</span>, <span class="dv">2</span>]          <span class="fu">==</span> [[<span class="dv">1</span>],[<span class="dv">1</span>,<span class="dv">2</span>],[]]</code></pre></div>
+<div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt; descending ::</span> <span class="dt">Ord</span> a <span class="ot">=&gt;</span> a <span class="ot">-&gt;</span> [a] <span class="ot">-&gt;</span> [a] <span class="ot">-&gt;</span> [[a]]
+<span class="ot">&gt;</span> descending a as bs <span class="fu">=</span> error <span class="st">&quot;Define me!&quot;</span></code></pre></div>
+<ol start="3" style="list-style-type: decimal">
+<li><strong>(Difficult) Optimize ascending:</strong> Ascending on an increasing list gives us back exactly one sequence:</li>
+</ol>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell">ascending' <span class="dv">0</span> [] [<span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">3</span>, <span class="dv">4</span>] <span class="fu">==</span> [[<span class="dv">0</span>,<span class="dv">1</span>,<span class="dv">2</span>,<span class="dv">3</span>,<span class="dv">4</span>],[]]</code></pre></div>
+<p>but to do so, the <code>ascending'</code> definition imposes a huge performance leak as it has to reverse the returning list. Define a higher order <code>ascending</code> that satisfies the below type signature, does not reverse the returning sequence and still behaves like <code>ascending'</code> in that</p>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell">forall xs, a<span class="fu">:</span> ascending a id xs <span class="fu">==</span> ascending' a [] xs  </code></pre></div>
+<p>where <code>id</code> is the identity functions.</p>
+<p><strong>Restrictions:</strong> Increasing lists should be accessed only once! You are not allowed to use <code>reverse</code>, <code>(++)</code>, or any other list operations. Define <code>ascending</code> only by using</p>
+<ul>
+<li><p>one comparison,</p></li>
+<li><p>recursive calls to <code>ascending</code> and <code>sequences</code>,</p></li>
+<li><p>function application and abstraction (i.e., lambda),</p></li>
+<li><p>the list data constructors (<code>[]</code> and <code>(:)</code>),</p></li>
+<li><p>and no intermediate helper functions.</p></li>
+</ul>
+<div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt; ascending ::</span> <span class="dt">Ord</span> a <span class="ot">=&gt;</span> a <span class="ot">-&gt;</span> ([a] <span class="ot">-&gt;</span> [a]) <span class="ot">-&gt;</span> [a] <span class="ot">-&gt;</span> [[a]]
+<span class="ot">&gt;</span> ascending a as bs <span class="fu">=</span> error <span class="st">&quot;Define me!&quot;</span></code></pre></div>
+<p>Finally, replace the call to <code>ascending'</code> with <code>ascending</code> in the <code>sequences</code> definition.</p>
+<h2 id="problem-4-tic-tac-toe"><strong>Problem 4:</strong> Tic-Tac-Toe</h2>
+<ul>
+<li>Step 1: Download the <a href="https://github.com/nikivazou/tic-tac-toe">tic-tac-toe</a> game.</li>
+</ul>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell">git clone https<span class="fu">://</span>github<span class="fu">.</span>com<span class="fu">/</span>nikivazou<span class="fu">/</span>tic<span class="fu">-</span>tac<span class="fu">-</span>toe<span class="fu">.</span>git</code></pre></div>
+<ul>
+<li>Step 2: Install the game and play against the random strategy.</li>
+</ul>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell">cd tic<span class="fu">-</span>tac<span class="fu">-</span>toe<span class="fu">/</span>classic<span class="fu">/</span>
+stack install 
+tic<span class="fu">-</span>tac<span class="fu">-</span>toe</code></pre></div>
+<ul>
+<li><p>Step 3: Follow the description in the <a href="https://github.com/nikivazou/tic-tac-toe/blob/master/classic/src/Player/MinMax.lhs">src/Player/MinMax.lhs</a> file.</p></li>
+<li><p>Step 4: Import and call your player. In <a href="https://github.com/nikivazou/tic-tac-toe/blob/master/classic/src/TicTacToe.hs">src/TicTacToe.hs</a> add</p></li>
+</ul>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="kw">import </span><span class="dt">Player.MinMax</span> (playerMinMax)</code></pre></div>
+<p>then in <a href="https://github.com/nikivazou/tic-tac-toe/blob/master/classic/src/TicTacToe.hs#L11">src/TicTacToe.hs#L11</a> replace</p>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell">player1 <span class="fu">=</span> playerHuman <span class="st">&quot;Me!&quot;</span></code></pre></div>
+<p>with</p>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell">player1 <span class="fu">=</span> playerMinMax</code></pre></div>
+<p>and make sure that your <code>playerMinMax</code> always wins the computer.</p>
         </div>
         <div id="footer">
             Site proudly generated by

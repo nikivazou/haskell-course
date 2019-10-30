@@ -4,59 +4,20 @@ Homework 1
 Instructions
 ------------
 
-The source code of this homework can be found [here](https://raw.githubusercontent.com/nikivazou/CMSC498V/master/CMSC498V/homeworks/HW1.lhs).
+The source code of this homework can be found [here](https://raw.githubusercontent.com/nikivazou/haskell-course/master/src/homeworks/HW1.lhs).
 You should fill in the definitions of the required functions but **do not** change the types of the functions. 
 
-**How to submit:** TBA
+**How to submit:** 
+Send an email to `niki.vazou@imdea.org` with 
+subject `Haskell-Course'19:HW1` and attach 
+this file and a `MinMax.lhs` file. 
 
 \begin{code}
 module HW1 where
-import Data.Char 
 \end{code}
 
-**Problem 1:** Strings
-----------------------
 
-In Haskell the `String` data type is defined to be a list of `Char`acters, 
-so `String` can be manipulated via list comprehension. 
-
-For example, bellow list comprehension is used to combine each possible adjectives with each possible noun.
-
-```
- > [adj ++ " " ++ noun | adj <- ["lazy", "nasty"], noun <- ["cat", "language"] ]
- ["lazy cat","lazy language","nasty cat","nasty language"]
-```
-
-You are requested to use list comprehension to define the following two functions on `String`s.
-
-1. Complete the function `removeUpper` that removes all uppercase characters from its String argument. 
-For example `removeUpper "Hello World!" = "ello orld!"`.
-*Hint:* use the library function `isLower`.
-
-\begin{code}
-removeUpper :: String -> String
-removeUpper xs = error "Define me!"
-\end{code}
-
-2. Complete the function `noIdent` that removes any non-letter character of its String argument to lower. 
-A letter is one of the characters `a..z` or `A..Z`.
-For example `noIdent "Hello World!" = "HelloWorld"`.
-*Hint:* use the library function `elem`.
-
-\begin{code}
-noIdent :: String -> String
-noIdent xs = error "Define me!"
-\end{code}
-
-3. Now use recursion to define the function `isPrefixOf xs ys` that turns `True` if and only if `xs` is prefix of `ys`. 
-For example `isPrefixOf "Haskell" "I like Haskell" = False` and `isPrefixOf "I like" "I like Haskell" = True`.
-
-\begin{code}
-isPrefixOf :: String -> String -> Bool 
-isPrefixOf xs ys = error "Define me!"
-\end{code}
-
-**Problem 2:** Factoring
+**Problem 1:** Factoring
 -------------------------
 
 We say that `a` is a factor of `n` when there exists an integer `b` so that 
@@ -80,7 +41,19 @@ isPrime :: Int -> Bool
 isPrime n = error "Define me!"
 \end{code}
 
-3. Optimize the `factors n` function to only call the `mod` function 
+3. Define the function `primes` that returns the list of all prime ints. 
+
+\begin{code}
+primes :: [Int]
+primes = error "Define me!"
+\end{code}
+
+*Hint:* You can define the above function in 20 characters. 
+If you want a challenge, you can use 5 more characters and define `primes`
+by only using library functions (from `Prelude` and `Data.List`). 
+
+
+4. Optimize the `factors n` function to only call the `mod` function 
 at most <span style="white-space: nowrap; font-size:larger">
 &radic;<span style="text-decoration:overline;">&nbsp;n&nbsp;</span>
 </span> times. 
@@ -96,7 +69,7 @@ factorsOpt n = error "Define me!"
 \end{code}
 
 
-4. Test your optimization. 
+5. Test your optimization. 
 The below function `sameElems xs ys` checks that the two input lists have the same elements, by checking that 
 
      - the two input lists have same length and
@@ -116,69 +89,226 @@ testFactors :: Int -> Bool
 testFactors n = error "Define me!"
 \end{code}
 
-**Problem 3:** Coloring
------------------------
+**Problem 2:** Merge Sort
+------------------------------------
 
-Let `Color` be the red, green, blue or yellow color data type. 
+In this problem, you will implement the standard [merge sort](https://en.wikipedia.org/wiki/Merge_sort) algorithm.
+
+The function `mergeSort` splits the input list at halves, 
+recursively sorts both halves and merges the two sorted halves. 
+
 \begin{code}
-data Color 
-  = Red | Green | Blue | Yellow 
-  deriving (Eq, Show)
+mergeSort :: [Int] -> [Int]
+mergeSort []  = [] 
+mergeSort [x] = [x]
+mergeSort xs  = merge (mergeSort ys) (mergeSort zs)
+  where 
+  (ys,zs)     = splitHalf xs
 \end{code}
 
-*Note* the above `deriving` annotation teaches Haskell 
-how to compare colors and how to turn them to strings for printing. 
+1. **List splitting:**
+Define the function `splitHalf xs` that split the input list into two sublists. 
+For example:
 
-Similarly, the `Balkan` data type defines the countries that belong in the 
-[Balkan area](https://en.wikipedia.org/wiki/Balkans).
+< splitHalf [1..4] == ([1,2],[3,4])
+< splitHalf [1..5] == ([1,2],[3,4,5])
+
+*Hint:* You can use the function `splitAt`.
+
 \begin{code}
-data Balkan 
-  =  Albania | Bulgaria   | BosniaAndHerzegovina 
-  |  Kosovo  |  Macedonia | Montenegro
-  deriving (Eq, Show)
+splitHalf :: [a] -> ([a],[a])
+splitHalf xs = error "Define me!"
 \end{code}
 
-Two countries are adjacent when they share the same border. 
-The below `adjacencies` list 
-captures all the balkan adjacencies: 
-`x` is adjacent to `y` when either `elem (x,y) adjacencies` 
-or `elem (y,x) adjacencies`.
+2. **Merging:** Define the function `merge` that merges two sorted lists. 
+For example, 
+
+< merge [1, 5, 9] [2,8] == [1,2,5,8,9]
+
+Your definition should satisfy the below type signature that reads as follows: 
+The input lists contain elements of type `a` that satisfies the constraint `Ord`. 
+This constraint lets you use any of the standard following comparison operators on elements of the input lists
+
+< (<), (<=), (>), (>=) :: Ord a => a -> a -> Bool   
 
 \begin{code}
-adjacencies :: [(Balkan,Balkan)]
-adjacencies = 
-   [ (Albania, Montenegro), (Albania, Kosovo), (Albania, Macedonia)
-   , (Bulgaria,Macedonia)
-   , (BosniaAndHerzegovina, Montenegro)
-   , (Kosovo, Macedonia), (Kosovo, Montenegro)
-   ]
-\end{code}
-
-We call coloring 
-a list of type `[(Balkan,Color)]`
-that related each Balkan country with a color. 
-A coloring is good with respect to an adjacency matrix 
-when every two adjacent countries have a different color. 
-A coloring is complete with respect to an adjacency matrix 
-when it colors every country in the matrix. 
-Good colorings may be incomplete. 
-
-1. Write a function `isGoodColoring adj coloring`
-that returns `True` if and only if the `coloring` list is good 
-with respect to the input `adj`acency list. 
-
-\begin{code}
-isGoodColoring :: [(Balkan, Balkan)] -> [(Balkan,Color)] -> Bool 
-isGoodColoring adj coloring = error "Define me!"
-\end{code}
-
-2. Define`colorings` to return all the good and complete colorings 
-of the adjacency list `adjacencies`. 
-
-\begin{code}
-colorings :: [[(Balkan, Color)]]
-colorings = error "Define me!"
+merge :: Ord a => [a] -> [a] -> [a]
+merge xs ys = error "Define me!"
 \end{code}
 
 
+3. **Raising the Ord constraint:**
+Haskell defines the data type `Ordering` as follows:
+
+< data Ordering = LT | EQ | GT
+
+to represent less, equal, and greater comparison respectively. 
+Moreover the library function compare is defined so that 
+
+< compare x y == LT <=> x <  y
+< compare x y == EQ <=> x == y
+< compare x y == GT <=> x >  y
+
+Redefine the `merge` and `mergeSort` functions 
+to take an explicit comparison argument. That is, 
+complete the definitions below so that 
+
+< mergeBy compare xs == merge xs 
+
+\begin{code}
+mergeBy :: (a -> a -> Ordering) -> [a] -> [a] -> [a]
+mergeBy cmp xs ys     = error "Define me!"
+
+mergeSortBy :: (a -> a -> Ordering) -> [a] -> [a] -> [a]
+mergeSortBy cmp xs ys = error "Define me!"
+\end{code}
+
+
+**Problem 3:** Fancy Sort
+------------------------------------
+
+Merge sort is an efficient sorting algorithm, 
+but it does not perform well when the input list is already sorted!
+The goal of this problem is to implement a different sorting algorithm, 
+`fancySort` that performs excellent when the list is already increasing or even 
+decreasing. 
+
+The idea behind `fancySort` is the following. 
+
+- First, grap all the sorted sequences that appear in the input list and
+- then, merge all the sorted sublists together. 
+
+\begin{code}
+fancySort :: Ord a => [a] -> [a]
+fancySort = mergeAll . sequences
+\end{code}
+
+1. **Merging:** Define the function `mergeAll` that uses the `merge` from Problem 2 
+to merge a list of sorted lists into a single sorted list. For example, 
+
+< mergeAll [[1, 5, 9], [2,8], [7]] == [1,2,5,7,8,9]
+
+\begin{code}
+mergeAll :: Ord a => [[a]] -> [a]
+mergeAll xs = error "Define me!"
+\end{code}
+
+The `fancySort` function creates the sorted sequences as follows. 
+If the input list `(a:b:xs)` looks like ascending, 
+that is `a < b`, then we call `ascending'` with the "accumulated"
+sorted list `[a]` and a "pivot" element `b` with the goal to 
+collect the rest of the ascending list. Otherwise we call `descending`
+with dual arguments and goals. For example, 
+
+< sequences [1, 2, 3, 2, 1] == [[1,2,3],[1,2],[]]
+< sequences [1, 2, 3, 4, 5] == [[1,2,3,4,5],[]]
+< sequences [5, 4, 3, 2, 1] == [[1,2,3,4,5],[]]
+
+\begin{code}    
+sequences :: Ord a => [a] -> [[a]]
+sequences (a:b:xs)
+  | a < b     = ascending' b [a] xs
+  | otherwise = descending b [a] xs
+sequences xs  = [xs]
+\end{code}
+
+The function `ascending' a as (b:bs)` takes as input 
+the pivot element `a`, the increasing accumulator `as`, 
+and the unsorted list `xs`. If the pivot is less than `b`, 
+it puts the pivot in the head of the accumulator and recurses, 
+otherwise, it returns the first sorted sequence `reverse(a:as)`
+and calls back to `sequences` to construct the next descending sequence.
+
+\begin{code}
+ascending' :: Ord a => a -> [a] -> [a] -> [[a]]
+ascending' a as (b:bs)
+  | a < b = ascending' b (a:as) bs
+ascending' a as bs = (reverse(a:as)):sequences bs
+\end{code}
+
+2. **Define descending:** Follow the definition of `ascending'` to define `descending`
+that returns the first descending sequence it finds and calls back to 
+`sequences` for the rest. For example, 
+
+< descending 4 [] [3, 2, 1]       == [[1,2,3,4],[]]
+< descending 0 [] [3, 2, 1]       == [[0],[1,2,3],[]]
+< descending 0 [] [1, 2, 3, 2, 1] == [[0],[1,2,3],[1,2],[]]
+
+Note that `descending` should only find strictly descending sequences, i.e.
+
+< descending 1 [] [1, 2]          == [[1],[1,2],[]]
+
+\begin{code}
+descending :: Ord a => a -> [a] -> [a] -> [[a]]
+descending a as bs = error "Define me!"
+\end{code}
+
+3. **(Difficult) Optimize ascending:** Ascending on an increasing list gives us back 
+exactly one sequence: 
+
+< ascending' 0 [] [1, 2, 3, 4] == [[0,1,2,3,4],[]]
+
+but to do so, the `ascending'` definition imposes a huge performance leak
+as it has to reverse the returning list. 
+Define a higher order `ascending` that 
+satisfies the below type signature, 
+does not reverse the returning sequence and still
+behaves like `ascending'` in that 
+
+< forall xs, a: ascending a id xs == ascending' a [] xs  
+
+
+where `id` is the identity functions. 
+
+**Restrictions:** Increasing lists should be accessed only once! You are not allowed to use `reverse`, `(++)`, 
+or any other list operations. Define `ascending` only by using 
+
+- one comparison, 
+
+- recursive calls to `ascending` and `sequences`,
+
+- function application and abstraction (i.e., lambda),
+
+- the list data constructors (`[]` and `(:)`),
+
+- and no intermediate helper functions. 
+
+\begin{code}
+ascending :: Ord a => a -> ([a] -> [a]) -> [a] -> [[a]]
+ascending a as bs = error "Define me!"
+\end{code}
+
+Finally, replace the call to `ascending'` with `ascending` in the `sequences` definition.
+
+
+
+**Problem 4:** Tic-Tac-Toe
+------------------------------------
+
+- Step 1: Download the [tic-tac-toe](https://github.com/nikivazou/tic-tac-toe) game. 
+
+< git clone https://github.com/nikivazou/tic-tac-toe.git
+
+- Step 2: Install the game and play against the random strategy. 
+
+< cd tic-tac-toe/classic/
+< stack install 
+< tic-tac-toe
+
+- Step 3: Follow the description in the [src/Player/MinMax.lhs](https://github.com/nikivazou/tic-tac-toe/blob/master/classic/src/Player/MinMax.lhs) file. 
+
+- Step 4: Import and call your player. In [src/TicTacToe.hs](https://github.com/nikivazou/tic-tac-toe/blob/master/classic/src/TicTacToe.hs) add
+
+< import Player.MinMax (playerMinMax)
+
+then in
+[src/TicTacToe.hs#L11](https://github.com/nikivazou/tic-tac-toe/blob/master/classic/src/TicTacToe.hs#L11) replace 
+
+< player1 = playerHuman "Me!"
+
+with 
+
+< player1 = playerMinMax
+
+and make sure that your `playerMinMax` always wins the computer. 
 

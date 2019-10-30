@@ -43,13 +43,7 @@ ghci<span class="fu">&gt;</span> [<span class="dv">1</span>,<span class="dv">2</
 ghci<span class="fu">&gt;</span> [] <span class="fu">++</span> [<span class="fl">0.5</span>, <span class="fl">2.5</span>]  
 [<span class="fl">0.5</span>,<span class="fl">2.5</span>]  </code></pre></div>
 <p>It seems that both <code>(*)</code> together with <code>1</code> and <code>(++)</code> along with <code>[]</code> share some common properties.</p>
-<p><strong>Q:</strong> Can you write down the common properties in Haskell terms?</p>
-<p>(Multiplication , 1 )</p>
-<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell">x <span class="fu">++</span> [] <span class="fu">=</span> x 
-[] <span class="fu">++</span> x <span class="fu">=</span> x
-x <span class="fu">++</span> (y <span class="fu">++</span> z) <span class="fu">=</span> (x <span class="fu">++</span> y) <span class="fu">++</span> z 
-
-x <span class="fu">*</span> y <span class="fu">==</span> y <span class="fu">*</span> x </code></pre></div>
+<p><strong>Q:</strong> Can you write down the common properties in Haskell term</p>
 <ul>
 <li><p>The function takes two parameters.</p></li>
 <li><p>The parameters and the returned value have the same type.</p></li>

@@ -54,30 +54,7 @@ That value is the empty list: `[]`.
 
 It seems that both `(*)` together with `1` and `(++)` along with `[]` share some common properties.
 
-**Q:** Can you write down the common properties in Haskell terms?
-
-
-(Multiplication , 1 )
-
-< x ++ [] = x 
-< [] ++ x = x
-< x ++ (y ++ z) = (x ++ y) ++ z 
-< 
-< x * y == y * x 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+**Q:** Can you write down the common properties in Haskell term
 
 - The function takes two parameters.
 

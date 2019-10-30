@@ -6,7 +6,8 @@ Type Classes
 module TypeClasses where
 \end{code}
 
-We have already seen that the `(<)` operator works for a bunch of different underlying data types. For example
+The `(<)` operator can be used to compare a bunch of different underlying data types. 
+For example
 
 < ghci> 2 < 3
 < True 
@@ -25,6 +26,8 @@ Similarly we can compare all sorts of values
 
 “So?”
 Indeed, this is quite unremarkable, since languages since the dawn of time has supported some form of operator “overloading” to support this kind of **ad–hoc polymorphism**.
+
+**Q:** What is the type of `==` in other functional languages (e.g., OCaml)?
 
 However, in Haskell, there is no caste system. There is no distinction between operators and functions. All are first class citizens in Haskell.
 
@@ -101,21 +104,18 @@ then we can create values of the type,
 but can’t view or compare them
 
 < ghci> x = A
-< 
-< <interactive>:1:0:
-<     No instance for (Show Unshowable)
-<       arising from a use of `print' at <interactive>:1:0
-<     Possible fix: add an instance declaration for (Show Unshowable)
-<     In a stmt of a 'do' expression: print it
+< <interactive>:6:1: error:
+< • No instance for (Eq Unshowable) arising from a use of ‘==’
+< • In the expression: x == A
+<   In an equation for ‘it’: it = x == A
 < 
 < ghci> x == x
 < 
-< <interactive>:1:0:
-<     No instance for (Eq Unshowable)
-<       arising from a use of `==' at <interactive>:1:0-5
-<     Possible fix: add an instance declaration for (Eq Unshowable)
-<     In the expression: x == x
-<     In the definition of `it': it = x == x
+< <interactive>:7:1: error:
+< • No instance for (Eq Unshowable) arising from a use of ‘==’
+< • In the expression: x == x
+<   In an equation for ‘it’: it = x == x
+
 
 Again, the previously incomprehensible type error message should make sense to you.
 
@@ -184,19 +184,12 @@ But not all of them
 < (1,2,3,4,5,6,7,8,9,10,1,1,1,1,1,1) == (1,2,3,4,5,6,7,8,9,10,1,1,1,1,1,1)
 
 
-\begin{code}
-instance (Eq a, Eq b, Eq c, Eq d, Eq e, Eq f, Eq g, Eq h, Eq i,
-          Eq j, Eq k, Eq l, Eq m, Eq n, Eq o, Eq w) =>
-         Eq (a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, w) where
-  _ == _ = False 
-\end{code}
-
 Using Typeclasses
 ------------------
 
 We have already see how type classes integrate with the rest of the Haskell's type. 
 
-Recall the `insert` function
+Let's define an `insert` function
 
 \begin{code}
 insert x [] = [x]
@@ -205,10 +198,7 @@ insert x (y:ys)
   | otherwise = y:insert x ys
 \end{code}
 
-Notice that we didn’t write down the type of the `insert`. Lets see what the type is
-
-< <ghci :t insert
-< insert :: Ord t => t -> [t] -> [t]
+**Q:** What is the type of `insert`?
 
 How, did the engine figure this out? 
 Easy enough, if you look at the body of the insert, you’ll see that we compare two key values.
@@ -218,14 +208,12 @@ Constraint Propagation
 
 Every function that calls `insert` should propagate the `Ord` constraint.
 
-\begin{code}
-insertSort :: Ord a => [a] ->[a]
--- insertSort ::[Int] ->[Int]
-insertSort = foldl (flip insert) []  
+**Q:** Can you use `insert` to sort lists? 
 
-f :: Int -> Int 
-f x = x 
+\begin{code}
+insertSort = error "define me!"
 \end{code}
+
 
 Note, that now Haskell is not smart enough to figure out the constraint, 
 so we need an explicit type signature. 
@@ -244,18 +232,22 @@ For example, `Read` is a built-in typeclass, where any instance a of `Read` has 
 which can parse a string and turn it into an a. Thus, `Read` is, in a sense, the dual of the `Show`.
 
 **Q:** Is it possible that `read` creates any value of type `a`?
-Does this remind you any function we saw earlier?
+Does this remind you any function we saw last time?
 
 **Q:** What does the expression `read "2"` evaluate to?
 
-Haskell is foxed, because it doesn’t know what to convert the string to! Did we want an `Int` or a `Double`? Or maybe something else altogether. Thus, we get back the complaint
+Haskell is foxed, because it doesn’t know what to convert the string to! 
+Did we want an `Int` or a `Double`? Or maybe something else altogether. 
+Thus, Haskell will freak out! 
 
-< interactive>:1:0:
-<     Ambiguous type variable `a' in the constraint:
-<       `Read a' arising from a use of `read' at <interactive>:1:0-9
-<     Probable fix: add a type signature that fixes these type variable(s)
+< *** Exception: Prelude.read: no parse
 
-which clearly states what the issue is. Thus, here an explicit type annotation is needed to tell it what to convert the string to. Thus, if we play nice and add the types we get
+In fact, `read` is discouraged from being used in real applications because of this 
+exception and instead `Text.Read.readMaybe` is suggested. 
+
+But, if you insist on using `read`... an explicit type annotation 
+is needed to tell it what to convert the string to. 
+Thus, if we play nice and add the types we get
 
 < ghci> (read "2") :: Int
 < 2
@@ -281,7 +273,7 @@ For example suppose you want to compare two tic-tac-toe tiles.
 
 \begin{code}
 data Tile = X | O | EmptyTile 
---     deriving (Eq)
+    deriving (Eq)
 \end{code}
 
 **Q:** What does 
@@ -297,12 +289,12 @@ is always `False`?
 
 We can write our own tile-equality operator to capture exactly this crazy requirement.
 
-\begin{code}
+\begin{spec}
 instance Eq Tile where
   X == X = True 
   O == O = True 
   _ == _ = False 
-\end{code}
+\end{spec}
 
 **Q:** Now what does 
 
@@ -375,11 +367,6 @@ insert' dict x (y:ys)
 
 insertSort' :: OrdDict a -> [a] ->[a]
 insertSort' dict = foldl (flip (insert' dict)) []  
-
-
-insertSort' :: Ord a => [a] ->[a]
-insertSort' = foldl (flip (insert)) []  
-
 \end{code}
 
 Note how `insertSort'` propagates the dictionary to `insert'`.
@@ -414,14 +401,14 @@ JSON
 *JavaScript Object Notation* or [JSON](http://www.json.org/) is a simple format for transferring data around. Here is an example:
 
 < { "name"    : "Niki"
-< , "age"     : 30
-< , "likes"   : ["guacamole", "coffee", "cats"]
+< , "age"     : 32
+< , "likes"   : ["avocado", "coffee", "cats"]
 < , "hates"   : [ "waiting" , "grapefruit"]
-< , "lunches" : [ {"day" : "monday",    "loc" : "sweet green"}
-<               , {"day" : "tuesday",   "loc" : "stamp"}
-<               , {"day" : "wednesday", "loc" : "farmers market"}
-<               , {"day" : "thursday",  "loc" : "lab"}
-<               , {"day" : "friday",    "loc" : "home"} ]
+< , "lunches" : [ {"day" : "monday",    "food" : "chickpeas"}
+<               , {"day" : "tuesday",   "food" : "pasta"}
+<               , {"day" : "wednesday", "food" : "lentils"}
+<               , {"day" : "thursday",  "food" : "tortilla"}
+<               , {"day" : "friday",    "food" : "pizza"} ]
 < }
 
 In brief, each JSON object is either 
@@ -448,19 +435,19 @@ Thus, the above `JSON` value would be represented by the `JVal`
 \begin{code}
 js1 =
   JObj [("name", JStr "Niki")
-       ,("age",  JNum 30)
-       ,("likes",   JArr [ JStr "guacamole", JStr "coffee", JStr "cats"])
+       ,("age",  JNum 32)
+       ,("likes",   JArr [ JStr "avocado", JStr "coffee", JStr "cats"])
        ,("hates",   JArr [ JStr "waiting"  , JStr "grapefruit"])
        ,("lunches", JArr [ JObj [("day",  JStr "monday")
-                                ,("loc",  JStr "sweet green")]
+                                ,("food",  JStr "chickpeas")]
                          , JObj [("day",  JStr "tuesday")
-                                ,("loc",  JStr "farmers market")]
+                                ,("food",  JStr "pasta")]
                          , JObj [("day",  JStr "wednesday")
-                                ,("loc",  JStr "farmers market")]
+                                ,("food",  JStr "lentils")]
                          , JObj [("day",  JStr "thursday")
-                                ,("loc",  JStr "lab")]
+                                ,("food",  JStr "tortilla")]
                          , JObj [("day",  JStr "friday")
-                                ,("loc",  JStr "home")]
+                                ,("food",  JStr "pizza")]
                          ])
        ]
 \end{code}
@@ -508,32 +495,33 @@ xysToJSON :: (a -> JVal) -> [(String, a)] -> JVal
 xysToJSON f kvs = JObj [ (k, f v) | (k, v) <- kvs ]
 \end{code}
 
-but still, this is getting rather tedious, since we have to redefine versions for each Haskell type, and instantiate them by hand for each conversion
+but still, this is getting rather tedious, since we have to redefine versions for each Haskell type, 
+and instantiate them by hand for each conversion
 
 < ghci> doubleToJSON 4
 < JNum 4.0
 < 
-< ghci> xsToJSON stringToJSON ["coffee", "guacamole", "cats"]
-< JArr [JStr "coffee",JStr "guacamole",JStr "cats"]
+< ghci> xsToJSON stringToJSON ["coffee", "avocado", "cats"]
+< JArr [JStr "coffee",JStr "avocado",JStr "cats"]
 < 
-< ghci> xysToJSON stringToJSON [("day", "monday"), ("loc", "zanzibar")]
-< JObj [("day",JStr "monday"),("loc",JStr "zanzibar")]
+< ghci> xysToJSON stringToJSON [("day", "monday"), ("food", "chickpeas")]
+< JObj [("day",JStr "monday"),("loc",JStr "chickpeas")]
 
 and this gets more hideous when you have richer objects like
 
 \begin{code}
-lunches = [ [("day", "monday"),    ("loc", "sweet green")]
-          , [("day", "tuesday"),   ("loc", "stamp")]
-          , [("day", "wednesday"), ("loc", "farmers market")]
-          , [("day", "thursday"),  ("loc", "lab")]
-          , [("day", "friday"),    ("loc", "home")]
+lunches = [ [("day", "monday"),    ("food", "chickpeas")]
+          , [("day", "tuesday"),   ("food", "pasta")]
+          , [("day", "wednesday"), ("food", "lentils")]
+          , [("day", "thursday"),  ("food", "tortilla")]
+          , [("day", "friday"),    ("food", "pizza")]
           ]
 \end{code}
 
 because we have to go through gymnastics like
 
 < ghci> xsToJSON (xysToJSON stringToJSON) lunches
-< JArr [JObj [("day",JStr "monday"),("loc",JStr "sweet green")],JObj [("day",JStr "tuesday"),("loc",JStr "stamp")]]
+< JArr [JObj [("day",JStr "monday"),("food",JStr "chickpeas")],JObj [("day",JStr "tuesday"),("food",JStr "pasta")],JObj [("day",JStr "wednesday"),("food",JStr "lentils")],JObj [("day",JStr "thursday"),("food",JStr "tortilla")],JObj [("day",JStr "friday"),("food",JStr "pizza")]]
 
 Ugh! So much for readability. Isn’t there a better way? Is it too much to ask for a magical `toJSON` that just works?
 
@@ -606,7 +594,7 @@ instance (JSON a) => JSON [(String, a)] where
 after which, we are all set!
 
 < ghci> toJSON lunches
-< JArr [JObj [("day",JStr "monday"),("loc",JStr "stamp")],JObj [("day",JStr "tuesday"),("loc",JStr "stamp")]]
+< JArr [JObj [("day",JStr "monday"),("food",JStr "chickpeas")],JObj [("day",JStr "tuesday"),("food",JStr "pasta")],JObj [("day",JStr "wednesday"),("food",JStr "lentils")],JObj [("day",JStr "thursday"),("food",JStr "tortilla")],JObj [("day",JStr "friday"),("food",JStr "pizza")]]
 
 It is also useful to bootstrap the serialization for tuples (upto some fixed size) so we can easily write “non-uniform” `JSON` objects where keys are bound to values with different shapes.
 
@@ -632,8 +620,8 @@ Now, we can simply write
 
 \begin{code}
 hs = (("name"   , "Niki")
-     ,("age"    , 30 :: Double)
-     ,("likes"  , ["guacamole", "coffee", "cats"])
+     ,("age"    , 32 :: Double)
+     ,("likes"  , ["avocado", "coffee", "cats"])
      ,("hates"  , ["waiting", "grapefruit"])
      ,("lunches", lunches)
      )
