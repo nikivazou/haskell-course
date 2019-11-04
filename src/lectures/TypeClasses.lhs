@@ -93,8 +93,26 @@ Indeed, we can test this on different (built-in) types
 
 When we type an expression into ghci, it computes the value and then calls show on the result. Thus, if we create a new type by
 
-< ghci> data Unshowable = A | B | C
+\begin{code}
+data Unshowable = A | B | C
+   deriving Eq  
 
+instance Ord Unshowable where 
+  A <= B = True 
+  _ <= _ = False 
+
+instance Show Unshowable where 
+  show A = "a"
+  show B = "B"
+  show C = "C"
+
+
+instance Eq (x1, x2, x3, x4, x5, x6, x7, x8, x9, x10, x11, x12, x13, x14, x15, x16) where 
+ _ == _ = False 
+\end{code}
+
+
+< ghci> 
 then we can create values of the type,
 
 < ghci> let x = A
@@ -192,10 +210,21 @@ We have already see how type classes integrate with the rest of the Haskell's ty
 Let's define an `insert` function
 
 \begin{code}
+
+insert :: Ord a => a -> [a] -> [a]
 insert x [] = [x]
 insert x (y:ys)
   | x <= y    = x:y:ys
   | otherwise = y:insert x ys
+
+-- insertSort [4, 3, 8] = [3, 4, 8]
+
+insertSort0 :: Ord a => [a] -> [a]
+insertSort0 xs = foldr insert [] xs 
+
+insertSort :: Ord a => [a] -> [a]
+insertSort [] = [] 
+insertSort (x:xs) = insert x (insertSort xs)
 \end{code}
 
 **Q:** What is the type of `insert`?
@@ -209,10 +238,6 @@ Constraint Propagation
 Every function that calls `insert` should propagate the `Ord` constraint.
 
 **Q:** Can you use `insert` to sort lists? 
-
-\begin{code}
-insertSort = error "define me!"
-\end{code}
 
 
 Note, that now Haskell is not smart enough to figure out the constraint, 
@@ -291,7 +316,7 @@ We can write our own tile-equality operator to capture exactly this crazy requir
 
 \begin{spec}
 instance Eq Tile where
-  X == X = True 
+  X == X = False  
   O == O = True 
   _ == _ = False 
 \end{spec}
@@ -360,10 +385,10 @@ to a function that takes an extra explicit dictionary argument
 and use this argument to compare values of type `a`.
 
 \begin{code}
-insert' dict x []   = [x]
-insert' dict x (y:ys)
-  | leq dict x y    = x:y:ys
-  | otherwise       = y:insert' dict x ys
+insert' w x []   = [x]
+insert' w x (y:ys)
+  | (leq w) x y  = x:y:ys
+  | otherwise    = y:insert' w x ys
 
 insertSort' :: OrdDict a -> [a] ->[a]
 insertSort' dict = foldl (flip (insert' dict)) []  

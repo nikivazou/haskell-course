@@ -11,14 +11,13 @@ An `Int` can act like a lot of things. It can act like an equatable thing, like 
 Typeclasses are *open*, which means that we can define our own data type, think about what it can act like and connect it with the typeclasses that define its behaviors. 
 Because of that and because of Haskell's great type system that allows us to know a lot about a function just by knowing its type declaration, we can define typeclasses that define behavior that's very general and abstract
 (using terminology from the scary [Category Theory](https://en.wikipedia.org/wiki/Category_theory)). 
-We've met typeclasses that define operations for seeing if two things are equal,comparing two things by some ordering or turning things into a `JSon`. 
+We've met typeclasses that define operations for seeing if two things are equal, comparing two things by some ordering or turning things into a `JSon`. 
 Those are very abstract and elegant behaviors, but we just don't think of them as anything very special because we've been dealing with them for most of our lives. 
 Our goal in the next lectures it to understand the abstract class of Monads. 
 The path to Monads goes throught the classes of functors and applicatives. 
 But let's start today with a simpler class: monoids, which are sort of like socks.
 
 \begin{code}
-
 {-# LANGUAGE FlexibleInstances #-}
 
 module MonoidsAndFoldables where
@@ -29,30 +28,29 @@ import Prelude       hiding (sum)
 \end{code}
 
 
-Monoids
+Semigroups 
 --------
 
 Type classes in Haskell are used to present an interface for types that have some behavior in common. We started out with simple type classes like Eq, which is for types whose values can be equated, and Ord, which is for things that can be put in an order and then moved on to more interesting ones.
 
-When we make a type, we think about which behaviors it supports, i.e. what it can act like and then based on that we decide which type classes to make it an instance of. If it makes sense for values of our type to be equated, we make it an instance of the Eq type class. 
+When we make a type, we think about which behaviors it supports, 
+i.e. what it can act like and then based on that we decide which type classes to make it an instance of. If it makes sense for values of our type to be equated, we make it an instance of the Eq type class. 
 
-Now consider the following: `(*)` is a function that takes two numbers and multiplies them. If we multiply some number with an `1`, the result is always equal to that number. 
-It doesn't matter if we do `1 * x` or `x * 1`, the result is always `x`. 
+Now consider the following: `(+)` is a function that takes two numbers and adds them. 
 *Similarly*, `(++)` is also a function which takes two things and returns a third. 
-Only instead of multiplying numbers, it takes two lists and concatenates them. 
-And much like `(*)`, it also has a certain value which doesn't change the other one when used with `(++)`. 
-That value is the empty list: `[]`.
+Only instead of adding numbers, it takes two lists and concatenates them. 
 
-< ghci> 4 * 1  
-< 4  
-< ghci> 1 * 9  
-< 9  
-< ghci> [1,2,3] ++ []  
-< [1,2,3]  
-< ghci> [] ++ [0.5, 2.5]  
-< [0.5,2.5]  
+< ghci> 4 + 1  
+< 5
+< ghci> 40 + 2  
+< 42
+< ghci> [1,2,3] ++ [4, 5]  
+< [1,2,3,4,5]  
+< ghci> [0.0] ++ [0.5, 2.5]  
+< [0.0,0.5,2.5]  
 
-It seems that both `(*)` together with `1` and `(++)` along with `[]` share some common properties.
+Other than their names, these two functions, share two common properties: 
+
 
 **Q:** Can you write down the common properties in Haskell term
 
@@ -60,37 +58,90 @@ It seems that both `(*)` together with `1` and `(++)` along with `[]` share some
 
 - The parameters and the returned value have the same type.
 
-- There exists such a value that doesn't change other values when used with the binary function.
+There’s another thing that these two operations have in common that may not be as obvious as our previous observations: 
+when we have three or more values and we want to use the binary function to reduce them to a single result, 
+the order in which we apply the binary function to the values doesn’t matter. 
+It doesn’t matter if we do `(3 + 4) + 5` or `3 + (4 + 5)`. 
+Either way, the result is `12`. The same goes for `(++)`:
 
-There's another thing that these two operations have in common that may not be as obvious as our previous observations: when we have three or more values and we want to use the binary function to reduce them to a single result, the order in which we apply the binary function to the values doesn't matter. 
-It doesn't matter if we do `(3 * 4) * 5` or `3 * (4 * 5)`. 
-Either way, the result is `60`. The same goes for `(++)`:
-
-< ghci> (3 * 2) * (8 * 5)  
-< 240  
-< ghci> 3 * (2 * (8 * 5))  
-< 240  
+< ghci> (3 + 2) + (8 + 5)  
+< 18  
+< ghci> 3 + (2 + (8 + 5))  
+< 18  
 < ghci> "la" ++ ("di" ++ "da")  
 < "ladida"  
 < ghci> ("la" ++ "di") ++ "da"  
 < "ladida"  
 
 We call this property *associativity*. 
-`(*)` is associative, and so is `(++)`, but `(-)`, for example, is not. 
+`(+)` is associative, and so is `(++)`, but `(-)`, for example, is not. 
 The expressions `(5 - 3) - 4` and `5 - (3 - 4)` result in different numbers.
 
-By noticing and writing down these properties, we have chanced upon monoids! 
+By noticing and writing down these properties, we have chanced upon semigroups!
+
+
+In mathematics, a semigroup is an algebraic structure consisting 
+of a set together with an associative binary operation.
+
+< class Semigroup a where  
+<   (<>) :: a -> a -> a 
+
+The `Semigroup` type class is defined in `import Data.Semigroup`. 
+
+It has one method, `(<>)`, which is the binary function. 
+It takes two values of the same type and returns a value of that type as well. 
+
+Note of fixity
+--------------
+
+The method `(<>)` is infix. 
+In Haskell we can define infix functions that start with non letter characters
+and even define their priority, e.g., 
+
+< infixr 6 <>
+
+Parenthesis makes infix functions prefix, `e.g., (<>) [1,2] [3, 4]`
+and quotes do the dual (e.g., `f \`map\` [1,2]`).
+
+
+
+The list is an instance of Semigroup with 
+
+< instance Semigroup [a] where 
+<   (<>) = (++)
+
+So, from now on, you can use `(<>)` instead if `(++)`!
+  
+**Q:** Why would you do that? 
+
+But let's think what else do `(+)` and `(++)` have in common? 
+
+Monoids
+-------
+
+Both `(+)` and `(++)` have in common a *neutral element*.
+If we add some number with an `0`, the result is always equal to that number.
+It doesn’t matter if we do `0 + x` or `x + 0`, 
+the result is always `x`. 
+Similarly, `(++)` has also the empty list as a neutral element. 
+ 
+If we extend the type class of semigroups with a neutral (or empty) element, 
+we get monoids!
+
 A monoid is when you have an associative binary function and a value which acts as an identity with respect to that function. 
-When something acts as an identity with respect to a function, it means that when called with that function and some other value, the result is always equal to that other value. 
-`1` is the identity with respect to `(*)` and 
+When something acts as an identity with respect to a function, 
+it means that when called with that function and some other value, 
+the result is always equal to that other value. 
+`0` is the identity with respect to `(+)` and 
 `([])` is the identity with respect to `(++)`. 
 There are a lot of other monoids to be found in the world of Haskell, 
 which is why the `Monoid` type class exists. 
 It's for types which can act like monoids. Let's see how the type class is defined:
 
-< class Monoid m where  
+< class Semigroup m => Monoid m where  
 <     mempty  :: m  
-<     mappend :: m -> m -> m  
+<     mappend :: m -> m -> m
+<     mappend = (<>)  
 <     mconcat :: [m] -> m  
 <     mconcat = foldr mappend mempty  
 
@@ -103,7 +154,8 @@ The first function is `mempty`.
 It's not really a function, since it doesn't take parameters, so it's a polymorphic constant, kind of like  `minBound` from `Bounded`. 
 `mempty` represents the identity value for a particular monoid.
 
-Next up, we have `mappend`, which, as you've probably guessed, is the binary function. 
+
+Next up, we have `mappend`, which is the binary function predefined to be equal to semigroup's `(<>)`.
 It takes two values of the same type and returns a value of that type as well. 
 It's worth noting that the decision to name `mappend` as it's named was kind of unfortunate, because it implies that we're appending two things in some way. 
 While `(++)` does take two lists and append one to the other, 
@@ -117,7 +169,7 @@ It has a default implementation, which just takes mempty as a starting value and
 Because the default implementation is fine for most instances, we won't concern ourselves with `mconcat` too much from now on. 
 When making a type an instance of `Monoid`, it suffices to just implement `mempty` and `mappend`. 
 
-**Q:** Can you think of a reason why we would not use the default implementation of `mconat`?
+**Q:** Can you think of a reason why we would not use the default implementation of `mconcat`?
 
 <!---
 The reason `mconcat` is there at all is because for some instances, there might be a more efficient way to implement mconcat, but for most instances the default implementation is just fine.
@@ -193,20 +245,6 @@ the following two expressions are equal
 < ("one" `mappend` "two") `mappend` "tree" 
 
 
-**Haskell it up!**
-Even when using `mappend` as infix the code has too many characters for a Haskell program. 
-To save up characters the `Monoid` library provides an infix operator `(<>)` that acts exactly like `mappend`.
-
-< infixr 6 <>
-< (<>) :: Monoid m => m -> m -> m
-< (<>) = mappend
-
-Using `(<>)` now we can instead write 
-
-< ghci> "one" <> "two" <> "tree"  
-
-saving `7` characters at each `mappend` call!
-
 To use `mempty` as the monoid list identity we have to write an explicit type annotation, 
 because if we just did `mempty`, GHCi wouldn't know which instance to use, 
 so we had to say we want the list instance. 
@@ -226,14 +264,8 @@ because that's the equivalent of doing `(++)` between all the adjecent lists in 
 
 
 < GOAL: [] ++ xs = xs 
-< -- trivial 
 < GOAL: xs ++ [] = xs 
-< -- by structural induction 
-< 
-< []     ++ [] = [] 
-< (x:xs) ++ [] = x:(xs++[])
-<                  --  Inductive Hypothesis
-<                  = x:xs
+< GOAL: xs ++ (ys ++ zs) = (xs ++ ys) ++ zs
 
 Notice that monoids don't require that `a <> b` be equal to `b <> a`. In the case of the list, they clearly aren't:
 
@@ -242,31 +274,31 @@ Notice that monoids don't require that `a <> b` be equal to `b <> a`. In the cas
 < ghci> "two" <> "one"  
 < "twoone"  
 
-And that's okay. The fact that for multiplication `3 * 5` and `5 * 3` are the same is just a property of multiplication, but it doesn't hold for all (and indeed, most) monoids.
+And that's okay. The fact that for addition `3 + 5` and `5 + 3` are the same is just a property of addition, but it doesn't hold for all (and indeed, most) monoids.
 In fact, we call the monoids that satisfy the property `x <> y == y <> x` 
 commutative monoids. 
 
 The `newtype` keyword
 ----------------
 
-We already examined one way for numbers to be considered monoids. Just have the binary function be `(*)` and the identity value `1`. 
+We already examined one way for numbers to be considered monoids. Just have the binary function be `(+)` and the identity value `0`. 
 It turns out that that's not the only way for numbers to be monoids! 
 
 **Q:** Can you think of another famous binary operator on numbers with an identity element?
 
-Another way is to have the binary function be `(+)` and the identity value `0`:
+Another way is to have the binary function be `(*)` and the identity value `1`:
 
-< ghci> 0 + 4  
+< ghci> 1 * 4  
 < 4  
-< ghci> 5 + 0  
+< ghci> 5 * 1  
 < 5  
-< ghci> (1 + 3) + 5  
-< 9  
-< ghci> 1 + (3 + 5)  
-< 9  
+< ghci> (2 * 3) * 5  
+< 30
+< ghci> 2 * (3 * 5)  
+< 30 
 
-The monoid laws hold, because if you add `0` to any number, the result is that number. 
-And addition is also associative, so we get no problems there. 
+The monoid laws hold, because if you multiply `1` to any number, the result is that number. 
+And multiplication is also associative, so we get no problems there. 
 So now that there are two equally valid ways for numbers to be monoids, which way do choose? 
 Well, we don't have to. 
 
@@ -476,9 +508,12 @@ The `Data.Monoid` module exports two types for this, namely `Product` and `Sum`.
 newtype Sum a =  Sum { getSum' :: a }  
     deriving (Eq, Ord, Read, Show)  
 
+
+instance Num a => Semigroup (Sum a) where
+  Sum x <> Sum y = Sum (x + y)  
+
 instance Num a => Monoid (Sum a) where  
     mempty = Sum 0
-    Sum x `mappend` Sum y = Sum (x + y)  
 \end{code}
 
 
@@ -491,9 +526,11 @@ x || (y || z) == (x || y) || z
 newtype Any a =  Any {  getAny :: a }  
     deriving (Eq, Ord, Read, Show)  
 
+instance Semigroup (Any Bool) where  
+  Any x <> Any y = Any (x || y)      
+
 instance Monoid (Any Bool) where  
     mempty = Any False
-    Any x `mappend` Any y = Any (x || y)      
 \end{code}
 
 
