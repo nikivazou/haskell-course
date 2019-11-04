@@ -72,8 +72,22 @@ ghci<span class="fu">&gt;</span> show <span class="fl">3.14</span>
 <div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell">ghci<span class="fu">&gt;</span> show (<span class="dv">1</span>, <span class="st">&quot;two&quot;</span>, ([],[],[]))
 <span class="st">&quot;(1,\&quot;two\&quot;,([],[],[]))&quot;</span></code></pre></div>
 <p>When we type an expression into ghci, it computes the value and then calls show on the result. Thus, if we create a new type by</p>
-<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell">ghci<span class="fu">&gt;</span> <span class="kw">data</span> <span class="dt">Unshowable</span> <span class="fu">=</span> <span class="dt">A</span> <span class="fu">|</span> <span class="dt">B</span> <span class="fu">|</span> <span class="dt">C</span></code></pre></div>
-<p>then we can create values of the type,</p>
+<div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt;</span> <span class="kw">data</span> <span class="dt">Unshowable</span> <span class="fu">=</span> <span class="dt">A</span> <span class="fu">|</span> <span class="dt">B</span> <span class="fu">|</span> <span class="dt">C</span>
+<span class="ot">&gt;</span>    <span class="kw">deriving</span> <span class="dt">Eq</span>  
+<span class="ot">&gt;</span> 
+<span class="ot">&gt;</span> <span class="kw">instance</span> <span class="dt">Ord</span> <span class="dt">Unshowable</span> <span class="kw">where</span> 
+<span class="ot">&gt;</span>   <span class="dt">A</span> <span class="fu">&lt;=</span> <span class="dt">B</span> <span class="fu">=</span> <span class="dt">True</span> 
+<span class="ot">&gt;</span>   _ <span class="fu">&lt;=</span> _ <span class="fu">=</span> <span class="dt">False</span> 
+<span class="ot">&gt;</span> 
+<span class="ot">&gt;</span> <span class="kw">instance</span> <span class="dt">Show</span> <span class="dt">Unshowable</span> <span class="kw">where</span> 
+<span class="ot">&gt;</span>   show <span class="dt">A</span> <span class="fu">=</span> <span class="st">&quot;a&quot;</span>
+<span class="ot">&gt;</span>   show <span class="dt">B</span> <span class="fu">=</span> <span class="st">&quot;B&quot;</span>
+<span class="ot">&gt;</span>   show <span class="dt">C</span> <span class="fu">=</span> <span class="st">&quot;C&quot;</span>
+<span class="ot">&gt;</span> 
+<span class="ot">&gt;</span> 
+<span class="ot">&gt;</span> <span class="kw">instance</span> <span class="dt">Eq</span> (x1, x2, x3, x4, x5, x6, x7, x8, x9, x10, x11, x12, x13, x14, x15, x16) <span class="kw">where</span> 
+<span class="ot">&gt;</span>  _ <span class="fu">==</span> _ <span class="fu">=</span> <span class="dt">False</span> </code></pre></div>
+<p>&lt; ghci&gt; then we can create values of the type,</p>
 <div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell">ghci<span class="fu">&gt;</span> <span class="kw">let</span> x <span class="fu">=</span> <span class="dt">A</span>
 ghci<span class="fu">&gt;</span> <span class="fu">:</span><span class="kw">type</span> x
 <span class="ot">x ::</span> <span class="dt">Unshowable</span></code></pre></div>
@@ -138,16 +152,26 @@ ghci<span class="fu">&gt;</span> x' <span class="fu">==</span> x'
 <h2 id="using-typeclasses">Using Typeclasses</h2>
 <p>We have already see how type classes integrate with the rest of the Haskell’s type.</p>
 <p>Let’s define an <code>insert</code> function</p>
-<div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt;</span> insert x [] <span class="fu">=</span> [x]
+<div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt;</span> 
+<span class="ot">&gt; insert ::</span> <span class="dt">Ord</span> a <span class="ot">=&gt;</span> a <span class="ot">-&gt;</span> [a] <span class="ot">-&gt;</span> [a]
+<span class="ot">&gt;</span> insert x [] <span class="fu">=</span> [x]
 <span class="ot">&gt;</span> insert x (y<span class="fu">:</span>ys)
 <span class="ot">&gt;</span>   <span class="fu">|</span> x <span class="fu">&lt;=</span> y    <span class="fu">=</span> x<span class="fu">:</span>y<span class="fu">:</span>ys
-<span class="ot">&gt;</span>   <span class="fu">|</span> otherwise <span class="fu">=</span> y<span class="fu">:</span>insert x ys</code></pre></div>
+<span class="ot">&gt;</span>   <span class="fu">|</span> otherwise <span class="fu">=</span> y<span class="fu">:</span>insert x ys
+<span class="ot">&gt;</span> 
+<span class="ot">&gt;</span> <span class="co">-- insertSort [4, 3, 8] = [3, 4, 8]</span>
+<span class="ot">&gt;</span> 
+<span class="ot">&gt; insertSort0 ::</span> <span class="dt">Ord</span> a <span class="ot">=&gt;</span> [a] <span class="ot">-&gt;</span> [a]
+<span class="ot">&gt;</span> insertSort0 xs <span class="fu">=</span> foldr insert [] xs 
+<span class="ot">&gt;</span> 
+<span class="ot">&gt; insertSort ::</span> <span class="dt">Ord</span> a <span class="ot">=&gt;</span> [a] <span class="ot">-&gt;</span> [a]
+<span class="ot">&gt;</span> insertSort [] <span class="fu">=</span> [] 
+<span class="ot">&gt;</span> insertSort (x<span class="fu">:</span>xs) <span class="fu">=</span> insert x (insertSort xs)</code></pre></div>
 <p><strong>Q:</strong> What is the type of <code>insert</code>?</p>
 <p>How, did the engine figure this out? Easy enough, if you look at the body of the insert, you’ll see that we compare two key values.</p>
 <h2 id="constraint-propagation">Constraint Propagation</h2>
 <p>Every function that calls <code>insert</code> should propagate the <code>Ord</code> constraint.</p>
 <p><strong>Q:</strong> Can you use <code>insert</code> to sort lists?</p>
-<div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt;</span> insertSort <span class="fu">=</span> error <span class="st">&quot;define me!&quot;</span></code></pre></div>
 <p>Note, that now Haskell is not smart enough to figure out the constraint, so we need an explicit type signature.</p>
 <h2 id="explicit-signatures">Explicit Signatures</h2>
 <p>In the case of <code>insertSort</code> Haskell could have guessed a proper type. But, there are cases when the use of type classes requires explicit annotations (which change the behavior of the code.)</p>
@@ -207,10 +231,10 @@ forall t1,    t1 <span class="fu">==</span> t1 </code></pre></div>
 <span class="ot">&gt;</span>             }</code></pre></div>
 <p>This dictionary will be an implicit argument to all the functions that use the class methods. The implicit argument will be automatically filled in by the compiler.</p>
 <p>The compiler will transform our <code>insert</code> function to a function that takes an extra explicit dictionary argument and use this argument to compare values of type <code>a</code>.</p>
-<div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt;</span> insert' dict x []   <span class="fu">=</span> [x]
-<span class="ot">&gt;</span> insert' dict x (y<span class="fu">:</span>ys)
-<span class="ot">&gt;</span>   <span class="fu">|</span> leq dict x y    <span class="fu">=</span> x<span class="fu">:</span>y<span class="fu">:</span>ys
-<span class="ot">&gt;</span>   <span class="fu">|</span> otherwise       <span class="fu">=</span> y<span class="fu">:</span>insert' dict x ys
+<div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt;</span> insert' w x []   <span class="fu">=</span> [x]
+<span class="ot">&gt;</span> insert' w x (y<span class="fu">:</span>ys)
+<span class="ot">&gt;</span>   <span class="fu">|</span> (leq w) x y  <span class="fu">=</span> x<span class="fu">:</span>y<span class="fu">:</span>ys
+<span class="ot">&gt;</span>   <span class="fu">|</span> otherwise    <span class="fu">=</span> y<span class="fu">:</span>insert' w x ys
 <span class="ot">&gt;</span> 
 <span class="ot">&gt; insertSort' ::</span> <span class="dt">OrdDict</span> a <span class="ot">-&gt;</span> [a] <span class="ot">-&gt;</span>[a]
 <span class="ot">&gt;</span> insertSort' dict <span class="fu">=</span> foldl (flip (insert' dict)) []  </code></pre></div>

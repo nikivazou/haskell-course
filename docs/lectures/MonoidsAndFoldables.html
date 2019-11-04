@@ -21,55 +21,73 @@
             <h1 id="monoids-foldables-kinds">Monoids &amp; Foldables (&amp; Kinds)</h1>
 <p>This lecture is adjusted from <a href="http://learnyouahaskell.com/functors-applicative-functors-and-monoids">Learn you a Haskell for Great Good!</a>.</p>
 <p>Haskell’s combination of purity, higher order functions, parameterized algebraic data types, and typeclasses allows us to implement <em>polymorphism</em> on a much higher level than possible in other languages. It allows us to abstract over <em>properties of functions</em> (what we call class lows)! We don’t have to think about types belonging to a big hierarchy of types. Instead, we think about what the types can act like and then connect them with the appropriate typeclasses. An <code>Int</code> can act like a lot of things. It can act like an equatable thing, like an ordered thing, like an enumerable thing, etc.</p>
-<p>Typeclasses are <em>open</em>, which means that we can define our own data type, think about what it can act like and connect it with the typeclasses that define its behaviors. Because of that and because of Haskell’s great type system that allows us to know a lot about a function just by knowing its type declaration, we can define typeclasses that define behavior that’s very general and abstract (using terminology from the scary <a href="https://en.wikipedia.org/wiki/Category_theory">Category Theory</a>). We’ve met typeclasses that define operations for seeing if two things are equal,comparing two things by some ordering or turning things into a <code>JSon</code>. Those are very abstract and elegant behaviors, but we just don’t think of them as anything very special because we’ve been dealing with them for most of our lives. Our goal in the next lectures it to understand the abstract class of Monads. The path to Monads goes throught the classes of functors and applicatives. But let’s start today with a simpler class: monoids, which are sort of like socks.</p>
-<div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt;</span> 
-<span class="ot">&gt;</span> <span class="ot">{-# LANGUAGE FlexibleInstances #-}</span>
+<p>Typeclasses are <em>open</em>, which means that we can define our own data type, think about what it can act like and connect it with the typeclasses that define its behaviors. Because of that and because of Haskell’s great type system that allows us to know a lot about a function just by knowing its type declaration, we can define typeclasses that define behavior that’s very general and abstract (using terminology from the scary <a href="https://en.wikipedia.org/wiki/Category_theory">Category Theory</a>). We’ve met typeclasses that define operations for seeing if two things are equal, comparing two things by some ordering or turning things into a <code>JSon</code>. Those are very abstract and elegant behaviors, but we just don’t think of them as anything very special because we’ve been dealing with them for most of our lives. Our goal in the next lectures it to understand the abstract class of Monads. The path to Monads goes throught the classes of functors and applicatives. But let’s start today with a simpler class: monoids, which are sort of like socks.</p>
+<div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt;</span> <span class="ot">{-# LANGUAGE FlexibleInstances #-}</span>
 <span class="ot">&gt;</span> 
 <span class="ot">&gt;</span> <span class="kw">module</span> <span class="dt">MonoidsAndFoldables</span> <span class="kw">where</span>
 <span class="ot">&gt;</span> 
 <span class="ot">&gt;</span> <span class="kw">import </span><span class="dt">Data.Monoid</span>   <span class="kw">hiding</span> (<span class="dt">Any</span>(..), <span class="dt">All</span>(..), <span class="dt">Sum</span>(..))
 <span class="ot">&gt;</span> <span class="kw">import </span><span class="dt">Data.Foldable</span> <span class="kw">hiding</span> (sum)
 <span class="ot">&gt;</span> <span class="kw">import </span><span class="dt">Prelude</span>       <span class="kw">hiding</span> (sum)</code></pre></div>
-<h2 id="monoids">Monoids</h2>
+<h2 id="semigroups">Semigroups</h2>
 <p>Type classes in Haskell are used to present an interface for types that have some behavior in common. We started out with simple type classes like Eq, which is for types whose values can be equated, and Ord, which is for things that can be put in an order and then moved on to more interesting ones.</p>
 <p>When we make a type, we think about which behaviors it supports, i.e. what it can act like and then based on that we decide which type classes to make it an instance of. If it makes sense for values of our type to be equated, we make it an instance of the Eq type class.</p>
-<p>Now consider the following: <code>(*)</code> is a function that takes two numbers and multiplies them. If we multiply some number with an <code>1</code>, the result is always equal to that number. It doesn’t matter if we do <code>1 * x</code> or <code>x * 1</code>, the result is always <code>x</code>. <em>Similarly</em>, <code>(++)</code> is also a function which takes two things and returns a third. Only instead of multiplying numbers, it takes two lists and concatenates them. And much like <code>(*)</code>, it also has a certain value which doesn’t change the other one when used with <code>(++)</code>. That value is the empty list: <code>[]</code>.</p>
-<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell">ghci<span class="fu">&gt;</span> <span class="dv">4</span> <span class="fu">*</span> <span class="dv">1</span>  
-<span class="dv">4</span>  
-ghci<span class="fu">&gt;</span> <span class="dv">1</span> <span class="fu">*</span> <span class="dv">9</span>  
-<span class="dv">9</span>  
-ghci<span class="fu">&gt;</span> [<span class="dv">1</span>,<span class="dv">2</span>,<span class="dv">3</span>] <span class="fu">++</span> []  
-[<span class="dv">1</span>,<span class="dv">2</span>,<span class="dv">3</span>]  
-ghci<span class="fu">&gt;</span> [] <span class="fu">++</span> [<span class="fl">0.5</span>, <span class="fl">2.5</span>]  
-[<span class="fl">0.5</span>,<span class="fl">2.5</span>]  </code></pre></div>
-<p>It seems that both <code>(*)</code> together with <code>1</code> and <code>(++)</code> along with <code>[]</code> share some common properties.</p>
+<p>Now consider the following: <code>(+)</code> is a function that takes two numbers and adds them. <em>Similarly</em>, <code>(++)</code> is also a function which takes two things and returns a third. Only instead of adding numbers, it takes two lists and concatenates them.</p>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell">ghci<span class="fu">&gt;</span> <span class="dv">4</span> <span class="fu">+</span> <span class="dv">1</span>  
+<span class="dv">5</span>
+ghci<span class="fu">&gt;</span> <span class="dv">40</span> <span class="fu">+</span> <span class="dv">2</span>  
+<span class="dv">42</span>
+ghci<span class="fu">&gt;</span> [<span class="dv">1</span>,<span class="dv">2</span>,<span class="dv">3</span>] <span class="fu">++</span> [<span class="dv">4</span>, <span class="dv">5</span>]  
+[<span class="dv">1</span>,<span class="dv">2</span>,<span class="dv">3</span>,<span class="dv">4</span>,<span class="dv">5</span>]  
+ghci<span class="fu">&gt;</span> [<span class="fl">0.0</span>] <span class="fu">++</span> [<span class="fl">0.5</span>, <span class="fl">2.5</span>]  
+[<span class="fl">0.0</span>,<span class="fl">0.5</span>,<span class="fl">2.5</span>]  </code></pre></div>
+<p>Other than their names, these two functions, share two common properties:</p>
 <p><strong>Q:</strong> Can you write down the common properties in Haskell term</p>
 <ul>
 <li><p>The function takes two parameters.</p></li>
 <li><p>The parameters and the returned value have the same type.</p></li>
-<li><p>There exists such a value that doesn’t change other values when used with the binary function.</p></li>
 </ul>
-<p>There’s another thing that these two operations have in common that may not be as obvious as our previous observations: when we have three or more values and we want to use the binary function to reduce them to a single result, the order in which we apply the binary function to the values doesn’t matter. It doesn’t matter if we do <code>(3 * 4) * 5</code> or <code>3 * (4 * 5)</code>. Either way, the result is <code>60</code>. The same goes for <code>(++)</code>:</p>
-<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell">ghci<span class="fu">&gt;</span> (<span class="dv">3</span> <span class="fu">*</span> <span class="dv">2</span>) <span class="fu">*</span> (<span class="dv">8</span> <span class="fu">*</span> <span class="dv">5</span>)  
-<span class="dv">240</span>  
-ghci<span class="fu">&gt;</span> <span class="dv">3</span> <span class="fu">*</span> (<span class="dv">2</span> <span class="fu">*</span> (<span class="dv">8</span> <span class="fu">*</span> <span class="dv">5</span>))  
-<span class="dv">240</span>  
+<p>There’s another thing that these two operations have in common that may not be as obvious as our previous observations: when we have three or more values and we want to use the binary function to reduce them to a single result, the order in which we apply the binary function to the values doesn’t matter. It doesn’t matter if we do <code>(3 + 4) + 5</code> or <code>3 + (4 + 5)</code>. Either way, the result is <code>12</code>. The same goes for <code>(++)</code>:</p>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell">ghci<span class="fu">&gt;</span> (<span class="dv">3</span> <span class="fu">+</span> <span class="dv">2</span>) <span class="fu">+</span> (<span class="dv">8</span> <span class="fu">+</span> <span class="dv">5</span>)  
+<span class="dv">18</span>  
+ghci<span class="fu">&gt;</span> <span class="dv">3</span> <span class="fu">+</span> (<span class="dv">2</span> <span class="fu">+</span> (<span class="dv">8</span> <span class="fu">+</span> <span class="dv">5</span>))  
+<span class="dv">18</span>  
 ghci<span class="fu">&gt;</span> <span class="st">&quot;la&quot;</span> <span class="fu">++</span> (<span class="st">&quot;di&quot;</span> <span class="fu">++</span> <span class="st">&quot;da&quot;</span>)  
 <span class="st">&quot;ladida&quot;</span>  
 ghci<span class="fu">&gt;</span> (<span class="st">&quot;la&quot;</span> <span class="fu">++</span> <span class="st">&quot;di&quot;</span>) <span class="fu">++</span> <span class="st">&quot;da&quot;</span>  
 <span class="st">&quot;ladida&quot;</span>  </code></pre></div>
-<p>We call this property <em>associativity</em>. <code>(*)</code> is associative, and so is <code>(++)</code>, but <code>(-)</code>, for example, is not. The expressions <code>(5 - 3) - 4</code> and <code>5 - (3 - 4)</code> result in different numbers.</p>
-<p>By noticing and writing down these properties, we have chanced upon monoids! A monoid is when you have an associative binary function and a value which acts as an identity with respect to that function. When something acts as an identity with respect to a function, it means that when called with that function and some other value, the result is always equal to that other value. <code>1</code> is the identity with respect to <code>(*)</code> and <code>([])</code> is the identity with respect to <code>(++)</code>. There are a lot of other monoids to be found in the world of Haskell, which is why the <code>Monoid</code> type class exists. It’s for types which can act like monoids. Let’s see how the type class is defined:</p>
-<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="kw">class</span> <span class="dt">Monoid</span> m <span class="kw">where</span>  
+<p>We call this property <em>associativity</em>. <code>(+)</code> is associative, and so is <code>(++)</code>, but <code>(-)</code>, for example, is not. The expressions <code>(5 - 3) - 4</code> and <code>5 - (3 - 4)</code> result in different numbers.</p>
+<p>By noticing and writing down these properties, we have chanced upon semigroups!</p>
+<p>In mathematics, a semigroup is an algebraic structure consisting of a set together with an associative binary operation.</p>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="kw">class</span> <span class="dt">Semigroup</span> a <span class="kw">where</span>  
+<span class="ot">  (&lt;&gt;) ::</span> a <span class="ot">-&gt;</span> a <span class="ot">-&gt;</span> a </code></pre></div>
+<p>The <code>Semigroup</code> type class is defined in <code>import Data.Semigroup</code>.</p>
+<p>It has one method, <code>(&lt;&gt;)</code>, which is the binary function. It takes two values of the same type and returns a value of that type as well.</p>
+<h2 id="note-of-fixity">Note of fixity</h2>
+<p>The method <code>(&lt;&gt;)</code> is infix. In Haskell we can define infix functions that start with non letter characters and even define their priority, e.g.,</p>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="kw">infixr</span> <span class="dv">6</span> <span class="fu">&lt;&gt;</span></code></pre></div>
+<p>Parenthesis makes infix functions prefix, <code>e.g., (&lt;&gt;) [1,2] [3, 4]</code> and quotes do the dual (e.g., <code>f \</code>map` [1,2]`).</p>
+<p>The list is an instance of Semigroup with</p>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="kw">instance</span> <span class="dt">Semigroup</span> [a] <span class="kw">where</span> 
+  (<span class="fu">&lt;&gt;</span>) <span class="fu">=</span> (<span class="fu">++</span>)</code></pre></div>
+<p>So, from now on, you can use <code>(&lt;&gt;)</code> instead if <code>(++)</code>!</p>
+<p><strong>Q:</strong> Why would you do that?</p>
+<p>But let’s think what else do <code>(+)</code> and <code>(++)</code> have in common?</p>
+<h2 id="monoids">Monoids</h2>
+<p>Both <code>(+)</code> and <code>(++)</code> have in common a <em>neutral element</em>. If we add some number with an <code>0</code>, the result is always equal to that number. It doesn’t matter if we do <code>0 + x</code> or <code>x + 0</code>, the result is always <code>x</code>. Similarly, <code>(++)</code> has also the empty list as a neutral element.</p>
+<p>If we extend the type class of semigroups with a neutral (or empty) element, we get monoids!</p>
+<p>A monoid is when you have an associative binary function and a value which acts as an identity with respect to that function. When something acts as an identity with respect to a function, it means that when called with that function and some other value, the result is always equal to that other value. <code>0</code> is the identity with respect to <code>(+)</code> and <code>([])</code> is the identity with respect to <code>(++)</code>. There are a lot of other monoids to be found in the world of Haskell, which is why the <code>Monoid</code> type class exists. It’s for types which can act like monoids. Let’s see how the type class is defined:</p>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="kw">class</span> <span class="dt">Semigroup</span> m <span class="ot">=&gt;</span> <span class="dt">Monoid</span> m <span class="kw">where</span>  
 <span class="ot">    mempty  ::</span> m  
-<span class="ot">    mappend ::</span> m <span class="ot">-&gt;</span> m <span class="ot">-&gt;</span> m  
+<span class="ot">    mappend ::</span> m <span class="ot">-&gt;</span> m <span class="ot">-&gt;</span> m
+    mappend <span class="fu">=</span> (<span class="fu">&lt;&gt;</span>)  
 <span class="ot">    mconcat ::</span> [m] <span class="ot">-&gt;</span> m  
     mconcat <span class="fu">=</span> foldr mappend mempty  </code></pre></div>
 <p>The <code>Monoid</code> type class is defined in <code>import Data.Monoid</code>. Let’s take some time and get properly acquainted with it.</p>
 <p>The first function is <code>mempty</code>. It’s not really a function, since it doesn’t take parameters, so it’s a polymorphic constant, kind of like <code>minBound</code> from <code>Bounded</code>. <code>mempty</code> represents the identity value for a particular monoid.</p>
-<p>Next up, we have <code>mappend</code>, which, as you’ve probably guessed, is the binary function. It takes two values of the same type and returns a value of that type as well. It’s worth noting that the decision to name <code>mappend</code> as it’s named was kind of unfortunate, because it implies that we’re appending two things in some way. While <code>(++)</code> does take two lists and append one to the other, <code>(*)</code> doesn’t really do any appending, it just multiplies two numbers together. When we meet other instances of <code>Monoid</code>, we’ll see that most of them don’t append values either, so avoid thinking in terms of appending and just think in terms of <code>mappend</code> being a binary function that takes two monoid values and returns a third.</p>
+<p>Next up, we have <code>mappend</code>, which is the binary function predefined to be equal to semigroup’s <code>(&lt;&gt;)</code>. It takes two values of the same type and returns a value of that type as well. It’s worth noting that the decision to name <code>mappend</code> as it’s named was kind of unfortunate, because it implies that we’re appending two things in some way. While <code>(++)</code> does take two lists and append one to the other, <code>(*)</code> doesn’t really do any appending, it just multiplies two numbers together. When we meet other instances of <code>Monoid</code>, we’ll see that most of them don’t append values either, so avoid thinking in terms of appending and just think in terms of <code>mappend</code> being a binary function that takes two monoid values and returns a third.</p>
 <p>The last function in this type class definition is the default function <code>mconcat</code>. It takes a list of monoid values and reduces them to a single value by doing <code>mappend</code> between the list’s elements. It has a default implementation, which just takes mempty as a starting value and folds the list from the right with mappend. Because the default implementation is fine for most instances, we won’t concern ourselves with <code>mconcat</code> too much from now on. When making a type an instance of <code>Monoid</code>, it suffices to just implement <code>mempty</code> and <code>mappend</code>.</p>
-<p><strong>Q:</strong> Can you think of a reason why we would not use the default implementation of <code>mconat</code>?</p>
+<p><strong>Q:</strong> Can you think of a reason why we would not use the default implementation of <code>mconcat</code>?</p>
 <!---
 The reason `mconcat` is there at all is because for some instances, there might be a more efficient way to implement mconcat, but for most instances the default implementation is just fine.
 -->
@@ -105,13 +123,6 @@ ghci<span class="fu">&gt;</span> mconcat [[<span class="dv">1</span>,<span class
 <p>Haskell defaults infix operators to be left associative, that is the following two expressions are equal</p>
 <div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="st">&quot;one&quot;</span> <span class="ot">`mappend`</span> <span class="st">&quot;two&quot;</span> <span class="ot">`mappend`</span> <span class="st">&quot;tree&quot;</span> 
 (<span class="st">&quot;one&quot;</span> <span class="ot">`mappend`</span> <span class="st">&quot;two&quot;</span>) <span class="ot">`mappend`</span> <span class="st">&quot;tree&quot;</span> </code></pre></div>
-<p><strong>Haskell it up!</strong> Even when using <code>mappend</code> as infix the code has too many characters for a Haskell program. To save up characters the <code>Monoid</code> library provides an infix operator <code>(&lt;&gt;)</code> that acts exactly like <code>mappend</code>.</p>
-<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="kw">infixr</span> <span class="dv">6</span> <span class="fu">&lt;&gt;</span>
-<span class="ot">(&lt;&gt;) ::</span> <span class="dt">Monoid</span> m <span class="ot">=&gt;</span> m <span class="ot">-&gt;</span> m <span class="ot">-&gt;</span> m
-(<span class="fu">&lt;&gt;</span>) <span class="fu">=</span> mappend</code></pre></div>
-<p>Using <code>(&lt;&gt;)</code> now we can instead write</p>
-<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell">ghci<span class="fu">&gt;</span> <span class="st">&quot;one&quot;</span> <span class="fu">&lt;&gt;</span> <span class="st">&quot;two&quot;</span> <span class="fu">&lt;&gt;</span> <span class="st">&quot;tree&quot;</span>  </code></pre></div>
-<p>saving <code>7</code> characters at each <code>mappend</code> call!</p>
 <p>To use <code>mempty</code> as the monoid list identity we have to write an explicit type annotation, because if we just did <code>mempty</code>, GHCi wouldn’t know which instance to use, so we had to say we want the list instance. We were able to use the general type of <code>[a]</code> (as opposed to specifying <code>[Int]</code> or <code>[String]</code>) because the empty list can act as if it contains any type.</p>
 <p>Because <code>mconcat</code> has a default implementation, we get it for free when we make something an instance of <code>Monoid</code>! In the case of the list, <code>mconcat</code> turns out to be just concat. It takes a list of lists and flattens it, because that’s the equivalent of doing <code>(++)</code> between all the adjecent lists in a list.</p>
 <p><strong>Q:</strong> Do the monoid laws hold for the list instance?</p>
@@ -119,33 +130,27 @@ ghci<span class="fu">&gt;</span> mconcat [[<span class="dv">1</span>,<span class
 [] <span class="fu">++</span> xs <span class="fu">=</span> xs 
 (y<span class="fu">:</span>ys) <span class="fu">++</span> xs <span class="fu">=</span> y<span class="fu">:</span>(ys <span class="fu">++</span> xs)</code></pre></div>
 <div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="dt">GOAL</span><span class="fu">:</span> [] <span class="fu">++</span> xs <span class="fu">=</span> xs 
-<span class="co">-- trivial </span>
 <span class="dt">GOAL</span><span class="fu">:</span> xs <span class="fu">++</span> [] <span class="fu">=</span> xs 
-<span class="co">-- by structural induction </span>
-
-[]     <span class="fu">++</span> [] <span class="fu">=</span> [] 
-(x<span class="fu">:</span>xs) <span class="fu">++</span> [] <span class="fu">=</span> x<span class="fu">:</span>(xs<span class="fu">++</span>[])
-                 <span class="co">--  Inductive Hypothesis</span>
-                 <span class="fu">=</span> x<span class="fu">:</span>xs</code></pre></div>
+<span class="dt">GOAL</span><span class="fu">:</span> xs <span class="fu">++</span> (ys <span class="fu">++</span> zs) <span class="fu">=</span> (xs <span class="fu">++</span> ys) <span class="fu">++</span> zs</code></pre></div>
 <p>Notice that monoids don’t require that <code>a &lt;&gt; b</code> be equal to <code>b &lt;&gt; a</code>. In the case of the list, they clearly aren’t:</p>
 <div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell">ghci<span class="fu">&gt;</span> <span class="st">&quot;one&quot;</span> <span class="fu">&lt;&gt;</span> <span class="st">&quot;two&quot;</span>  
 <span class="st">&quot;onetwo&quot;</span>  
 ghci<span class="fu">&gt;</span> <span class="st">&quot;two&quot;</span> <span class="fu">&lt;&gt;</span> <span class="st">&quot;one&quot;</span>  
 <span class="st">&quot;twoone&quot;</span>  </code></pre></div>
-<p>And that’s okay. The fact that for multiplication <code>3 * 5</code> and <code>5 * 3</code> are the same is just a property of multiplication, but it doesn’t hold for all (and indeed, most) monoids. In fact, we call the monoids that satisfy the property <code>x &lt;&gt; y == y &lt;&gt; x</code> commutative monoids.</p>
+<p>And that’s okay. The fact that for addition <code>3 + 5</code> and <code>5 + 3</code> are the same is just a property of addition, but it doesn’t hold for all (and indeed, most) monoids. In fact, we call the monoids that satisfy the property <code>x &lt;&gt; y == y &lt;&gt; x</code> commutative monoids.</p>
 <h2 id="the-newtype-keyword">The <code>newtype</code> keyword</h2>
-<p>We already examined one way for numbers to be considered monoids. Just have the binary function be <code>(*)</code> and the identity value <code>1</code>. It turns out that that’s not the only way for numbers to be monoids!</p>
+<p>We already examined one way for numbers to be considered monoids. Just have the binary function be <code>(+)</code> and the identity value <code>0</code>. It turns out that that’s not the only way for numbers to be monoids!</p>
 <p><strong>Q:</strong> Can you think of another famous binary operator on numbers with an identity element?</p>
-<p>Another way is to have the binary function be <code>(+)</code> and the identity value <code>0</code>:</p>
-<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell">ghci<span class="fu">&gt;</span> <span class="dv">0</span> <span class="fu">+</span> <span class="dv">4</span>  
+<p>Another way is to have the binary function be <code>(*)</code> and the identity value <code>1</code>:</p>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell">ghci<span class="fu">&gt;</span> <span class="dv">1</span> <span class="fu">*</span> <span class="dv">4</span>  
 <span class="dv">4</span>  
-ghci<span class="fu">&gt;</span> <span class="dv">5</span> <span class="fu">+</span> <span class="dv">0</span>  
+ghci<span class="fu">&gt;</span> <span class="dv">5</span> <span class="fu">*</span> <span class="dv">1</span>  
 <span class="dv">5</span>  
-ghci<span class="fu">&gt;</span> (<span class="dv">1</span> <span class="fu">+</span> <span class="dv">3</span>) <span class="fu">+</span> <span class="dv">5</span>  
-<span class="dv">9</span>  
-ghci<span class="fu">&gt;</span> <span class="dv">1</span> <span class="fu">+</span> (<span class="dv">3</span> <span class="fu">+</span> <span class="dv">5</span>)  
-<span class="dv">9</span>  </code></pre></div>
-<p>The monoid laws hold, because if you add <code>0</code> to any number, the result is that number. And addition is also associative, so we get no problems there. So now that there are two equally valid ways for numbers to be monoids, which way do choose? Well, we don’t have to.</p>
+ghci<span class="fu">&gt;</span> (<span class="dv">2</span> <span class="fu">*</span> <span class="dv">3</span>) <span class="fu">*</span> <span class="dv">5</span>  
+<span class="dv">30</span>
+ghci<span class="fu">&gt;</span> <span class="dv">2</span> <span class="fu">*</span> (<span class="dv">3</span> <span class="fu">*</span> <span class="dv">5</span>)  
+<span class="dv">30</span> </code></pre></div>
+<p>The monoid laws hold, because if you multiply <code>1</code> to any number, the result is that number. And multiplication is also associative, so we get no problems there. So now that there are two equally valid ways for numbers to be monoids, which way do choose? Well, we don’t have to.</p>
 <p>We can use the <code>newtype</code> keyword to define multiple monoid instances for numbers!</p>
 <p>So far, we’ve learned how to make our own algebraic data types by using the <code>data</code> keyword. We’ve also learned how to give existing types synonyms with the <code>type</code> keyword. Now, we’ll be taking a look at how to make new types out of existing data types by using the <code>newtype</code> keyword and why we’d want to do that in the first place.</p>
 <p>To be able to use numbers as monoids both on <code>(*)</code> and <code>(+)</code> we can define two different data types that wrap numbers.</p>
@@ -229,16 +234,21 @@ ghci<span class="fu">&gt;</span> <span class="dt">Prods</span> <span class="dv">
 <div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt;</span> <span class="kw">newtype</span> <span class="dt">Sum</span> a <span class="fu">=</span>  <span class="dt">Sum</span> {<span class="ot"> getSum' ::</span> a }  
 <span class="ot">&gt;</span>     <span class="kw">deriving</span> (<span class="dt">Eq</span>, <span class="dt">Ord</span>, <span class="dt">Read</span>, <span class="dt">Show</span>)  
 <span class="ot">&gt;</span> 
+<span class="ot">&gt;</span> 
+<span class="ot">&gt;</span> <span class="kw">instance</span> <span class="dt">Num</span> a <span class="ot">=&gt;</span> <span class="dt">Semigroup</span> (<span class="dt">Sum</span> a) <span class="kw">where</span>
+<span class="ot">&gt;</span>   <span class="dt">Sum</span> x <span class="fu">&lt;&gt;</span> <span class="dt">Sum</span> y <span class="fu">=</span> <span class="dt">Sum</span> (x <span class="fu">+</span> y)  
+<span class="ot">&gt;</span> 
 <span class="ot">&gt;</span> <span class="kw">instance</span> <span class="dt">Num</span> a <span class="ot">=&gt;</span> <span class="dt">Monoid</span> (<span class="dt">Sum</span> a) <span class="kw">where</span>  
-<span class="ot">&gt;</span>     mempty <span class="fu">=</span> <span class="dt">Sum</span> <span class="dv">0</span>
-<span class="ot">&gt;</span>     <span class="dt">Sum</span> x <span class="ot">`mappend`</span> <span class="dt">Sum</span> y <span class="fu">=</span> <span class="dt">Sum</span> (x <span class="fu">+</span> y)  </code></pre></div>
+<span class="ot">&gt;</span>     mempty <span class="fu">=</span> <span class="dt">Sum</span> <span class="dv">0</span></code></pre></div>
 <p>False || x == x x || False == x x || (y || z) == (x || y) || z</p>
 <div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt;</span> <span class="kw">newtype</span> <span class="dt">Any</span> a <span class="fu">=</span>  <span class="dt">Any</span> {<span class="ot">  getAny ::</span> a }  
 <span class="ot">&gt;</span>     <span class="kw">deriving</span> (<span class="dt">Eq</span>, <span class="dt">Ord</span>, <span class="dt">Read</span>, <span class="dt">Show</span>)  
 <span class="ot">&gt;</span> 
+<span class="ot">&gt;</span> <span class="kw">instance</span> <span class="dt">Semigroup</span> (<span class="dt">Any</span> <span class="dt">Bool</span>) <span class="kw">where</span>  
+<span class="ot">&gt;</span>   <span class="dt">Any</span> x <span class="fu">&lt;&gt;</span> <span class="dt">Any</span> y <span class="fu">=</span> <span class="dt">Any</span> (x <span class="fu">||</span> y)      
+<span class="ot">&gt;</span> 
 <span class="ot">&gt;</span> <span class="kw">instance</span> <span class="dt">Monoid</span> (<span class="dt">Any</span> <span class="dt">Bool</span>) <span class="kw">where</span>  
-<span class="ot">&gt;</span>     mempty <span class="fu">=</span> <span class="dt">Any</span> <span class="dt">False</span>
-<span class="ot">&gt;</span>     <span class="dt">Any</span> x <span class="ot">`mappend`</span> <span class="dt">Any</span> y <span class="fu">=</span> <span class="dt">Any</span> (x <span class="fu">||</span> y)      </code></pre></div>
+<span class="ot">&gt;</span>     mempty <span class="fu">=</span> <span class="dt">Any</span> <span class="dt">False</span></code></pre></div>
 <div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="kw">newtype</span> <span class="dt">Product</span> a <span class="fu">=</span>  <span class="dt">Product</span> {<span class="ot"> getProduct ::</span> a }  
     <span class="kw">deriving</span> (<span class="dt">Eq</span>, <span class="dt">Ord</span>, <span class="dt">Read</span>, <span class="dt">Show</span>)  </code></pre></div>
 <p>Simple, just a newtype wrapper with one type parameter along with some derived instances. Its instance for <code>Monoid</code> goes a little something like this:</p>
