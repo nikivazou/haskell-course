@@ -101,7 +101,7 @@ and even define their priority, e.g.,
 < infixr 6 <>
 
 Parenthesis makes infix functions prefix, `e.g., (<>) [1,2] [3, 4]`
-and quotes do the dual (e.g., `f \`map\` [1,2]`).
+and quotes do the dual (e.g., f \`map\` [1,2]).
 
 
 
@@ -199,12 +199,14 @@ Haskell *doesn't enforce these laws*, so we as the programmer have to be careful
 Lists are monoids
 ------------------
 
-Yes, lists are monoids! Like we've seen, the `(++)` function and the empty list `[]` form a monoid. 
+Yes, lists are monoids! 
+We already saw that lists are semigroups.
+To define the monoid instance, we only need to add 
+the empty list `[]` as the empty element. 
 The instance is very simple:
 
 < instance Monoid [a] where  
-<     mempty  = []  
-<     mappend = (++)  
+<     mempty = []  
 
 Lists are an instance of the `Monoid` type class regardless of the type of the elements they hold. 
 
@@ -475,7 +477,7 @@ When we use `newtype` to wrap an existing type, the type that we get is separate
 
 < newtype Move = Move { getMove :: (Int,Int) }
 
-We can't use `(<)` to compare `Move` with `(Int,Int)`
+We can't use `(<)` to compare `Move` with `(Int,Int)`.
 We cannot even compare `Move` with `Move` unless we define an `Ord` instance on `Move`.
 
 When we use record syntax in our `newtype` declarations, we get functions for converting between the new type and the original type: namely the value constructor of our `newtype` and the function for extracting the value in its field. 
@@ -504,54 +506,22 @@ We can have our cake and eat it too.
 The `Data.Monoid` module exports two types for this, namely `Product` and `Sum`. 
 `Product` is defined like this:
 
-\begin{code}
-newtype Sum a =  Sum { getSum' :: a }  
-    deriving (Eq, Ord, Read, Show)  
-
-
-instance Num a => Semigroup (Sum a) where
-  Sum x <> Sum y = Sum (x + y)  
-
-instance Num a => Monoid (Sum a) where  
-    mempty = Sum 0
-\end{code}
-
-
-
-False || x == x 
-x || False == x 
-x || (y || z) == (x || y) || z
-
-\begin{code}
-newtype Any a =  Any {  getAny :: a }  
-    deriving (Eq, Ord, Read, Show)  
-
-instance Semigroup (Any Bool) where  
-  Any x <> Any y = Any (x || y)      
-
-instance Monoid (Any Bool) where  
-    mempty = Any False
-\end{code}
-
-
-
 < newtype Product a =  Product { getProduct :: a }  
 <     deriving (Eq, Ord, Read, Show)  
 
 Simple, just a newtype wrapper with one type parameter along with some derived instances. 
 Its instance for `Monoid` goes a little something like this:
 
+< instance Num a => Semigroup (Produce a) where 
+<     Product x <> Product y = Product (x * y)  
+< 
 < instance Num a => Monoid (Product a) where  
 <     mempty = Product 1  
-<     Product x `mappend` Product y = Product (x * y)  
 
 `mempty` is just `1` wrapped in a `Product` constructor. 
 `mappend` pattern matches on the `Product` constructor, multiplies the two numbers and then wraps the resulting number back. 
 As you can see, there's a `Num a` class constraint. 
 So this means that `Product a` is an instance of `Monoid` for all `a`'s that are already an instance of `Num`. 
-
-**Q:** We saw that we can use `(<>)` instead of `mappend` to append monoids. 
-Can we use `(<>)` instead of `mappend` in the monoid instance definition?
 
 To use `Product a` as a monoid, we have to do some newtype wrapping and unwrapping:
 
@@ -575,16 +545,6 @@ But a bit later, we'll see how these `Monoid` instances that may seem trivial at
 < 3  
 < ghci> getSum . mconcat . map Sum $ [1,2,3]  
 < 6  
-
-< newtype Product a =  Product { getProduct :: a }  
-<     deriving (Eq, Ord, Read, Show)  
-
-Simple, just a newtype wrapper with one type parameter along with some derived instances. 
-Its instance for `Monoid` goes a little something like this:
-
-< instance Num a => Monoid (Product a) where  
-<     mempty = Product 1  
-<     Product x `mappend` Product y = Product (x * y)  
 
 
 
@@ -650,12 +610,9 @@ To save ourselves precious keystrokes, we've chosen to import it qualified as `F
 
 Alright, so what are some of the functions that this type class defines? 
 
-When we introduced recusion over lists, we saw the functions `foldl` and `length`, 
-But what are the real types of these functions?
-
 Well, among them are foldr, foldl, foldr1 and foldl1. 
 Huh? But we already know these functions, what's so new about this? 
-Let's compare the types of Foldable's foldr and the foldr from the Prelude to see how they differ:
+Let's compare the types of Foldable's `foldr` and the `foldr` from the `Prelude` to see how they differ:
 
 < ghci> :t length  
 < length :: Foldable t => t a -> Int
@@ -878,10 +835,7 @@ with the same type as `mapReduce` that returns a non-equivalent function?
 \begin{code}
 mapReduceBad :: (Chunkable a, Monoid b) 
              => (a -> b) -> (a -> b)
-mapReduceBad f x = mempty
-
-id' :: Monoid a => a -> a 
-id' x = mempty 
+mapReduceBad f = undefined 
 \end{code}
 
 Ok, assuming that the returning function behaves as the input one, 
@@ -890,10 +844,6 @@ Nothing for now, but
 in a pure function like Hakell the `map` portion of `foldMap` 
 can get parallelised, and then we got efficiency!
 
-
-**Project Idea:** 
-Define the mapReducable type class and use it to (actually) parallelize 
-divide and conquer algorithms, for example [string matching](https://nikivazou.github.io/static/Haskell17/a-tale.pdf). 
 
 Summary
 -------
