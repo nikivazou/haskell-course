@@ -71,19 +71,7 @@ map<span class="ot">  ::</span> (a <span class="ot">-&gt;</span> b) <span class=
 <span class="ot">&gt;</span> 
 <span class="ot">&gt;</span> <span class="kw">instance</span> <span class="dt">Transformable</span> [] <span class="kw">where</span>
 <span class="ot">&gt;</span>   tx _ []     <span class="fu">=</span> []
-<span class="ot">&gt;</span>   tx f (x<span class="fu">:</span>xs) <span class="fu">=</span> f x <span class="fu">:</span> tx f xs
-<span class="ot">&gt;</span> 
-<span class="ot">&gt;</span> <span class="co">-- data Maybe a = Nothing | Just a </span>
-<span class="ot">&gt;</span> <span class="kw">instance</span> <span class="dt">Transformable</span> <span class="dt">Maybe</span> <span class="kw">where</span> 
-<span class="ot">&gt;</span>   <span class="co">-- tx :: (a -&gt; b) -&gt; Maybe a -&gt; Maybe b</span>
-<span class="ot">&gt;</span>   tx f <span class="dt">Nothing</span>  <span class="fu">=</span> <span class="dt">Nothing</span> 
-<span class="ot">&gt;</span>   tx f (<span class="dt">Just</span> x) <span class="fu">=</span> <span class="dt">Just</span> (f x) 
-<span class="ot">&gt;</span> 
-<span class="ot">&gt;</span> <span class="kw">instance</span> <span class="dt">Transformable</span> <span class="dt">IO</span> <span class="kw">where</span>
-<span class="ot">&gt;</span>   <span class="co">--  tx :: (a -&gt; b) -&gt; IO a -&gt; IO b</span>
-<span class="ot">&gt;</span>   tx f io <span class="fu">=</span> <span class="kw">do</span> 
-<span class="ot">&gt;</span>     a <span class="ot">&lt;-</span> io
-<span class="ot">&gt;</span>     return (f a) </code></pre></div>
+<span class="ot">&gt;</span>   tx f (x<span class="fu">:</span>xs) <span class="fu">=</span> f x <span class="fu">:</span> tx f xs</code></pre></div>
 <p>Both functions are defined using the same programming pattern, namely mapping the empty list to itself, and a non-empty list to some function applied to the head of the list and the result of recursively processing the tail of the list in the same manner. Abstracting this pattern gives the library function called map</p>
 <div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell">map<span class="ot">         ::</span> (a <span class="ot">-&gt;</span> b) <span class="ot">-&gt;</span> [a] <span class="ot">-&gt;</span> [b]
 map f []     <span class="fu">=</span> []
@@ -96,6 +84,7 @@ sqr <span class="fu">=</span> tx (<span class="fu">^</span><span class="dv">2</s
 <div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt;</span> foo f (<span class="dt">Just</span> x)  <span class="fu">=</span> <span class="dt">Just</span> (f x)
 <span class="ot">&gt;</span> foo f (<span class="dt">Nothing</span>) <span class="fu">=</span> <span class="dt">Nothing</span></code></pre></div>
 <p>Ha! It is also a transformation on <code>Maybe</code> values. Let’s go back and make the proper instance!</p>
+<p><strong>Q:</strong> Define the tranformable instance for <code>Maybe</code>.</p>
 <h2 id="generalizing-map">Generalizing map</h2>
 <p>The same notion of mapping applies to other types, for example, you can imagine:</p>
 <div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="ot">mmap   ::</span> (a <span class="ot">-&gt;</span> b) <span class="ot">-&gt;</span> <span class="dt">Maybe</span> a <span class="ot">-&gt;</span> <span class="dt">Maybe</span> b</code></pre></div>
@@ -135,30 +124,20 @@ ghci <span class="fu">&gt;</span> fmap length (<span class="dt">Bin</span> <span
 <p><strong>Q:</strong> Let’s define the functor instance for trees!</p>
 <p><strong>Q:</strong> Can you define an instance now for an association tree?</p>
 <div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt;</span> <span class="kw">data</span> <span class="dt">Map</span> k v <span class="fu">=</span> <span class="dt">MTip</span> <span class="fu">|</span> <span class="dt">MBin</span> k v (<span class="dt">Map</span> k v) (<span class="dt">Map</span> k v)
-<span class="ot">&gt;</span>   <span class="kw">deriving</span> (<span class="dt">Eq</span>, <span class="dt">Show</span>)
-<span class="ot">&gt;</span> 
-<span class="ot">&gt;</span> <span class="co">-- fmap :: (a -&gt; b) -&gt; IO a -&gt; IO b</span>
-<span class="ot">&gt;</span> 
-<span class="ot">&gt;</span> 
-<span class="ot">&gt;</span> bar <span class="fu">=</span>  fmap (\str <span class="ot">-&gt;</span> (<span class="st">&quot;Hello &quot;</span> <span class="fu">++</span> str)) getLine
-<span class="ot">&gt;</span> 
-<span class="ot">&gt;</span> <span class="co">-- instance Functor (\k -&gt; Map k v) where </span>
-<span class="ot">&gt;</span> <span class="co">-- fmap :: (a -&gt; b) -&gt; Map k a -&gt; Map k b  </span>
-<span class="ot">&gt;</span> <span class="co">--   fmap f MTip = MTip</span>
-<span class="ot">&gt;</span> <span class="co">--   fmap f (MBin k v l r) = MBin k (f v) (fmap f l) (fmap f r) </span></code></pre></div>
+<span class="ot">&gt;</span>   <span class="kw">deriving</span> (<span class="dt">Eq</span>, <span class="dt">Show</span>)</code></pre></div>
 <p><strong>Q:</strong> Can you fmap on an <code>IO a</code> action?</p>
 <p>Note how <code>IO</code> is also some sort of a container of values <code>a</code>, that are generated using input and output.</p>
 <p>An interesting example of mapping over <code>IO</code> actions is getting the line from the input <code>getLine</code>, which returns a <code>String</code> or a <code>[Char]</code> and then mapping each character to lower case. Thus, we use the same <em>overloaded</em> function, to map twice, once over lists and once over <code>IO</code>.</p>
 <div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell">fmap (fmap C.toLower) getLine</code></pre></div>
 <h2 id="functor-laws">Functor laws</h2>
 <p>Most classes come with laws. Lets try to guess the <code>Functor</code> laws</p>
-<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell">fmap id x      <span class="fu">==?</span> x </code></pre></div>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell">fmap id x      <span class="fu">==?</span> <span class="fu">...</span></code></pre></div>
 <p>For example,</p>
 <div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell">ghci<span class="fu">&gt;</span> fmap id [<span class="dv">1</span><span class="fu">..</span><span class="dv">3</span>]
 [<span class="dv">1</span>,<span class="dv">2</span>,<span class="dv">3</span>]
 ghci<span class="fu">&gt;</span> fmap id <span class="st">&quot;good morning&quot;</span>
 <span class="st">&quot;good morning&quot;</span></code></pre></div>
-<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell">fmap (f <span class="fu">.</span> g) x <span class="fu">==?</span> fmap f (fmap g x)</code></pre></div>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell">fmap (f <span class="fu">.</span> g) x <span class="fu">==?</span> <span class="fu">...</span></code></pre></div>
 <p>For example,</p>
 <div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell">ghci<span class="fu">&gt;</span> fmap ((<span class="fu">+</span><span class="dv">1</span>) <span class="fu">.</span> (<span class="fu">+</span><span class="dv">2</span>)) [<span class="dv">1</span><span class="fu">..</span><span class="dv">3</span>]
 [<span class="dv">4</span>,<span class="dv">5</span>,<span class="dv">6</span>]
@@ -186,7 +165,7 @@ lift1 f (<span class="dt">Just</span> x) <span class="fu">=</span> <span class="
 lift2 f (x<span class="fu">:</span>xs) (y<span class="fu">:</span>ys) <span class="fu">=</span> f x y <span class="fu">:</span> lift2 f xs ys
 lift2 f _      _      <span class="fu">=</span> []
 
-<span class="ot">lift2           ::</span> (a1 <span class="ot">-&gt;</span> a2 <span class="ot">-&gt;</span> b) <span class="ot">-&gt;</span> <span class="dt">Maybe</span> a1 <span class="ot">-&gt;</span> <span class="dt">Maybe</span> a2 <span class="ot">-&gt;</span> <span class="dt">Maybe</span> b
+<span class="ot">lift2 ::</span> (a1 <span class="ot">-&gt;</span> a2 <span class="ot">-&gt;</span> b) <span class="ot">-&gt;</span> <span class="dt">Maybe</span> a1 <span class="ot">-&gt;</span> <span class="dt">Maybe</span> a2 <span class="ot">-&gt;</span> <span class="dt">Maybe</span> b
 lift2 f (<span class="dt">Just</span> x1) (<span class="dt">Just</span> x2) <span class="fu">=</span> <span class="dt">Just</span> (f x1 x2)
 lift2 f _        _          <span class="fu">=</span> <span class="dt">Nothing</span></code></pre></div>
 <p>and three arguments and so on</p>
@@ -234,11 +213,8 @@ lift2 f x1 x2 <span class="fu">=</span> pure f <span class="fu">&lt;*&gt;</span>
 <h2 id="applicative-instances">Applicative Instances</h2>
 <p>The standard <code>Prelude</code> defines many applicative instances, including the Maybe instance:</p>
 <div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="kw">instance</span> <span class="dt">Applicative</span> <span class="dt">Maybe</span> <span class="kw">where</span>
- <span class="co">-- pure :: a -&gt; Maybe a</span>
- pure <span class="fu">=</span> <span class="dt">Just</span>
- <span class="co">-- (&lt;*&gt;) :: Maybe (a -&gt; b) -&gt; Maybe a -&gt; Maybe b</span>
- <span class="dt">Nothing</span>  <span class="fu">&lt;*&gt;</span> _  <span class="fu">=</span> <span class="dt">Nothing</span>
- (<span class="dt">Just</span> g) <span class="fu">&lt;*&gt;</span> mx <span class="fu">=</span> fmap g mx</code></pre></div>
+ <span class="co">-- pure  :: a -&gt; Maybe a</span>
+ <span class="co">-- (&lt;*&gt;) :: Maybe (a -&gt; b) -&gt; Maybe a -&gt; Maybe b</span></code></pre></div>
 <p>The definition is easy! Just follow the types, but the intuition is interesting! For the application <code>f &lt;*&gt; x</code> to be successful, that is return a <code>Just</code> both the arguments should succeed! Applicative for maybes represent <em>exceptional</em> programming, since they propagate the <code>Nothing</code> expeption!</p>
 <p><strong>Q:</strong> What is the values of the following computations?</p>
 <div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell">pure (<span class="fu">+</span><span class="dv">1</span>) <span class="fu">&lt;*&gt;</span> <span class="dt">Just</span> <span class="dv">1</span>

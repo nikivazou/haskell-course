@@ -6,8 +6,7 @@ For the tournament you are requested to implement a strategy
 that solves [gomoku](https://en.wikipedia.org/wiki/Gomoku), 
 a generalization of tic-tac-toe. 
 
-You can (and are encouraged) to work in pairs.
-You should submit your implementation any time on **10/8**. 
+You should submit your implementation any time on **17/11**. 
 
 
 Game Rules 
@@ -93,13 +92,12 @@ How to submit
 To submit your strategy, generate a [Pull Request](https://help.github.com/articles/creating-a-pull-request/) to the tic-tac-toc repository
 that adds your `Strategy.Lambdas.hs` file and does not touch anything else. 
 
-Alternatively, you can send your file to the instructor and TA by email, with subject "CMSC498V: Tournamet".
+Alternatively, you can send your file to the instructor by email, with subject "Haskell-Course: Tournamet".
 
 You can submit multiple pull requests as long as you make sure that by the end of the deadline 
 you have only one team submitted.
 You can only send one email. 
 
-On **10/9** all the teams will be announced on piazza. (Check that your submission is registered.)
 
 
 
@@ -109,7 +107,6 @@ Grading
 - If you do not submit a file or your file does not compile (please do not...) you get 0 points. 
 - If your strategy makes more than 30 sec or crashes you get half points. 
 - Otherwise, you get full points. 
-- If you win, you also get a gift!
 
 Teams and Ties
 --------------
@@ -127,7 +124,7 @@ Sending your solution via a pull request has two benefits
 - You will learn how to create a pull request.
 
 But also it will make your code public. 
-If you do not want your code to get public, send your solutions via email to the instructor and TA.
+If you do not want your code to get public, send your solutions via email to the instructor.
 
 Making your solutions public means that some students 
 can copy and submit your solution. 

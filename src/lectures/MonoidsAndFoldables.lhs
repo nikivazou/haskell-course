@@ -19,7 +19,8 @@ But let's start today with a simpler class: monoids, which are sort of like sock
 
 \begin{code}
 {-# LANGUAGE FlexibleInstances #-}
-
+{-# LANGUAGE  UndecidableInstances #-}
+{-# LANGUAGE RankNTypes #-}
 module MonoidsAndFoldables where
 
 import Data.Monoid   hiding (Any(..), All(..), Sum(..))
@@ -55,6 +56,9 @@ Other than their names, these two functions, share two common properties:
 **Q:** Can you write down the common properties in Haskell term
 
 - The function takes two parameters.
+
+class Semigroup a where 
+   <> :: a -> a -> a 
 
 - The parameters and the returned value have the same type.
 
@@ -100,7 +104,7 @@ and even define their priority, e.g.,
 
 < infixr 6 <>
 
-Parenthesis makes infix functions prefix, `e.g., (<>) [1,2] [3, 4]`
+Parenthesis makes infix functions prefix, e.g., `(<>) [1,2] [3, 4]`
 and quotes do the dual (e.g., f \`map\` [1,2]).
 
 
@@ -546,7 +550,17 @@ But a bit later, we'll see how these `Monoid` instances that may seem trivial at
 < ghci> getSum . mconcat . map Sum $ [1,2,3]  
 < 6  
 
+\begin{code}
 
+newtype Sum a = Sum {getSum' :: a} 
+  deriving (Show)
+
+instance Num a => Semigroup (Sum a) where 
+  Sum x <> Sum y = Sum (x + y)
+
+instance Num a => Monoid (Sum a) where 
+  mempty = Sum 0 
+\end{code}
 
 Any and All
 ------------
@@ -569,6 +583,27 @@ The first way is to have the or function `(||)` act as the binary function along
 < ghci> getAny $ mempty <> mempty  
 < False  
 
+
+\begin{code}
+newtype Any a = Any {getAny :: a}
+
+instance Semigroup (Any Bool) where 
+  Any x <> Any y = Any (x || y)
+
+instance Monoid (Any Bool) where 
+  mempty = Any False 
+
+
+newtype All a = All {getAll :: a}
+
+instance Semigroup (All Bool) where 
+  All x <> All y = All (x && y)
+
+instance Monoid (All Bool) where 
+  mempty = All True 
+
+
+\end{code}
 
 
 

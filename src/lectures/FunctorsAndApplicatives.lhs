@@ -104,18 +104,6 @@ instance Transformable Tree where
 instance Transformable [] where
   tx _ []     = []
   tx f (x:xs) = f x : tx f xs
-
--- data Maybe a = Nothing | Just a 
-instance Transformable Maybe where 
-  -- tx :: (a -> b) -> Maybe a -> Maybe b
-  tx f Nothing  = Nothing 
-  tx f (Just x) = Just (f x) 
-
-instance Transformable IO where
-  --  tx :: (a -> b) -> IO a -> IO b
-  tx f io = do 
-    a <- io
-    return (f a) 
 \end{code}
 
 
@@ -141,6 +129,8 @@ foo f (Nothing) = Nothing
 
 Ha! It is also a transformation on `Maybe` values. 
 Let's go back and make the proper instance! 
+
+**Q:** Define the tranformable instance for `Maybe`.
 
 Generalizing map
 -----------------
@@ -219,16 +209,6 @@ Given a data structure that *contains* elements of some type `a`,
 \begin{code}
 data Map k v = MTip | MBin k v (Map k v) (Map k v)
   deriving (Eq, Show)
-
--- fmap :: (a -> b) -> IO a -> IO b
-
-
-bar =  fmap (\str -> ("Hello " ++ str)) getLine
-
--- instance Functor (\k -> Map k v) where 
--- fmap :: (a -> b) -> Map k a -> Map k b  
---   fmap f MTip = MTip
---   fmap f (MBin k v l r) = MBin k (f v) (fmap f l) (fmap f r) 
 \end{code}
 
 **Q:** Can you fmap on an `IO a` action?
@@ -252,7 +232,7 @@ Functor laws
 Most classes come with laws. 
 Lets try to guess the `Functor` laws
 
-< fmap id x      ==? x 
+< fmap id x      ==? ...
 
 For example, 
 
@@ -261,7 +241,7 @@ For example,
 < ghci> fmap id "good morning"
 < "good morning"
 
-< fmap (f . g) x ==? fmap f (fmap g x)
+< fmap (f . g) x ==? ...
 
 For example, 
 
@@ -314,7 +294,7 @@ You can imagine defining a version for two arguments
 < lift2 f (x:xs) (y:ys) = f x y : lift2 f xs ys
 < lift2 f _      _      = []
 < 
-< lift2           :: (a1 -> a2 -> b) -> Maybe a1 -> Maybe a2 -> Maybe b
+< lift2 :: (a1 -> a2 -> b) -> Maybe a1 -> Maybe a2 -> Maybe b
 < lift2 f (Just x1) (Just x2) = Just (f x1 x2)
 < lift2 f _        _          = Nothing
 
@@ -403,11 +383,8 @@ The standard `Prelude` defines many applicative instances,
 including the Maybe instance: 
 
 < instance Applicative Maybe where
-<  -- pure :: a -> Maybe a
-<  pure = Just
+<  -- pure  :: a -> Maybe a
 <  -- (<*>) :: Maybe (a -> b) -> Maybe a -> Maybe b
-<  Nothing  <*> _  = Nothing
-<  (Just g) <*> mx = fmap g mx
 
 The definition is easy! Just follow the types, 
 but the intuition is interesting! 

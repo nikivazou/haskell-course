@@ -2,7 +2,7 @@
 - *Mon, 28/10:* [Laziness](lectures/Laziness.html) & [Reality](lectures/TheRealWorld.html) 
 - *Wed, 30/10:* [Type Classes](lectures/TypeClasses.html)
 - *Mon, 4/11:* [Monoids & Foldables](lectures/MonoidsAndFoldables.html)
-- *Wed, 6/11:* Functors & Applicatives
+- *Wed, 6/11:* [Functors & Applicatives](lectures/FunctorsAndApplicatives.html)
 - *Mon, 18/11:* **Tournament** & Monads
 - *Wed, 20/11:* Testing
 - *Mon, 25/11:* Liquid Haskell
