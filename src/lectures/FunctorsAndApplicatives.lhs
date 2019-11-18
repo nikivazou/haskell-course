@@ -43,6 +43,9 @@ inc' = map (+ 1)
 sqr' = map (^ 2)
 \end{code}
 
+tx :: (Transformable blob) 
+   => (a -> b) -> blob a  -> blob b 
+
 
 This pattern applied not only to lists, 
 but also to trees: 
@@ -104,6 +107,24 @@ instance Transformable Tree where
 instance Transformable [] where
   tx _ []     = []
   tx f (x:xs) = f x : tx f xs
+
+instance Transformable Maybe where 
+  tx f Nothing  = Nothing 
+  tx f (Just x) = Just (f x) -- :: b 
+  -- f :: (a -> b)
+  -- Just x :: Maybe a 
+  -- x :: a 
+
+instance Transformable IO where 
+  tx f a = do x <- a 
+              return (f x)
+
+-- main :: IO () 
+-- main = do i <- readChar 
+-- readChar :: IO Char 
+-- i        :: Char 
+
+  -- tx :: (a -> b) -> IO a -> IO b 
 \end{code}
 
 
@@ -232,7 +253,7 @@ Functor laws
 Most classes come with laws. 
 Lets try to guess the `Functor` laws
 
-< fmap id x      ==? ...
+< fmap id x      == x
 
 For example, 
 
@@ -241,7 +262,7 @@ For example,
 < ghci> fmap id "good morning"
 < "good morning"
 
-< fmap (f . g) x ==? ...
+< fmap (f . g) x == fmap f (fmap g x)
 
 For example, 
 

@@ -37,7 +37,7 @@ eval1 (Div x y)   =  eval1 x `div` eval1 y
 However, this function doesn’t take account of the possibility of division by zero, 
 and will produce an error in this case.
 
-< ghci> eval (Div (Val 1) (Val 0))
+< ghci> eval1 (Div (Val 1) (Val 0))
 < *** Exception: divide by zero 
 
 In order to deal with this explicitly, we can use the `Maybe` type
@@ -59,10 +59,11 @@ type Exception a = Maybe a
 
 eval1' ::  Expr -> Exception Int
 eval1' (Val n)   =  Just n
-eval1' (Div x y) = do
-  n1 <- eval1' x
-  n2 <- eval1' y 
-  n1 `safeDiv` n2
+eval1' (Div x y) = case eval1' x of 
+                    Just n1 -> case eval1' y of 
+                                 Just n2 -> n1 `safeDiv` n2
+                                 Nothing -> Nothing 
+                    Nothing -> Nothing
 \end{code}
 
 
@@ -152,20 +153,6 @@ Generalising from this example, a typical expression built using the `(>>=)` ope
 < mn >>= \xn ->
 < f x1 x2 ... xn
 
-< do 
-<  x1 <- m1 
-<  let y1 = a1  px[ ...x2..] ~~> ERROR  
-<  x2 <- m2 
-<  ...
-<  xn <- mn 
-<  f x1 x2 ... xn
-  where 
-    w1 = ... foo w2 ....
-    w2 = ... w3
-    w3 = ...
-
-
-
 
 That is, evaluate each of the expression `m1`, `m2`,…,`mn` in turn, 
 and combine their result values `x1`, `x2`,…, `x`n by applying the function `f`. 
@@ -228,11 +215,8 @@ It is now straightforward to make Maybe into a monadic type:
 
 < instance Monad Maybe where
 <    -- return      :: a -> Maybe a
-<    return x       =  Just x
 < 
 <    -- (>>=)       :: Maybe a -> (a -> Maybe b) -> Maybe b
-<    Nothing  >>= _ =  Nothing
-<    (Just x) >>= f =  f x
 
 It is because of this declaration that the do notation 
 can be used to sequence `Maybe` values. 
@@ -252,12 +236,7 @@ on maybe values.
 **Q:** Lets define the instance monad for lists. 
 
 < instance Monad [] where 
-<  -- (>>=)  :: [a] -> (a -> [b]) -> [b]
-<  xs >>= f = concatMap f xs
 < 
-<  -- return :: a -> [a]
-<  return x = [x]
-
 
 
 (Aside: in this context, `[]` denotes the list type `[a]` without its parameter.)
@@ -316,10 +295,7 @@ using do nation?
 < andTable = (pure (&&)) <*> [True,False] <*> [True, False]
 
 \begin{code}
-andTable = do 
-  x <- [True, False]
-  y <- [True, False]
-  return (x && y)
+andTable = undefined 
 \end{code}
 
 
@@ -982,9 +958,6 @@ However, the behavior is quite different with the `IO` monad
 **Q:** What is the type of `foo` defined as:
 
 \begin{code}
-foo :: Monad a => (x -> y) -> a x -> a y
--- foo :: (x -> y) -> [x] -> [y] -- map 
--- foo :: (x -> y) ->  Maybe x -> Maybe y -- map 
 foo f z = do x <- z
              return (f x)
 \end{code}
@@ -1027,7 +1000,7 @@ concatMap return []
 
 
 
-What does `baz [[1, 2], [3, 4]]` return?
+**Q:** What does `baz [[1, 2], [3, 4]]` return?
 
 1. `[1, 3], [1, 4], [2, 3], [2, 4]]`
 2. `[1, 2, 3, 4]`

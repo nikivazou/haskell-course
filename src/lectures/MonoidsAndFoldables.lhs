@@ -756,6 +756,62 @@ testList = [1, 42, 12]
 
 You can fold it or get its legth. 
 
+\begin{code}
+
+sumList' :: [Int] -> Int 
+sumList' = foldList (+) 0 
+
+
+prodList' :: [Int] -> Int 
+prodList'  = foldList (*) 1 
+
+
+foldList :: (a -> b -> b) 
+       -> b -> [a] -> b 
+foldList op b []     = b 
+foldList op b (x:xs) = op x (foldList op b xs)
+
+
+length' []     = 0 
+length' (x:xs) = 1 + length' xs 
+
+length'' :: Foldable t => t a -> Int 
+length'' = foldr (const (1 +)) 0 
+
+
+
+
+xs :: LList Int 
+xs = LCons 1 $ LCons 2 LN
+
+instance Semigroup (LList a) where 
+  -- (<>) :: LList a -> LList a -> LList a 
+  LN <> xs = xs 
+  (LCons y ys) <> xs = LCons y (ys <> xs)
+
+data LList a = LN | LCons a (LList a)
+  deriving (Show)
+
+instance Foldable LList where 
+  foldMap f LN = mempty
+  foldMap f (LCons x ys) 
+    =  f x {- :: m -}
+        `mappend` foldMap f ys {- :: m -}   
+  -- foldMap :: Monoid m 
+  --         => (a -> m) -> LList a -> m  
+
+
+
+
+
+\end{code}
+
+f :: a -> b 
+x :: a 
+mapRecude f x = mappend (f x) mempty -- :: b
+
+
+
 < ghci> foldl (+) 0 testList
 < 55  
 < ghci> foldl (*) 1 testList  

@@ -359,6 +359,49 @@ ghci<span class="fu">&gt;</span> length (<span class="dt">Product</span> <span c
 <p>Now we get all the folding functions for free! Assuming a test toy list</p>
 <div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt;</span> testList <span class="fu">=</span> [<span class="dv">1</span>, <span class="dv">42</span>, <span class="dv">12</span>]</code></pre></div>
 <p>You can fold it or get its legth.</p>
+<div class="sourceCode"><pre class="sourceCode literate literatehaskell"><code class="sourceCode literatehaskell"><span class="ot">&gt;</span> 
+<span class="ot">&gt; sumList' ::</span> [<span class="dt">Int</span>] <span class="ot">-&gt;</span> <span class="dt">Int</span> 
+<span class="ot">&gt;</span> sumList' <span class="fu">=</span> foldList (<span class="fu">+</span>) <span class="dv">0</span> 
+<span class="ot">&gt;</span> 
+<span class="ot">&gt;</span> 
+<span class="ot">&gt; prodList' ::</span> [<span class="dt">Int</span>] <span class="ot">-&gt;</span> <span class="dt">Int</span> 
+<span class="ot">&gt;</span> prodList'  <span class="fu">=</span> foldList (<span class="fu">*</span>) <span class="dv">1</span> 
+<span class="ot">&gt;</span> 
+<span class="ot">&gt;</span> 
+<span class="ot">&gt; foldList ::</span> (a <span class="ot">-&gt;</span> b <span class="ot">-&gt;</span> b) 
+<span class="ot">&gt;</span>        <span class="ot">-&gt;</span> b <span class="ot">-&gt;</span> [a] <span class="ot">-&gt;</span> b 
+<span class="ot">&gt;</span> foldList op b []     <span class="fu">=</span> b 
+<span class="ot">&gt;</span> foldList op b (x<span class="fu">:</span>xs) <span class="fu">=</span> op x (foldList op b xs)
+<span class="ot">&gt;</span> 
+<span class="ot">&gt;</span> 
+<span class="ot">&gt;</span> length' []     <span class="fu">=</span> <span class="dv">0</span> 
+<span class="ot">&gt;</span> length' (x<span class="fu">:</span>xs) <span class="fu">=</span> <span class="dv">1</span> <span class="fu">+</span> length' xs 
+<span class="ot">&gt;</span> 
+<span class="ot">&gt; length'' ::</span> <span class="dt">Foldable</span> t <span class="ot">=&gt;</span> t a <span class="ot">-&gt;</span> <span class="dt">Int</span> 
+<span class="ot">&gt;</span> length'' <span class="fu">=</span> foldr (const (<span class="dv">1</span> <span class="fu">+</span>)) <span class="dv">0</span> 
+<span class="ot">&gt;</span> 
+<span class="ot">&gt;</span> 
+<span class="ot">&gt;</span> 
+<span class="ot">&gt;</span> 
+<span class="ot">&gt; xs ::</span> <span class="dt">LList</span> <span class="dt">Int</span> 
+<span class="ot">&gt;</span> xs <span class="fu">=</span> <span class="dt">LCons</span> <span class="dv">1</span> <span class="fu">$</span> <span class="dt">LCons</span> <span class="dv">2</span> <span class="dt">LN</span>
+<span class="ot">&gt;</span> 
+<span class="ot">&gt;</span> <span class="kw">instance</span> <span class="dt">Semigroup</span> (<span class="dt">LList</span> a) <span class="kw">where</span> 
+<span class="ot">&gt;</span>   <span class="co">-- (&lt;&gt;) :: LList a -&gt; LList a -&gt; LList a </span>
+<span class="ot">&gt;</span>   <span class="dt">LN</span> <span class="fu">&lt;&gt;</span> xs <span class="fu">=</span> xs 
+<span class="ot">&gt;</span>   (<span class="dt">LCons</span> y ys) <span class="fu">&lt;&gt;</span> xs <span class="fu">=</span> <span class="dt">LCons</span> y (ys <span class="fu">&lt;&gt;</span> xs)
+<span class="ot">&gt;</span> 
+<span class="ot">&gt;</span> <span class="kw">data</span> <span class="dt">LList</span> a <span class="fu">=</span> <span class="dt">LN</span> <span class="fu">|</span> <span class="dt">LCons</span> a (<span class="dt">LList</span> a)
+<span class="ot">&gt;</span>   <span class="kw">deriving</span> (<span class="dt">Show</span>)
+<span class="ot">&gt;</span> 
+<span class="ot">&gt;</span> <span class="kw">instance</span> <span class="dt">Foldable</span> <span class="dt">LList</span> <span class="kw">where</span> 
+<span class="ot">&gt;</span>   foldMap f <span class="dt">LN</span> <span class="fu">=</span> mempty
+<span class="ot">&gt;</span>   foldMap f (<span class="dt">LCons</span> x ys) 
+<span class="ot">&gt;</span>     <span class="fu">=</span>  f x <span class="co">{- :: m -}</span>
+<span class="ot">&gt;</span>         <span class="ot">`mappend`</span> foldMap f ys <span class="co">{- :: m -}</span>   
+<span class="ot">&gt;</span>   <span class="co">-- foldMap :: Monoid m </span>
+<span class="ot">&gt;</span>   <span class="co">--         =&gt; (a -&gt; m) -&gt; LList a -&gt; m  </span></code></pre></div>
+<p>f :: a -&gt; b x :: a mapRecude f x = mappend (f x) mempty – :: b</p>
 <div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell">ghci<span class="fu">&gt;</span> foldl (<span class="fu">+</span>) <span class="dv">0</span> testList
 <span class="dv">55</span>  
 ghci<span class="fu">&gt;</span> foldl (<span class="fu">*</span>) <span class="dv">1</span> testList  
