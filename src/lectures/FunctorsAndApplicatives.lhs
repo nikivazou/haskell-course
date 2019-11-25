@@ -405,7 +405,14 @@ including the Maybe instance:
 
 < instance Applicative Maybe where
 <  -- pure  :: a -> Maybe a
-<  -- (<*>) :: Maybe (a -> b) -> Maybe a -> Maybe b
+<  pure x = Just x 
+<  -- (<*>) :: Maybe (a -> b) 
+<  --       -> Maybe a 
+<  --       -> Maybe b
+< Nothing <*> x = Nothing 
+< Just f  <*> Nothing = Nothing
+< Just f  <*> Just x  =  Just (f x)
+
 
 The definition is easy! Just follow the types, 
 but the intuition is interesting! 

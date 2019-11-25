@@ -4,293 +4,253 @@ Homework 2
 Instructions
 ------------
 
-The source code of this homework can be found [here](https://raw.githubusercontent.com/nikivazou/CMSC498V/master/CMSC498V/homeworks/HW2.lhs).
+The source code of this homework can be found [here](https://raw.githubusercontent.com/nikivazou/haskell-course/master/src/homeworks/HW2.lhs).
 You should fill in the definitions of the required functions but **do not** change the types of the functions. 
 
-**How to submit:** Submit this file and a `MinMax.lhs` file via the submit server. 
+**How to submit:** 
+Send an email to `niki.vazou@imdea.org` with 
+subject `Haskell-Course'19:HW2` and attach 
+this file. 
 
 \begin{code}
 module HW2 where
-import Prelude hiding (map)
+import Prelude hiding (sum, Either(..))
+import Data.Monoid
+import Control.Parallel.Strategies
 \end{code}
 
 
-**Problem 1:** Programming Patterns
-------------------------------------
+**Problem 1:** Eithers are Functors, Applicatives & Monads 
+-------------------------------------
 
-In the class we "saw" mapping and folding on lists. 
-Here you are required to port these patterns on Trees. 
+The data type `Either a b` contains 
+
+- either a `Left` value `a`, 
+- or a `Right` value `b`. 
+
+
+\begin{code}
+data Either a b = Left a | Right b 
+  deriving (Show, Eq)
+\end{code}
+
+1. **Functors:** 
+Define a functor instance of `Either`, that satisfies the functor laws. 
+So that, for example:
+
+
+< ghci> fmap (+42) (Left 0)
+< Left 0
+< ghci> fmap (+42) (Right 0)
+< Right 42 
+
+2. Give a proof that the two functor laws are satisfied by your definition. 
+
+3. **Applicatives:** 
+Define an applicative instance of `Either`, that satisfies the applicative laws. 
+So that, for example:
  
-A tree is either empty or contains a value and two subtrees: 
+
+< ghci> pure 0 :: Either Int Int
+< Right 0
+< ghci> pure (+42) <*> (Left 0)
+< Left 0 
+< ghci> pure (+42) <*> (Right 0)
+< Right 42 
+
+4. **Monads:** 
+Define a monad instance of `Either`, that satisfies the monad laws. 
+So that, for example:
 
 \begin{code}
-data Tree a = Tip | Bin a (Tree a) (Tree a)
-  deriving (Eq, Show)
-\end{code}  
-
-For testing, we define few trees
-
-\begin{code}
-tree1 = Tip 
-tree2 = Bin 1 (Bin 2 Tip Tip) Tip  
-tree3 = Bin 0  tree2 tree2
-tree4 = Bin "I am" (Bin "a" Tip Tip) (Bin "tree" Tip Tip)
+pairs xs ys = do  
+  x <- xs 
+  y <- ys
+  return (x,y)
 \end{code}
 
-1. **Mapping:** Define a function that maps all elements of a tree. 
-For example, 
+< ghci> pairs (Right  0) (Right 1)
+< Right (0,1)
+< ghci> pairs (Right  0) (Left  1)
+< Left 1
+< ghci> pairs (Left   0) (Right 1)
+< Left 0
+< ghci> pairs (Left   0) (Left 1)
+< Left 0
 
-< map (+1)    tree2 = Bin 2 (Bin 3 Tip Tip) Tip
-< map (++"!") tree4 = Bin "I am!" (Bin "a!" Tip Tip) (Bin "tree!" Tip Tip)
+
+**Problem 2:** Monadic Lambda Evaluation
+-------------------------------------
+
+Given the data type of expressions
 
 \begin{code}
-map :: (a -> b) -> Tree a -> Tree b 
-map f t = error "Define me!"
+data Exp a = EVar a | EVal Int | EAdd (Exp a) (Exp a)
 \end{code}
 
-2. **Folding:** Define a function that folds the elements of a tree, 
-top to bottom and left to right; so that 
+you are asked to define its monadic instance. 
 
-< fold (++) "" tree4 == "I amatree"
-< fold (+)  0  tree3 == 6
+1. **Functors:** Define the `Functor` instance of `Exp`.
 
 \begin{code}
-fold :: (b -> a -> b) -> b -> Tree a -> b 
-fold f b = error "Define me!"
+instance Functor Exp where
+  -- fmap :: (a -> b) -> Exp a -> Exp b
+  fmap f (EVar x)   = undefined "Define me!"
+  fmap f (EVal n)   = undefined "Define me!"
+  fmap f (EAdd x y) = undefined "Define me!"
 \end{code}
 
-3. **Elements:** Use your `fold` function to define a function that returns the list 
-of all the elements of the tree. For example, 
-
-< elems  tree2 == [2,1]
-< elems  tree4 == ["tree","a","I am"] 
-
-\begin{code}
-elems :: Tree a -> [a]
-elems t = error "Define me!"
-\end{code}
+2. **Functor Laws:** Give a proof that the two functor laws are satisfied by your definition. 
 
 
-**Problem 2:** Merge Sort
-------------------------------------
-
-In this problem, you will implement the standard [merge sort](https://en.wikipedia.org/wiki/Merge_sort) algorithm.
-
-The function `mergeSort` splits the input list at halves, 
-recursively sorts both halves and merges the two sorted halves. 
+3. **Applicatives:** Define the `Applicative` instance of `Exp`.
 
 \begin{code}
-mergeSort :: [Int] -> [Int]
-mergeSort []  = [] 
-mergeSort [x] = [x]
-mergeSort xs  = merge (mergeSort ys) (mergeSort zs)
-  where 
-  (ys,zs)     = splitHalf xs
-\end{code}
+instance Applicative Exp where
+  -- pure :: a -> Exp a 
+  pure x = undefined "Define me!"
 
-1. **List splitting:**
-Define the function `splitHalf xs` that split the input list into two sublists. 
-For example:
-
-< splitHalf [1..4] == ([1,2],[3,4])
-< splitHalf [1..5] == ([1,2],[3,4,5])
-
-*Hint:* You can use the function `splitAt`.
-
-\begin{code}
-splitHalf :: [a] -> ([a],[a])
-splitHalf xs = error "Define me!"
-\end{code}
-
-2. **Merging:** Define the function `merge` that merges two sorted lists. 
-For example, 
-
-< merge [1, 5, 9] [2,8] == [1,2,5,8,9]
-
-Your definition should satisfy the below type signature that reads as follows: 
-The input lists contain elements of type `a` that satisfies the constraint `Ord`. 
-This constraint lets you use any of the standard following comparison operators on elements of the input lists
-
-< (<), (<=), (>), (>=) :: Ord a => a -> a -> Bool   
-
-\begin{code}
-merge :: Ord a => [a] -> [a] -> [a]
-merge xs ys = error "Define me!"
+  -- (<*>) :: Exp (a -> b) -> Exp a -> Exp b
+  ef <*> e = undefined "Define me!"
 \end{code}
 
 
-3. **Raising the Ord constraint:**
-Haskell defines the data type `Ordering` as follows:
-
-< data Ordering = LT | EQ | GT
-
-to represent less, equal, and greater comparison respectively. 
-Moreover the library function compare is defined so that 
-
-< compare x y == LT <=> x <  y
-< compare x y == EQ <=> x == y
-< compare x y == GT <=> x >  y
-
-Redefine the `merge` and `mergeSort` functions 
-to take an explicit comparison argument. That is, 
-complete the definitions below so that 
-
-< mergeBy compare xs == merge xs 
+4. **Monads:** Define the `Monad` instance of `Exp`.
 
 \begin{code}
-mergeBy :: (a -> a -> Ordering) -> [a] -> [a] -> [a]
-mergeBy cmp xs ys     = error "Define me!"
+instance Monad Exp where
+  -- return :: a -> Expr a 
+  return x = undefined "Define me!"
 
-mergeSortBy :: (a -> a -> Ordering) -> [a] -> [a]
-mergeSortBy cmp xs ys = error "Define me!"
+  -- (>>=) :: Exp a -> (a -> Exp b) -> Exp b 
+  (EVar x)   >>= f = undefined "Define me!"
+  (EVal n)   >>= f = undefined "Define me!"
+  (EAdd x y) >>= f = undefined "Define me!"
 \end{code}
 
 
-**Problem 3:** Fancy Sort
-------------------------------------
+5. **Optional** What does the `(>>=)` operator for this type do?
 
-Merge sort is an efficient sorting algorithm, 
-but it does not perform well when the input list is already sorted!
-The goal of this problem is to implement a different sorting algorithm, 
-`fancySort` that performs excellent when the list is already increasing or even 
-decreasing. 
 
-The idea behind `fancySort` is the following. 
+**Problem 3:** Map Reduce
+--------------------------
 
-- First, grap all the sorted sequences that appear in the input list and
-- then, merge all the sorted sublists together. 
+1. **Chunkables:**
+The `Chunkable` type class has the method `chunk i x`
+that cuts its input `x` into lists of length as most `i`.
 
 \begin{code}
-fancySort :: Ord a => [a] -> [a]
-fancySort = mergeAll . sequences
+class Chunkable a where 
+  chunk :: Int -> a -> [a]
 \end{code}
 
-1. **Merging:** Define the function `mergeAll` that uses the `merge` from Problem 2 
-to merge a list of sorted lists into a single sorted list. For example, 
+Define lists as chunkable instances so that 
 
-< mergeAll [[1, 5, 9], [2,8], [7]] == [1,2,5,7,8,9]
+< ghci> chunk 2 [1]
+< [[1]]
+< ghci> chunk 2 [1..5]
+< [[1,2],[3,4],[5]]
+< ghci> chunk 6 [1..5]
+< [[1,2,3,4,5]]
+
+Generally, each element if `chunk i x` has length no more than `i`, 
+and the the chunks exactly reconstruct the list: 
+
+< forall i, x. mconcat (chunk i x) == x
 
 \begin{code}
-mergeAll :: Ord a => [[a]] -> [a]
-mergeAll xs = error "Define me!"
+instance Chunkable [a] where
+  chunk = error "Define me!"
 \end{code}
 
-The `fancySort` function creates the sorted sequences as follows. 
-If the input list `(a:b:xs)` looks like ascending, 
-that is `a < b`, then we call `ascending'` with the "accumulated"
-sorted list `[a]` and a "pivot" element `b` with the goal to 
-collect the rest of the ascending list. Otherwise we call `descending`
-with dual arguments and goals. For example, 
 
-< sequences [1, 2, 3, 2, 1] == [[1,2,3],[1,2],[]]
-< sequences [1, 2, 3, 4, 5] == [[1,2,3,4,5],[]]
-< sequences [5, 4, 3, 2, 1] == [[1,2,3,4,5],[]]
-
-\begin{code}    
-sequences :: Ord a => [a] -> [[a]]
-sequences (a:b:xs)
-  | a < b     = ascending' b [a] xs
-  | otherwise = descending b [a] xs
-sequences xs  = [xs]
-\end{code}
-
-The function `ascending' a as (b:bs)` takes as input 
-the pivot element `a`, the increasing accumulator `as`, 
-and the unsorted list `xs`. If the pivot is less than `b`, 
-it puts the pivot in the head of the accumulator and recurses, 
-otherwise, it returns the first sorted sequence `reverse(a:as)`
-and calls back to `sequences` to construct the next descending sequence.
+2. **Parallel Mapping:** 
+Using the parallel functions from the library `Control.Parallel.Strategies`,
+we define a parallel mapping function `pmap f xs`
+that applies `f` to each element in `xs` in parallel. 
 
 \begin{code}
-ascending' :: Ord a => a -> [a] -> [a] -> [[a]]
-ascending' a as (b:bs)
-  | a < b = ascending' b (a:as) bs
-ascending' a as bs = (reverse(a:as)):sequences bs
+pmap :: (a -> b) -> [a] -> [b]
+pmap = parMap rseq
 \end{code}
 
-2. **Define descending:** Follow the definition of `ascending'` to define `descending`
-that returns the first descending sequence it finds and calls back to 
-`sequences` for the rest. For example, 
+*Side-Note 1:* If you actually check on the description of `rseq`,
+you will discover that `pmap` is not really really parallel. 
+For the shake of simplicity, let's assume it is. 
 
-< descending 4 [] [3, 2, 1]       == [[1,2,3,4],[]]
-< descending 0 [] [3, 2, 1]       == [[0],[1,2,3],[]]
-< descending 0 [] [1, 2, 3, 2, 1] == [[0],[1,2,3],[1,2],[]]
+*Side-Note 2:* Parallelization is only possible because the argument function 
+is effect-free, as enforced by the type system. 
+If `f` had effects, then the order that the effects would be executed, would be undetermined. 
 
-Note that `descending` should only find strictly descending sequences, i.e.
+Use `chunk`, `pmap` and a monoid function to define the `mapReduce i f x` function below that 
 
-< descending 1 [] [1, 2]          == [[1],[1,2],[]]
+- chunks the input `x` in chunks of size at most `i`,
+- maps `f` to each chunk, in parallel, and 
+- concatenates the result list. 
 
 \begin{code}
-descending :: Ord a => a -> [a] -> [a] -> [[a]]
-descending a as bs = error "Define me!"
+mapReduce :: (Chunkable a, Monoid b) 
+          => Int -> (a -> b) -> (a -> b) 
+mapReduce = error "Define me!"
 \end{code}
 
-3. **(Difficult) Optimize ascending:** Ascending on an increasing list gives us back 
-exactly one sequence: 
+**Hint:** This should be an one line definition!
 
-< ascending' 0 [] [1, 2, 3, 4] == [[0,1,2,3,4],[]]
-
-but to do so, the `ascending'` definition imposes a huge performance leak
-as it has to reverse the returning list. 
-Define a higher order `ascending` that 
-satisfies the below type signature, 
-does not reverse the returning sequence and still
-behaves like `ascending'` in that 
-
-< forall xs, a: ascending a id xs == ascending' a [] xs  
-
-
-where `id` is the identity functions. 
-
-**Restrictions:** Increasing lists should be accessed only once! You are not allowed to use `reverse`, `(++)`, 
-or any other list operations. Define `ascending` only by using 
-
-- one comparison, 
-
-- recursive calls to `ascending` and `sequences`,
-
-- function application and abstraction (i.e., lambda),
-
-- the list data constructors (`[]` and `(:)`),
-
-- and no intermediate helper functions. 
+Then for example, you can parallelize the `sum` function from the lecture: 
 
 \begin{code}
-ascending :: Ord a => a -> ([a] -> [a]) -> [a] -> [[a]]
-ascending a as bs = error "Define me!"
+sum :: [Int] -> Sum Int 
+sum = mconcat . map Sum  
 \end{code}
 
-Finally, replace the call to `ascending'` with `ascending` in the `sequences` definition.
+So that 
+
+< ghci> sum [1..100]
+< Sum {getSum = 5050}
+< mapReduce 10 sum [1..100]
+< Sum {getSum = 5050}
+
+In general: 
+
+< forall xs, i. sum xs = mapReduce i sum xs
+
+Which generalizes to every function `f`
+
+< forall f, i. f = mapReduce i f
 
 
+3. **Parallel Reducing:** 
+As we parallelized mapping, we can also parallelize the "reduce"
+stage of map reduce. 
 
-**Problem 4:** Tic-Tac-Toe
-------------------------------------
+Use `chunk` and `pmap` from before to define a parallelized 
+version of the monoid `mconcat` method, so that `pmconcat i xs`
 
-- Step 1: Download the [tic-tac-toe](https://github.com/nikivazou/tic-tac-toe) game. 
+- if `xs` has length less than i, then calls `mconcat`, otherwise
+- chunks the input list `xs`, 
+- applied `mconcat` in parallel, and 
+- recurses on the concatenated chunks.
 
-< git clone https://github.com/nikivazou/tic-tac-toe.git
+\begin{code}
+pmconcat :: Monoid a => Int -> [a] -> a 
+pmconcat = error "Define me!"
+\end{code}
 
-- Step 2: Install the game and play against the random strategy. 
+**Hint:** `pmconcat` is recursively defined.
 
-< cd tic-tac-toe/
-< stack install 
-< tic-tac-toe
 
-- Step 3: Follow the description in the [src/Player/MinMax.lhs](https://github.com/nikivazou/tic-tac-toe/blob/master/src/Player/MinMax.lhs) file. 
+Use `pmconcat` to define a "two-level" parallel `mapReduce`, 
+that parallelized both the "map" and "reduce" stages: 
 
-- Step 4: Import and call your player. In [src/TicTacToe.hs](https://github.com/nikivazou/tic-tac-toe/blob/master/src/TicTacToe.hs) add
+\begin{code}
+mapReduce2 :: (Chunkable a, Monoid b) 
+          => Int -> (a -> b) -> (a -> b) 
+mapReduce2 = error "Define me!"
+\end{code}
 
-< import Player.MinMax (playerMinMax)
+**Hint:** `mapReduce2` can be defined with an one charactet edit from `mapReduce`.
 
-then in
-[src/TicTacToe.hs#L11](https://github.com/nikivazou/tic-tac-toe/blob/master/src/TicTacToe.hs#L11) replace 
 
-< player1 = playerHuman "Me!"
+So that 
 
-with 
-
-< player1 = playerMinMax
-
-and make sure that your `playerMinMax` always wins the computer. 
-
+< mapReduce2 == mapReduce

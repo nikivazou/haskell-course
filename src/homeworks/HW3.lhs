@@ -7,7 +7,10 @@ Instructions
 The source code of this homework can be found [here](https://raw.githubusercontent.com/nikivazou/CMSC498V/master/CMSC498V/homeworks/HW3.lhs).
 You should fill in the definitions of the required functions but **do not** change the types of the functions. 
 
-**How to submit:** Submit this file via the submit server. 
+**How to submit:** 
+Send an email to `niki.vazou@imdea.org` with 
+subject `Haskell-Course'19:HW2` and attach 
+this file. 
 
 \begin{code}
 module HW3 where

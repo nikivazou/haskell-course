@@ -3,7 +3,6 @@
 - *Wed, 30/10:* [Type Classes](lectures/TypeClasses.html)
 - *Mon, 4/11:* [Monoids & Foldables](lectures/MonoidsAndFoldables.html)
 - *Wed, 6/11:* [Functors & Applicatives](lectures/FunctorsAndApplicatives.html)
-- *Mon, 18/11:* **Tournament** & [Applicatives](lectures/FunctorsAndApplicatives.html) & [Monads]((lectures/Monads.html))
-- *Wed, 20/11:* Testing
-- *Mon, 25/11:* Liquid Haskell
+- *Wed, 20/11:* **Tournament** & [Applicatives](lectures/FunctorsAndApplicatives.html) & [Monads](lectures/Monads.html)
+- *Mon, 25/11:* [Monads](lectures/Monads.html) & [Liquid Haskell](lectures/LH.pdf)
 - *Wed, 27/11:* Theorem Proving 

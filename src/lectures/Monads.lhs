@@ -59,14 +59,13 @@ type Exception a = Maybe a
 
 eval1' ::  Expr -> Exception Int
 eval1' (Val n)   =  Just n
-eval1' (Div x y) = case eval1' x of 
-                    Just n1 -> case eval1' y of 
-                                 Just n2 -> n1 `safeDiv` n2
-                                 Nothing -> Nothing 
-                    Nothing -> Nothing
+eval1' (Div x y) = do n1 <- eval1' x 
+                      n2 <- eval1' y 
+                      n1 `safeDiv` n2
+                                 
 \end{code}
 
-
+(>>=) :: Maybe a -> (a -> Maybe b) -> Maybe b 
 
 
 **Q:** What happens now to our previous exception?
@@ -215,8 +214,12 @@ It is now straightforward to make Maybe into a monadic type:
 
 < instance Monad Maybe where
 <    -- return      :: a -> Maybe a
+<    return = pure 
 < 
 <    -- (>>=)       :: Maybe a -> (a -> Maybe b) -> Maybe b
+<    x >>= f = case x of 
+<                Nothing -> Nothing 
+<                Just y  -> f y
 
 It is because of this declaration that the do notation 
 can be used to sequence `Maybe` values. 
@@ -236,7 +239,13 @@ on maybe values.
 **Q:** Lets define the instance monad for lists. 
 
 < instance Monad [] where 
-< 
+<  -- return :: a -> [a]  
+<  return x = [x]
+<  
+<  -- (>>=)  :: [a] -> (a -> [b]) -> [b]
+<  []     >>= f = [] 
+<  (x:xs) >>= f = f x {- :: [b] -}++ (xs >>= f) {- :: [b]-}
+<  xs >>= f = concatMap f xs 
 
 
 (Aside: in this context, `[]` denotes the list type `[a]` without its parameter.)
@@ -295,7 +304,11 @@ using do nation?
 < andTable = (pure (&&)) <*> [True,False] <*> [True, False]
 
 \begin{code}
-andTable = undefined 
+andTable :: Monad m => m Bool -> m Bool -> m Bool
+andTable xs ys 
+  = do x <- xs 
+       y <- ys 
+       return (x && y) 
 \end{code}
 
 
@@ -675,10 +688,6 @@ This can be achieved by taking the next fresh integer as an additional argument
 to the function, and returning the next fresh integer as an additional result,
 for instance, as shown below:
 
-< data Tree a = Leaf a
-<             | Node (Tree a) (Tree a)
-
-
 \begin{code}
 mlabel :: Tree a -> ST0 (Tree (a,Int))
 mlabel (Leaf v)   = do 
@@ -989,16 +998,6 @@ baz mmx = do mx <- mmx
              return (x+1)
 \end{code}
 
-mmx >>= (\mx -> 
-return mx)
-
-
-mmx `concatMap` return
-
-concatMap return mmx
-concatMap return []
-
-
 
 **Q:** What does `baz [[1, 2], [3, 4]]` return?
 
@@ -1200,6 +1199,5 @@ where a parser is described as string (i.e., state) transformer
 
 < type Parser a = String -> [(a,String)]
 
-To make time to discuss more about program correctness, 
-we skip parsers and just directly to how monad combinators are used to 
-test properties of your program (or how Ben corrected your homeworks). 
+But due to lack of time, we will not see this application. 
+Instead let's take a quick look on proving program correctness! 

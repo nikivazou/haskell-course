@@ -233,7 +233,13 @@ lift2 f x1 x2 <span class="fu">=</span> pure f <span class="fu">&lt;*&gt;</span>
 <p>The standard <code>Prelude</code> defines many applicative instances, including the Maybe instance:</p>
 <div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="kw">instance</span> <span class="dt">Applicative</span> <span class="dt">Maybe</span> <span class="kw">where</span>
  <span class="co">-- pure  :: a -&gt; Maybe a</span>
- <span class="co">-- (&lt;*&gt;) :: Maybe (a -&gt; b) -&gt; Maybe a -&gt; Maybe b</span></code></pre></div>
+ pure x <span class="fu">=</span> <span class="dt">Just</span> x 
+ <span class="co">-- (&lt;*&gt;) :: Maybe (a -&gt; b) </span>
+ <span class="co">--       -&gt; Maybe a </span>
+ <span class="co">--       -&gt; Maybe b</span>
+<span class="dt">Nothing</span> <span class="fu">&lt;*&gt;</span> x <span class="fu">=</span> <span class="dt">Nothing</span> 
+<span class="dt">Just</span> f  <span class="fu">&lt;*&gt;</span> <span class="dt">Nothing</span> <span class="fu">=</span> <span class="dt">Nothing</span>
+<span class="dt">Just</span> f  <span class="fu">&lt;*&gt;</span> <span class="dt">Just</span> x  <span class="fu">=</span>  <span class="dt">Just</span> (f x)</code></pre></div>
 <p>The definition is easy! Just follow the types, but the intuition is interesting! For the application <code>f &lt;*&gt; x</code> to be successful, that is return a <code>Just</code> both the arguments should succeed! Applicative for maybes represent <em>exceptional</em> programming, since they propagate the <code>Nothing</code> expeption!</p>
 <p><strong>Q:</strong> What is the values of the following computations?</p>
 <div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell">pure (<span class="fu">+</span><span class="dv">1</span>) <span class="fu">&lt;*&gt;</span> <span class="dt">Just</span> <span class="dv">1</span>
